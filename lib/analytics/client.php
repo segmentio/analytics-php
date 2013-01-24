@@ -26,7 +26,6 @@ class Analytics_Client {
      * @return [type]             [description]
      */
     public function track($user_id, $event, $properties=array()) {
-        $Flusher = self::$Flusher;
         $Flusher::track($user_id, $event, $properties);
     }
 
