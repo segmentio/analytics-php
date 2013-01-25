@@ -12,7 +12,7 @@ class Analytics_Client {
      *
      * @param [String] $secret
      */
-    public function __construct($secret, $options=array()) {
+    public function __construct($secret, $options = array()) {
         $consumer = new Analytics_RequestConsumer($secret);
         $this->consumer = $consumer;
     }
@@ -25,13 +25,27 @@ class Analytics_Client {
      * @param  array  $properties [description]
      * @return [type]             [description]
      */
-    public function track($user_id, $event, $properties=array()) {
-        $Flusher::track($user_id, $event, $properties);
+    public function track($user_id, $event, $properties = array(),
+                          $timestamp = null) {
+
+        $context = $this->get_context();
+
+        $this->consumer.track($user_id, $event, $properties, $context,
+                              $timestamp);
     }
 
-    public static function identify($user_id, $traits=array()) {
-        $Flusher = self::$Flusher;
-        $Flusher::identify($user_id, $event, $properties);
+    public static function identify($user_id, $traits = array(),
+                                    $timestamp = null) {
+
+        $context = $this->get_context();
+
+        $this->consumer.identify($user_id, $event, $properties, $context,
+                                 $timestamp);
+    }
+
+
+    private function get_context () {
+        return array( 'library' => 'analytics-python' );
     }
 }
 
