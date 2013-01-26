@@ -18,20 +18,22 @@ class Analytics_RequestConsumer {
 
         $body = array(
             'secret'     => $this->secret,
-            'user_id'    => $user_id,
+            'userId'    => $user_id,
             'event'      => $event,
             'properties' => $properties,
             'timestamp'  => $timestamp
         );
 
+        echo(var_dump($body));
+
         $this->request('track', $body);
     }
 
-    public function identify ($user_id, $traits=array()) {
+    public function identify ($user_id, $event, $properties, $context, $timestamp) {
 
         $body = array(
             'secret'     => $this->secret,
-            'user_id'    => $user_id,
+            'userId'    => $user_id,
             'traits'     => $traits,
             'context'    => $context,
             'timestamp'  => $timestamp
@@ -50,7 +52,7 @@ class Analytics_RequestConsumer {
 
         $ch = curl_init();
 
-        $host = 'http://localhost:7001/v1/track';
+        $host = 'https://api.segment.io';
         $path = '/v1/' . $type;
 
         $body['type'] = $type;
@@ -61,18 +63,41 @@ class Analytics_RequestConsumer {
         curl_setopt($ch, CURLOPT_URL, $host . $path);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+                                                   'Accept: application/json'));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1000);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1500);
 
         $still_running = null;
 
+        echo $content . "\n";
+
         curl_multi_add_handle($this->mh, $ch);
         curl_multi_exec($this->mh, $still_running);
+
+
+        do {
+            $mrc = curl_multi_exec($this->mh, $still_running);
+        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+
+        /*while ($still_running && $mrc == CURLM_OK) {
+            if (curl_multi_select($this->mh) != -1) {
+                do {
+                    $mrc = curl_multi_exec($this->mh, $still_running);
+                } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+            }
+        }*/
+
+        #
+        #sleep(1);
+        $content =  curl_multi_getcontent($ch);
+        echo $content;
+        $info = curl_getinfo($ch);
+        echo var_dump($info);
     }
 }
 ?>

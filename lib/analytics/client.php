@@ -1,6 +1,6 @@
 <?php
 
-require(dirname(__FILE__) . '/consumers/request.php');
+require(dirname(__FILE__) . '/consumers/socket.php');
 
 class Analytics_Client {
 
@@ -25,12 +25,12 @@ class Analytics_Client {
      * @param  array  $properties [description]
      * @return [type]             [description]
      */
-    public function track($user_id, $event, $properties = array(),
+    public function track($user_id, $event, $properties = null,
                           $timestamp = null) {
 
         $context = $this->get_context();
 
-        $this->consumer.track($user_id, $event, $properties, $context,
+        $this->consumer->track($user_id, $event, $properties, $context,
                               $timestamp);
     }
 
@@ -45,10 +45,11 @@ class Analytics_Client {
 
 
     private function get_context () {
-        return array( 'library' => 'analytics-python' );
+        return array( 'library' => 'analytics-php' );
     }
 }
 
-$client = new Analytics_Client('aaa');
-
+$client = new Analytics_Client('testsecret');
+$client->track('Some User', 'Socket PHP Event');
+sleep(1);
 ?>
