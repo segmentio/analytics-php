@@ -13,8 +13,7 @@ class Analytics_Client {
      * @param [String] $secret
      */
     public function __construct($secret, $options = array()) {
-        $consumer = new Analytics_RequestConsumer($secret);
-        $this->consumer = $consumer;
+        $this->consumer = new Analytics_RequestConsumer($secret);
     }
 
 
@@ -30,6 +29,10 @@ class Analytics_Client {
 
         $context = $this->get_context();
 
+        if ($timestamp == null) {
+            $timestamp = time();
+        }
+
         $this->consumer->track($user_id, $event, $properties, $context,
                               $timestamp);
     }
@@ -38,6 +41,11 @@ class Analytics_Client {
                                     $timestamp = null) {
 
         $context = $this->get_context();
+
+        if ($timestamp == null) {
+            $timestamp = time();
+        }
+
 
         $this->consumer.identify($user_id, $event, $properties, $context,
                                  $timestamp);
@@ -50,6 +58,6 @@ class Analytics_Client {
 }
 
 $client = new Analytics_Client('testsecret');
-$client->track('Some User', 'Socket PHP Event');
+$client->track('Some User', 'New Test PHP Event');
 sleep(1);
 ?>
