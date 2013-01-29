@@ -1,6 +1,8 @@
 <?php
 
+require(dirname(__FILE__) . '/consumers/file.php');
 require(dirname(__FILE__) . '/consumers/socket.php');
+
 
 class Analytics_Client {
 
@@ -10,54 +12,71 @@ class Analytics_Client {
      * Create a new analytics object with your app's secret
      * key
      *
-     * @param [String] $secret
+     * @param [string] $secret
+     * @param [array]  $options array of consumer options [optional]
+     * @param [string] Consumer constructor to use, socket by default.
      */
-    public function __construct($secret, $options = array()) {
-        $this->consumer = new Analytics_RequestConsumer($secret);
+    public function __construct($secret, $Consumer = "Analytics_SocketConsumer",
+                                $options = array()) {
+        $this->consumer = new $Consumer($secret, $options);
     }
 
 
     /**
      * Tracks a user action
-     * @param  [type] $user_id    [description]
-     * @param  [type] $event      [description]
-     * @param  array  $properties [description]
-     * @return [type]             [description]
+     * @param  [string] $user_id    user id string
+     * @param  [string] $event      name of the event
+     * @param  [array]  $properties properties associated with the event [optional]
+     * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+     * @return [boolean] whether the track call succeeded
      */
     public function track($user_id, $event, $properties = null,
                           $timestamp = null) {
 
         $context = $this->get_context();
 
-        if ($timestamp == null) {
-            $timestamp = time();
-        }
+        $timestamp = $this->format_time($timestamp);
 
-        $this->consumer->track($user_id, $event, $properties, $context,
-                              $timestamp);
+        return $this->consumer->track($user_id, $event, $properties, $context,
+                                      $timestamp);
     }
 
-    public static function identify($user_id, $traits = array(),
-                                    $timestamp = null) {
+    /**
+     * Tags traits about the user.
+     * @param  [string] $user_id
+     * @param  [array]  $traits
+     * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+     * @return [boolean] whether the track call succeeded
+     */
+    public function identify($user_id, $traits = array(), $timestamp = null) {
 
         $context = $this->get_context();
 
-        if ($timestamp == null) {
-            $timestamp = time();
-        }
+        $timestamp = $this->format_time($timestamp);
 
+        return $this->consumer->identify($user_id, $traits, $context,
+                                         $timestamp);
+    }
 
-        $this->consumer.identify($user_id, $event, $properties, $context,
-                                 $timestamp);
+    /**
+     * Formats a timestamp by making sure it is set, and then converting it to
+     * iso8601 format.
+     * @param  [time] $timestamp
+     */
+    private function format_time($timestamp) {
+
+        if ($timestamp == null) $timestamp = time();
+
+        return date("c", $timestamp);
     }
 
 
+    /**
+     * Add the segment.io context to the request
+     * @return [type] [description]
+     */
     private function get_context () {
-        return array( 'library' => 'analytics-php' );
+        return array( "library" => "analytics-php" );
     }
 }
-
-$client = new Analytics_Client('testsecret');
-$client->track('Some User', 'New Test PHP Event');
-sleep(1);
 ?>
