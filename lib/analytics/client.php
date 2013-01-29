@@ -19,9 +19,15 @@ class Analytics_Client {
    */
   public function __construct($secret, $options = array()) {
 
-    # Use our default socket consumer
-    $Consumer = isset($options["Consumer"]) ? $options["Consumer"] :
-                                              "Analytics_SocketConsumer";
+    $consumers = array(
+      "socket" => "Analytics_SocketConsumer",
+      "file"   => "Analytics_FileConsumer"
+    );
+
+    # Use our socket consumer by default
+    $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
+                                                   "socket";
+    $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
   }
