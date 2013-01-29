@@ -10,7 +10,7 @@ class FileConsumerTest extends PHPUnit_Framework_TestCase {
   function setUp() {
 
     if (file_exists($this->filename))
-        unlink($this->filename);
+      unlink($this->filename);
 
     $this->client = new Analytics_Client("testsecret",
                           array("consumer" => "file",

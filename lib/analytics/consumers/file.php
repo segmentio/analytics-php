@@ -43,7 +43,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
 
     $body = array(
       "secret"     => $this->secret,
-      "userId"     => $user_id,
+      "user_id"    => $user_id,
       "event"      => $event,
       "properties" => $properties,
       "timestamp"  => $timestamp,
@@ -64,7 +64,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
 
     $body = array(
       "secret"     => $this->secret,
-      "userId"     => $user_id,
+      "user_id"    => $user_id,
       "traits"     => $traits,
       "context"    => $context,
       "timestamp"  => $timestamp,
