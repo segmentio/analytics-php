@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_SocketConsumer {
+class Analytics_SocketConsumer extends Analytics_Consumer {
 
   private $secret;
   private $options;
@@ -25,8 +25,8 @@ class Analytics_SocketConsumer {
    * Tracks a user action
    * @param  [string] $user_id    user id string
    * @param  [string] $event      name of the event
-   * @param  [array]  $properties properties associated with the event [optional]
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * @param  [array]  $properties properties associated with the event
+   * @param  [string] $timestamp  iso8601 of the timestamp
    * @return [boolean] whether the track call succeeded
    */
   public function track($user_id, $event, $properties, $context, $timestamp) {
@@ -46,7 +46,7 @@ class Analytics_SocketConsumer {
    * Tags traits about the user.
    * @param  [string] $user_id
    * @param  [array]  $traits
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * @param  [string] $timestamp   iso8601 of the timestamp
    * @return [boolean] whether the track call succeeded
    */
   public function identify($user_id, $traits, $context, $timestamp) {

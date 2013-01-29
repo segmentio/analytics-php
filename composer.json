@@ -1,0 +1,23 @@
+{
+  "name": "segmentio/analytics-php",
+  "description": "Segmentio Analytics PHP Library",
+  "keywords": [
+    "analytics",
+    "segmentio",
+    "analytics.js"
+  ],
+  "homepage": "https://segment.io/libraries/php",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Segment.io <friends@segment.io",
+      "homepage": "https://segment.io/"
+    }
+  ],
+  "require": {
+    "php": ">=5.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*"
+  }
+}

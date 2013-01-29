@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_FileConsumer {
+class Analytics_FileConsumer extends Analytics_Consumer {
 
   private $file_handle;
   private $secret;
@@ -29,8 +29,8 @@ class Analytics_FileConsumer {
    * Tracks a user action
    * @param  [string] $user_id    user id string
    * @param  [string] $event      name of the event
-   * @param  [array]  $properties properties associated with the event [optional]
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * @param  [array]  $properties properties associated with the event
+   * @param  [string] $timestamp  iso8601 of the timestamp
    * @return [boolean] whether the track call succeeded
    */
   public function track($user_id, $event, $properties, $context, $timestamp) {
@@ -51,7 +51,7 @@ class Analytics_FileConsumer {
    * Tags traits about the user.
    * @param  [string] $user_id
    * @param  [array]  $traits
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * @param  [string] $timestamp   iso8601 of the timestamp
    * @return [boolean] whether the track call succeeded
    */
   public function identify($user_id, $traits, $context, $timestamp) {
