@@ -68,6 +68,7 @@ class Analytics_Client {
 
     if ($timestamp == null) $timestamp = time();
 
+    # Format for iso8601
     return date("c", $timestamp);
   }
 

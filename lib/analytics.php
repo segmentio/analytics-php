@@ -34,13 +34,20 @@ class Analytics {
   public static function track($user_id, $event, $properties = null,
                                 $timestamp = null) {
     self::check_client();
-    self::$client->track();
+    return self::$client->track($user_id, $event, $properties, $timestamp);
   }
 
+  /**
+   * Tags traits about the user.
+   * @param  [string] $user_id
+   * @param  [array]  $traits
+   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * @return [boolean] whether the track call succeeded
+   */
   public static function identify($user_id, $traits = array(),
                                     $timestamp = null) {
     self::check_client();
-    self::$client->identify();
+    return self::$client->identify($user_id, $traits, $timestamp);
   }
 
   /**
