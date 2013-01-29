@@ -9,8 +9,8 @@ class FileConsumerTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
 
-    #if (file_exists($this->filename))
-    #  unlink($this->filename);
+    if (file_exists($this->filename))
+      unlink($this->filename);
 
     $this->client = new Analytics_Client("testsecret",
                           array("consumer" => "file",
@@ -47,7 +47,7 @@ class FileConsumerTest extends PHPUnit_Framework_TestCase {
   function checkWritten() {
     exec("wc -l " . $this->filename, $output);
     $this->assertEquals($output[0], "1 " . $this->filename);
-    #unlink($this->filename);
+    unlink($this->filename);
   }
 
 }
