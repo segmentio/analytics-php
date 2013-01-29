@@ -42,9 +42,9 @@ class Analytics_Client {
    * @return [boolean] whether the track call succeeded
    */
   public function track($user_id, $event, $properties = null,
-                        $timestamp = null) {
+                        $timestamp = null, $context = array()) {
 
-    $context = $this->get_context();
+    $context = array_merge($context, $this->get_context());
 
     $timestamp = $this->format_time($timestamp);
 
@@ -59,9 +59,10 @@ class Analytics_Client {
    * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
    * @return [boolean] whether the track call succeeded
    */
-  public function identify($user_id, $traits = array(), $timestamp = null) {
+  public function identify($user_id, $traits = array(), $timestamp = null,
+                            $context = array()) {
 
-    $context = $this->get_context();
+    $context = array_merge($context, $this->get_context());
 
     $timestamp = $this->format_time($timestamp);
 

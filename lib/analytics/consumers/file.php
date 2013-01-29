@@ -47,6 +47,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
       "event"      => $event,
       "properties" => $properties,
       "timestamp"  => $timestamp,
+      "context"    => $context,
       "action"     => "track"
     );
 
