@@ -14,13 +14,11 @@ class Analytics {
   /**
    * Initializes the default client to use. Uses the socket consumer by default.
    * @param  string $secret   your project's secret key
-   * @param  string $Consumer constructor name for consumer to use
-   * @param  array  $options
+   * @param  array  $options  passed straight to the client
    */
-  public static function init($secret, $Consumer = "Analytics_SocketConsumer",
-                              $options = array()) {
+  public static function init($secret, $options = array()) {
 
-    self::$client = new Analytics_Client($secret, $Consumer, $options);
+    self::$client = new Analytics_Client($secret, $options);
   }
 
   /**

@@ -2,32 +2,29 @@
 
 class Analytics_SocketConsumer extends Analytics_Consumer {
 
-  private $secret;
-  private $options;
-
   /**
    * Creates a new socket consumer for dispatching async requests immediately
    * @param string $secret
    * @param array  $options
-   *     @field number   $timeout - the timeout for connecting
-   *     @field function error_handler - function called back on errors.
+   *     number   "timeout" - the timeout for connecting
+   *     function "error_handler" - function called back on errors.
+   *     boolean  "debug" - whether to use debug output, wait for response.
    */
   public function __construct($secret, $options = array()) {
 
     if (!isset($options["timeout"]))
       $options["timeout"] = 0.6;
 
-    $this->secret  = $secret;
-    $this->options = $options;
+    parent::__construct($secret, $options);
   }
 
   /**
    * Tracks a user action
-   * @param  [string] $user_id    user id string
-   * @param  [string] $event      name of the event
-   * @param  [array]  $properties properties associated with the event
-   * @param  [string] $timestamp  iso8601 of the timestamp
-   * @return [boolean] whether the track call succeeded
+   * @param  string  $user_id    user id string
+   * @param  string  $event      name of the event
+   * @param  array   $properties properties associated with the event
+   * @param  string  $timestamp  iso8601 of the timestamp
+   * @return boolean whether the track call succeeded
    */
   public function track($user_id, $event, $properties, $context, $timestamp) {
 
@@ -44,10 +41,10 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
 
   /**
    * Tags traits about the user.
-   * @param  [string] $user_id
-   * @param  [array]  $traits
-   * @param  [string] $timestamp   iso8601 of the timestamp
-   * @return [boolean] whether the track call succeeded
+   * @param  string  $user_id
+   * @param  array   $traits
+   * @param  string  $timestamp   iso8601 of the timestamp
+   * @return boolean whether the track call succeeded
    */
   public function identify($user_id, $traits, $context, $timestamp) {
 
@@ -93,7 +90,7 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
         return false;
       }
 
-      # Create the request body
+      # Create the request body, and make the request.
       $req = $this->createBody($host, $path, $content);
       return $this->makeRequest($socket, $req);
 
@@ -123,7 +120,7 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
 
       if ($res["status"] != "200") {
         $this->handleError($res["status"], $res["message"]);
-        $sucess = false;
+        $success = false;
       }
     }
 
@@ -193,15 +190,6 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
     if ($this->debug()) {
       error_log("[Analytics][Socket] " . $errstr);
     }
-  }
-
-
-  /**
-   * Check whether debug mode is enabled
-   * @return boolean
-   */
-  private function debug() {
-    return isset($this->options['debug']) ? $this->options['debug'] : false;
   }
 }
 ?>

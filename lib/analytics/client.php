@@ -13,12 +13,16 @@ class Analytics_Client {
    * Create a new analytics object with your app's secret
    * key
    *
-   * @param [string] $secret
-   * @param [array]  $options array of consumer options [optional]
-   * @param [string] Consumer constructor to use, socket by default.
+   * @param string $secret
+   * @param array  $options array of consumer options [optional]
+   * @param string Consumer constructor to use, socket by default.
    */
-  public function __construct($secret, $Consumer = "Analytics_SocketConsumer",
-                              $options = array()) {
+  public function __construct($secret, $options = array()) {
+
+    # Use our default socket consumer
+    $Consumer = isset($options["Consumer"]) ? $options["Consumer"] :
+                                              "Analytics_SocketConsumer";
+
     $this->consumer = new $Consumer($secret, $options);
   }
 

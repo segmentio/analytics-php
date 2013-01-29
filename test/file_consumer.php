@@ -1,20 +1,23 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/analytics.php");
+require_once(dirname(__FILE__) . "/../lib/analytics/client.php");
 
-class AnalyticsTest extends PHPUnit_Framework_TestCase {
+class FileConsumerTest extends PHPUnit_Framework_TestCase {
+
+  private $client;
 
   function setUp() {
-    Analytics::init("testsecret");
+    $this->client = new Analytics_Client("testsecret",
+                          array("Consumer" => "Analytics_FileConsumer"));
   }
 
   function testTrack() {
-    $tracked = Analytics::track("some_user", "Test PHP Event");
+    $tracked = $this->client->track("some_user", "Test PHP Event");
     $this->assertTrue($tracked);
   }
 
   function testIdentify() {
-    $identified = Analytics::identify("some_user", array(
+    $identified = $this->client->identify("some_user", array(
                     "name"      => "Calvin",
                     "loves_php" => false,
                     "birthday"  => time(),
@@ -22,5 +25,16 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
     $this->assertTrue($identified);
   }
+
+  function testProductionProblems() {
+    # Open to a place where we should not have write access.
+    $client = new Analytics_Client("testsecret",
+                          array("Consumer" => "Analytics_FileConsumer",
+                                "filename" => "/dev/erwerw" ));
+
+    $tracked = $client->track("some_user", "Test PHP Event");
+    $this->assertFalse($tracked);
+  }
+
 }
 ?>
