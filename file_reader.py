@@ -12,7 +12,7 @@ clients = {}
 
 
 def process_file(filename):
-    print 'Reading from file', filename
+    print 'Processing file', filename
 
     with open(filename) as f:
         for line in f:
