@@ -12,6 +12,8 @@ clients = {}
 
 
 def process_file(filename):
+    """Processes the log file line by line"""
+
     print 'Processing file', filename
 
     with open(filename) as f:
@@ -20,6 +22,7 @@ def process_file(filename):
 
 
 def process_line(line):
+    """Tracks a single line by parsing its json and tracking"""
     line = line.strip()
     try:
         contents = json.loads(line)
@@ -36,6 +39,8 @@ def process_line(line):
 
 
 def get_client(secret):
+    """Returns or creates a new client by the secret"""
+
     if secret not in clients:
         clients[secret] = analytics.Client(secret)
 
@@ -43,6 +48,8 @@ def get_client(secret):
 
 
 def track(secret, contents):
+    """Tracks an event"""
+
     client = get_client(secret)
 
     body = shared_properties(contents)
@@ -55,6 +62,8 @@ def track(secret, contents):
 
 
 def identify(secret, contents):
+    """Identifies a user with traits"""
+
     client = get_client(secret)
 
     body = shared_properties(contents)
@@ -66,6 +75,8 @@ def identify(secret, contents):
 
 
 def shared_properties(contents):
+    """Returns the common properties between track and identify"""
+
     return {
         'user_id':   contents['user_id'],
         'timestamp': date_parser.parse(contents['timestamp']),
@@ -75,6 +86,7 @@ def shared_properties(contents):
 
 if __name__ == '__main__':
 
+    # Parse the file arguments
     parser = argparse.ArgumentParser(
                 description='Read from the analytics.log file')
 
@@ -91,6 +103,8 @@ if __name__ == '__main__':
         print 'Error: The filename you specified doesn\'t exist: ', filename
         sys.exit(1)
 
+    # Move the file so that we don't read from constantly appended file.
+    # Then process it.
     os.rename(filename, processing_filename)
     process_file(processing_filename)
     os.unlink(processing_filename)
