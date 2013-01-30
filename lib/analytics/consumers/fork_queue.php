@@ -12,13 +12,22 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
    * @param string $secret
    * @param array  $options
    *     boolean  "debug" - whether to use debug output, wait for response.
+   *     number   "max_queue_size" - the max size of messages to enqueue
+   *     number   "batch_size" - how many messages to send in a single request
    */
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
     $this->queue = array();
+
+    if (isset($options["max_queue_size"]))
+      $this->queue = $options["max_queue_size"];
+
+    if (isset($options["batch_Size"]))
+      $this->queue = $options["batch_size"];
   }
 
   public function __destruct() {
+    # Flush our queue on destruction
     $this->flush();
   }
 
@@ -27,6 +36,7 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
    * @param  string  $user_id    user id string
    * @param  string  $event      name of the event
    * @param  array   $properties properties associated with the event
+   * @param  array   $context
    * @param  string  $timestamp  iso8601 of the timestamp
    * @return boolean whether the track call succeeded
    */
@@ -49,6 +59,7 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
    * Tags traits about the user.
    * @param  string  $user_id
    * @param  array   $traits
+   * @param  array   $context
    * @param  string  $timestamp   iso8601 of the timestamp
    * @return boolean whether the track call succeeded
    */
@@ -85,6 +96,10 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
     return $success;
   }
 
+  /**
+   * Adds an item to our queue for processing later.
+   * @param  array $item a track or identify
+   */
   private function enqueue($item) {
 
     $count = count($this->queue);
@@ -103,8 +118,7 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
   /**
    * Make an async request to our API. Fork a curl process, immediately send
    * to the API. If debug is enabled, we wait for the response.
-   * @param  string  $type ("track" or "identify")
-   * @param  array   $body post body content.
+   * @param  array   $messages array of all the messages to send
    * @return boolean whether the request succeeded
    */
   private function request($messages) {
@@ -132,6 +146,10 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
     }
 
     exec($cmd, $output, $exit);
+
+    if ($exit != 0 && $this->debug()) {
+      error_log("[Analytics][Fork_Queue] " . $output);
+    }
 
     return $exit == 0;
   }

@@ -9,7 +9,8 @@ class ForkQueueConsumerTest extends PHPUnit_Framework_TestCase {
   function setUp() {
 
     $this->client = new Analytics_Client("testsecret",
-                          array("consumer" => "fork_queue"));
+                          array("consumer" => "fork_queue",
+                                "debug"    => true));
   }
 
   function testTrack() {
