@@ -49,8 +49,7 @@ class Analytics {
   }
 
   /**
-   * Ensures that the client is indeed set.
-   * @return [type] [description]
+   * Ensures that the client is indeed set. Throws an exception when not set.
    */
   private static function check_client() {
 

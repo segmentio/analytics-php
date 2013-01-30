@@ -12,7 +12,7 @@ clients = {}
 
 
 def process_file(filename):
-    """Processes the log file line by line"""
+    '''Processes the log file line by line'''
 
     print 'Processing file', filename
 
@@ -22,7 +22,7 @@ def process_file(filename):
 
 
 def process_line(line):
-    """Tracks a single line by parsing its json and tracking"""
+    '''Tracks a single line by parsing its json and tracking'''
     line = line.strip()
     try:
         contents = json.loads(line)
@@ -39,7 +39,7 @@ def process_line(line):
 
 
 def get_client(secret):
-    """Returns or creates a new client by the secret"""
+    '''Returns or creates a new client by the secret'''
 
     if secret not in clients:
         clients[secret] = analytics.Client(secret)
@@ -48,7 +48,7 @@ def get_client(secret):
 
 
 def track(secret, contents):
-    """Tracks an event"""
+    '''Tracks an event'''
 
     client = get_client(secret)
 
@@ -62,7 +62,7 @@ def track(secret, contents):
 
 
 def identify(secret, contents):
-    """Identifies a user with traits"""
+    '''Identifies a user with traits'''
 
     client = get_client(secret)
 
@@ -75,7 +75,7 @@ def identify(secret, contents):
 
 
 def shared_properties(contents):
-    """Returns the common properties between track and identify"""
+    '''Returns the common properties between track and identify'''
 
     return {
         'user_id':   contents['user_id'],
@@ -84,6 +84,15 @@ def shared_properties(contents):
     }
 
 
+'''
+
+    Processes the analytics.log file.
+
+    Requires: analytics (pip install analytics)
+
+    Usage:
+        python file_reader.py [--file /path/to/analytics.log]
+'''
 if __name__ == '__main__':
 
     # Parse the file arguments
