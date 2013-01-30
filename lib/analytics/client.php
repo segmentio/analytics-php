@@ -2,6 +2,8 @@
 
 require(dirname(__FILE__) . '/consumers/consumer.php');
 require(dirname(__FILE__) . '/consumers/file.php');
+require(dirname(__FILE__) . '/consumers/fork.php');
+require(dirname(__FILE__) . '/consumers/fork_queue.php');
 require(dirname(__FILE__) . '/consumers/socket.php');
 
 
@@ -20,13 +22,15 @@ class Analytics_Client {
   public function __construct($secret, $options = array()) {
 
     $consumers = array(
-      "socket" => "Analytics_SocketConsumer",
-      "file"   => "Analytics_FileConsumer"
+      "socket"     => "Analytics_SocketConsumer",
+      "file"       => "Analytics_FileConsumer",
+      "fork"       => "Analytics_ForkConsumer",
+      "fork_queue" => "Analytics_ForkQueueConsumer"
     );
 
     # Use our socket consumer by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
-                                                   "socket";
+                                                   "fork_queue";
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);

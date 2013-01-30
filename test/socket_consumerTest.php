@@ -7,7 +7,8 @@ class SocketConsumerTest extends PHPUnit_Framework_TestCase {
   private $client;
 
   function setUp() {
-    $this->client = new Analytics_Client("testsecret");
+    $this->client = new Analytics_Client("testsecret",
+                                          array("consumer" => "socket"));
   }
 
   function testTrack() {
@@ -27,7 +28,8 @@ class SocketConsumerTest extends PHPUnit_Framework_TestCase {
 
   function testShortTimeout() {
     $client = new Analytics_Client("testsecret",
-                                   array( "timeout" => 0.05 ));
+                                   array( "timeout"  => 0.05,
+                                          "consumer" => "socket" ));
 
     $tracked = $client->track("some_user", "Test PHP Event");
     $this->assertFalse($tracked);
@@ -45,7 +47,9 @@ class SocketConsumerTest extends PHPUnit_Framework_TestCase {
   }
 
   function testDebugProblems() {
-    $client = new Analytics_Client("x", array("debug" => true));
+    $client = new Analytics_Client("x", array(
+                                    "debug"   => true,
+                                    "consumer"=> "socket"));
 
     # Should error out with debug on.
     $tracked = $client->track("some_user", "Test PHP Event");

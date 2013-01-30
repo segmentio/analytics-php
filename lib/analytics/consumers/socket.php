@@ -33,7 +33,8 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
       "userId"     => $user_id,
       "event"      => $event,
       "properties" => $properties,
-      "timestamp"  => $timestamp
+      "timestamp"  => $timestamp,
+      "context"    => $context
     );
 
     return $this->request("track", $body);
