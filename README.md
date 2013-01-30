@@ -1,6 +1,8 @@
 analytics-php
 ==============
 
+[![Build Status](https://travis-ci.org/segmentio/analytics-php.png)](https://travis-ci.org/segmentio/analytics-php)
+
 analytics-php is a php client for [Segment.io](https://segment.io)
 
 ## Documentation
