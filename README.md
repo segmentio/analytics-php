@@ -7,7 +7,7 @@ analytics-php is a php client for [Segment.io](https://segment.io)
 
 ## Documentation
 
-Documentation is available at [https://segment.io/libraries/php](https://segment.io/libraries/php).
+Documentation is available at [segment.io/libraries/php](https://segment.io/libraries/php)
 
 ## License
 
