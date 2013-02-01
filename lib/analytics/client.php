@@ -2,8 +2,7 @@
 
 require(dirname(__FILE__) . '/consumers/consumer.php');
 require(dirname(__FILE__) . '/consumers/file.php');
-require(dirname(__FILE__) . '/consumers/fork.php');
-require(dirname(__FILE__) . '/consumers/fork_queue.php');
+require(dirname(__FILE__) . '/consumers/fork_curl.php');
 require(dirname(__FILE__) . '/consumers/socket.php');
 
 
@@ -24,13 +23,12 @@ class Analytics_Client {
     $consumers = array(
       "socket"     => "Analytics_SocketConsumer",
       "file"       => "Analytics_FileConsumer",
-      "fork"       => "Analytics_ForkConsumer",
-      "fork_queue" => "Analytics_ForkQueueConsumer"
+      "fork_curl"  => "Analytics_ForkCurlConsumer"
     );
 
     # Use our socket consumer by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
-                                                   "fork_queue";
+                                                   "fork_curl";
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
@@ -48,9 +46,9 @@ class Analytics_Client {
   public function track($user_id, $event, $properties = null,
                         $timestamp = null, $context = array()) {
 
-    $context = array_merge($context, $this->get_context());
+    $context = array_merge($context, $this->getContext());
 
-    $timestamp = $this->format_time($timestamp);
+    $timestamp = $this->formatTime($timestamp);
 
     return $this->consumer->track($user_id, $event, $properties, $context,
                                     $timestamp);
@@ -66,9 +64,9 @@ class Analytics_Client {
   public function identify($user_id, $traits = array(), $timestamp = null,
                             $context = array()) {
 
-    $context = array_merge($context, $this->get_context());
+    $context = array_merge($context, $this->getContext());
 
-    $timestamp = $this->format_time($timestamp);
+    $timestamp = $this->formatTime($timestamp);
 
     return $this->consumer->identify($user_id, $traits, $context,
                                       $timestamp);
@@ -77,9 +75,9 @@ class Analytics_Client {
   /**
    * Formats a timestamp by making sure it is set, and then converting it to
    * iso8601 format.
-   * @param  [time] $timestamp
+   * @param  time $timestamp - time in seconds (time())
    */
-  private function format_time($timestamp) {
+  private function formatTime($timestamp) {
 
     if ($timestamp == null) $timestamp = time();
 
@@ -90,9 +88,9 @@ class Analytics_Client {
 
   /**
    * Add the segment.io context to the request
-   * @return [type] [description]
+   * @return array additional context
    */
-  private function get_context () {
+  private function getContext () {
     return array( "library" => "analytics-php" );
   }
 }

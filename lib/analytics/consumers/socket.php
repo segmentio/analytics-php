@@ -2,6 +2,8 @@
 
 class Analytics_SocketConsumer extends Analytics_Consumer {
 
+  protected $type = "Socket";
+
   /**
    * Creates a new socket consumer for dispatching async requests immediately
    * @param string $secret
@@ -13,7 +15,7 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
   public function __construct($secret, $options = array()) {
 
     if (!isset($options["timeout"]))
-      $options["timeout"] = 0.6;
+      $options["timeout"] = 0.4;
 
     parent::__construct($secret, $options);
   }
@@ -73,9 +75,9 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
 
     $content = json_encode($body);
 
-    $protocol = "ssl";
+    $protocol = $this->ssl() ? "ssl" : "tcp";
     $host = "api.segment.io";
-    $port = 443;
+    $port = $this->ssl() ? 443 : 80;
     $path = "/v1/" . $type;
 
     $timeout = $this->options['timeout'];
@@ -175,23 +177,7 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
   }
 
 
-  /**
-   * On an error, try and call the error handler, if debugging output to
-   * error_log as well.
-   * @param  string $errno
-   * @param  string $errstr
-   */
-  private function handleError($errno, $errstr) {
 
-    if (isset($this->options['error_handler'])) {
-      $handler = $this->options['error_handler'];
-      $handler($errno, $errstr);
-    }
-
-    if ($this->debug()) {
-      error_log("[Analytics][Socket] " . $errstr);
-    }
-  }
 }
 ?>
 

@@ -3,6 +3,7 @@
 class Analytics_FileConsumer extends Analytics_Consumer {
 
   private $file_handle;
+  protected $type = "File";
 
   /**
    * The file consumer writes track and identify calls to a file.
@@ -21,8 +22,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
       $this->file_handle = fopen($options["filename"], "a");
     } catch (Exception $e) {
 
-      if ($this->debug())
-        error_log($this->file_handle);
+      $this->handleError($e->getCode(), $e->getMessage());
     }
   }
 
@@ -76,7 +76,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
   }
 
   /**
-   * Writes the API call to a file as line-delimeted json
+   * Writes the API call to a file as line-delimited json
    * @param  [array]   $body post body content.
    * @return [boolean] whether the request succeeded
    */
@@ -88,7 +88,7 @@ class Analytics_FileConsumer extends Analytics_Consumer {
     $content = json_encode($body);
     $content.= "\n";
 
-    return fwrite($this->file_handle, $content) > 0;
+    return fwrite($this->file_handle, $content) == strlen($content);
   }
 }
 ?>

@@ -1,3 +1,8 @@
+0.2.0 / 2-1-2013
+=============
+* Updating consumer class to use shared functions.
+* Removed *fork* consumer, renamed *fork_queue* to *fork*.
+
 0.1.1 / 1-30-2013
 =============
 * Adding fork consumer

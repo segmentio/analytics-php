@@ -30,22 +30,24 @@ class Analytics {
    * @return [boolean] whether the track call succeeded
    */
   public static function track($user_id, $event, $properties = null,
-                                $timestamp = null) {
+                                $timestamp = null, $context = array()) {
     self::check_client();
-    return self::$client->track($user_id, $event, $properties, $timestamp);
+    return self::$client->track($user_id, $event, $properties, $timestamp,
+                                $context);
   }
 
   /**
    * Tags traits about the user.
-   * @param  [string] $user_id
-   * @param  [array]  $traits
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
-   * @return [boolean] whether the track call succeeded
+   * @param  string  $user_id
+   * @param  array   $traits
+   * @param  number  $timestamp  unix seconds since epoch (time()) [optional]
+   * @param  array
+   * @return boolean whether the track call succeeded
    */
   public static function identify($user_id, $traits = array(),
-                                    $timestamp = null) {
+                                    $timestamp = null, $context = array()) {
     self::check_client();
-    return self::$client->identify($user_id, $traits, $timestamp);
+    return self::$client->identify($user_id, $traits, $timestamp, $context);
   }
 
   /**
@@ -54,7 +56,8 @@ class Analytics {
   private static function check_client() {
 
     if (self::$client == null) {
-      throw new Exception("Analytics::init must be called before track or identify");
+      throw new Exception("Analytics::init must be called " .
+                          "before track or identify");
     }
   }
 };

@@ -1,7 +1,8 @@
 <?php
 
-class Analytics_ForkQueueConsumer extends Analytics_Consumer {
+class Analytics_ForkCurlConsumer extends Analytics_Consumer {
 
+  protected $type = "Fork";
   private $queue;
   private $max_queue_size = 10000;
   private $batch_size = 100;
@@ -17,13 +18,14 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
    */
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
+
     $this->queue = array();
 
     if (isset($options["max_queue_size"]))
-      $this->queue = $options["max_queue_size"];
+      $this->max_queue_size = $options["max_queue_size"];
 
-    if (isset($options["batch_Size"]))
-      $this->queue = $options["batch_size"];
+    if (isset($options["batch_size"]))
+      $this->batch_size = $options["batch_size"];
   }
 
   public function __destruct() {
@@ -133,7 +135,7 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
     # Replace our single quotes since we are using them in the terminal
     $payload = str_replace("'", "'\''", $payload);
 
-    $protocol = "https://";
+    $protocol = $this->ssl() ? "https://" : "http://";
     $host = "api.segment.io";
     $path = "/v1/import";
     $url = $protocol . $host . $path;
@@ -147,8 +149,8 @@ class Analytics_ForkQueueConsumer extends Analytics_Consumer {
 
     exec($cmd, $output, $exit);
 
-    if ($exit != 0 && $this->debug()) {
-      error_log("[Analytics][Fork_Queue] " . $output);
+    if ($exit != 0) {
+      $this->handleError($exit, $output);
     }
 
     return $exit == 0;

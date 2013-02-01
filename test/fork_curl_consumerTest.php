@@ -2,14 +2,14 @@
 
 require_once(dirname(__FILE__) . "/../lib/analytics/client.php");
 
-class ForkQueueConsumerTest extends PHPUnit_Framework_TestCase {
+class ForkCurlConsumerTest extends PHPUnit_Framework_TestCase {
 
   private $client;
 
   function setUp() {
 
     $this->client = new Analytics_Client("testsecret",
-                          array("consumer" => "fork_queue",
+                          array("consumer" => "fork_curl",
                                 "debug"    => true));
   }
 
