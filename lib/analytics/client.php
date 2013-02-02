@@ -1,6 +1,8 @@
 <?php
 
 require(dirname(__FILE__) . '/consumers/consumer.php');
+require(dirname(__FILE__) . '/consumers/queue_consumer.php');
+
 require(dirname(__FILE__) . '/consumers/file.php');
 require(dirname(__FILE__) . '/consumers/fork_curl.php');
 require(dirname(__FILE__) . '/consumers/socket.php');

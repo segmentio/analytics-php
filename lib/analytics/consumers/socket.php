@@ -1,8 +1,9 @@
 <?php
 
-class Analytics_SocketConsumer extends Analytics_Consumer {
+class Analytics_SocketConsumer extends Analytics_QueueConsumer {
 
   protected $type = "Socket";
+  private $socket_failed;
 
   /**
    * Creates a new socket consumer for dispatching async requests immediately
@@ -16,6 +17,9 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
 
     if (!isset($options["timeout"]))
       $options["timeout"] = 0.4;
+
+    if (!isset($options["host"]))
+      $options["host"] = "api.segment.io";
 
     parent::__construct($secret, $options);
   }
@@ -36,10 +40,11 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
       "event"      => $event,
       "properties" => $properties,
       "timestamp"  => $timestamp,
-      "context"    => $context
+      "context"    => $context,
+      "action"     => "track"
     );
 
-    return $this->request("track", $body);
+    return $this->enqueue($body);
   }
 
   /**
@@ -56,50 +61,57 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
       "userId"     => $user_id,
       "traits"     => $traits,
       "context"    => $context,
-      "timestamp"  => $timestamp
+      "timestamp"  => $timestamp,
+      "action"     => "identify"
     );
 
-    return $this->request("identify", $body);
+    return $this->enqueue($body);
   }
 
-  /**
-   * Make an async request to our API. Does this by opening up a socket
-   * and then writing to it without waiting for the response.
-   * @param  string  $type ("track" or "identify")
-   * @param  array   $body post body content.
-   * @return boolean whether the request succeeded
-   */
-  private function request($type, $body) {
 
-    $body["type"] = $type;
+  public function flushBatch($batch) {
+    $socket = $this->createSocket();
 
-    $content = json_encode($body);
+    if (!$socket)
+      return;
+
+    $payload = array("secret" => $this->secret,
+                     "batch"  => $batch );
+
+    $payload = json_encode($payload);
+
+    $body = $this->createBody($this->options["host"], $payload);
+    return $this->makeRequest($socket, $body);
+  }
+
+
+  private function createSocket() {
+
+    if ($this->socket_failed)
+      return false;
 
     $protocol = $this->ssl() ? "ssl" : "tcp";
-    $host = "api.segment.io";
+    $host = $this->options["host"];
     $port = $this->ssl() ? 443 : 80;
-    $path = "/v1/" . $type;
-
-    $timeout = $this->options['timeout'];
+    $timeout = $this->options["timeout"];
 
     try {
       # Open our socket to the API Server.
-      $socket = fsockopen($protocol . "://" . $host, $port, $errno, $errstr,
-                          $timeout);
+      $socket = fsockopen($protocol . "://" . $host, $port, $errno,
+                          $errstr, $timeout);
 
       # If we couldn't open the socket, handle the error.
       if ($errno != 0) {
         $this->handleError($errno, $errstr);
+        $this->socket_failed = true;
         return false;
       }
 
-      # Create the request body, and make the request.
-      $req = $this->createBody($host, $path, $content);
-      return $this->makeRequest($socket, $req);
+      return $socket;
 
     } catch (Exception $e) {
-
       $this->handleError($e->getCode(), $e->getMessage());
+      $this->socket_failed = true;
       return false;
     }
   }
@@ -135,14 +147,13 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
   /**
    * Create the body to send as the post request.
    * @param  string $host
-   * @param  string $path
    * @param  string $content
    * @return string body
    */
-  private function createBody($host, $path, $content) {
+  private function createBody($host, $content) {
 
     $req = "";
-    $req.= "POST " . $path . " HTTP/1.1\r\n";
+    $req.= "POST /v1/import HTTP/1.1\r\n";
     $req.= "Host: " . $host . "\r\n";
     $req.= "Content-Type: application/json\r\n";
     $req.= "Accept: application/json\r\n";
@@ -175,9 +186,6 @@ class Analytics_SocketConsumer extends Analytics_Consumer {
       "message" => $result
     );
   }
-
-
-
 }
 ?>
 

@@ -1,11 +1,9 @@
 <?php
 
-class Analytics_ForkCurlConsumer extends Analytics_Consumer {
+class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
 
-  protected $type = "Fork";
-  private $queue;
-  private $max_queue_size = 10000;
-  private $batch_size = 100;
+  protected $type = "ForkCurl";
+
 
   /**
    * Creates a new queued fork consumer which queues fork and identify
@@ -18,19 +16,6 @@ class Analytics_ForkCurlConsumer extends Analytics_Consumer {
    */
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
-
-    $this->queue = array();
-
-    if (isset($options["max_queue_size"]))
-      $this->max_queue_size = $options["max_queue_size"];
-
-    if (isset($options["batch_size"]))
-      $this->batch_size = $options["batch_size"];
-  }
-
-  public function __destruct() {
-    # Flush our queue on destruction
-    $this->flush();
   }
 
   /**
@@ -80,50 +65,12 @@ class Analytics_ForkCurlConsumer extends Analytics_Consumer {
   }
 
   /**
-   * Flushes our queue of messages by batching them to the server
-   */
-  public function flush() {
-
-    $count = count($this->queue);
-    $success = true;
-
-    while($count > 0 && $success) {
-
-      $batch = array_splice($this->queue, 0, min($this->batch_size, $count));
-      $success = $this->request($batch);
-
-      $count = count($this->queue);
-    }
-
-    return $success;
-  }
-
-  /**
-   * Adds an item to our queue for processing later.
-   * @param  array $item a track or identify
-   */
-  private function enqueue($item) {
-
-    $count = count($this->queue);
-
-    if ($count > $this->max_queue_size)
-      return false;
-
-    $count = array_push($this->queue, $item);
-
-    if ($count > $this->batch_size)
-      $this->flush();
-
-    return true;
-  }
-
-  /**
    * Make an async request to our API. Fork a curl process, immediately send
    * to the API. If debug is enabled, we wait for the response.
    * @param  array   $messages array of all the messages to send
    * @return boolean whether the request succeeded
    */
-  private function request($messages) {
+  public function flushBatch($messages) {
 
     $body = array(
       "batch"  => $messages,

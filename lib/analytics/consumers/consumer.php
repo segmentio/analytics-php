@@ -1,9 +1,10 @@
 <?php
 abstract class Analytics_Consumer {
 
+  protected $type = "Consumer";
+
   protected $options;
   protected $secret;
-  protected $type = "Consumer";
 
   /**
    * Store our secret and options as part of this consumer
@@ -11,9 +12,10 @@ abstract class Analytics_Consumer {
    * @param array  $options
    */
   public function __construct($secret, $options = array()) {
-      $this->secret = $secret;
-      $this->options = $options;
+    $this->secret = $secret;
+    $this->options = $options;
   }
+
 
   /**
    * Tracks a user action
@@ -34,6 +36,11 @@ abstract class Analytics_Consumer {
    * @return boolean whether the track call succeeded
    */
   abstract public function identify($user_id, $traits, $context, $timestamp);
+
+  protected function enqueue($item) {
+
+  }
+
 
   /**
    * Check whether debug mode is enabled
