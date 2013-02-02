@@ -12,7 +12,7 @@ class SocketConsumerTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "Test PHP Event");
+    $tracked = $this->client->track("some_user", "Socket PHP Event");
     $this->assertTrue($tracked);
   }
 
@@ -31,30 +31,38 @@ class SocketConsumerTest extends PHPUnit_Framework_TestCase {
                                    array( "timeout"  => 0.01,
                                           "consumer" => "socket" ));
 
-    $tracked = $client->track("some_user", "Test PHP Event");
-    $this->assertFalse($tracked);
+    $tracked = $client->track("some_user", "Socket PHP Event");
+    $this->assertTrue($tracked);
 
     $identified = $client->identify("some_user");
-    $this->assertFalse($identified);
+    $this->assertTrue($identified);
   }
 
   function testProductionProblems() {
-    $client = new Analytics_Client("x");
+    $client = new Analytics_Client("x", array(
+        "consumer"      => "socket",
+        "error_handler" => function () { throw new Exception("Was called"); }));
 
     # Shouldn't error out without debug on.
-    $client->track("some_user", "Test PHP Event");
-    #$flushed = $client->flush();
-    #$this->assertTrue($flushed);
+    $client->track("some_user", "Socket PHP Event");
+    $client->__destruct();
   }
 
   function testDebugProblems() {
-    $client = new Analytics_Client("x", array("debug"    => true,
-                                              "consumer" => "socket"));
+
+    $options = array(
+      "debug"         => true,
+      "consumer"      => "socket",
+      "error_handler" => function ($errno, $errmsg) {
+                            if ($errno != 400)
+                              throw new Exception("Response is not 400"); }
+    );
+
+    $client = new Analytics_Client("x", $options);
 
     # Should error out with debug on.
-    $client->track("some_user", "Test PHP Event");
+    $client->track("some_user", "Socket PHP Event");
     $client->__destruct();
-    #$this->assertFalse($flushed);
   }
 }
 ?>

@@ -9,7 +9,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = Analytics::track("some_user", "Test PHP Event");
+    $tracked = Analytics::track("some_user", "Module PHP Event");
     $this->assertTrue($tracked);
   }
 

@@ -18,7 +18,7 @@ class FileConsumerTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "Test PHP Event");
+    $tracked = $this->client->track("some_user", "File PHP Event");
     $this->assertTrue($tracked);
     $this->checkWritten();
   }
@@ -40,7 +40,7 @@ class FileConsumerTest extends PHPUnit_Framework_TestCase {
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 
-    $tracked = $client->track("some_user", "Test PHP Event");
+    $tracked = $client->track("some_user", "File PHP Event");
     $this->assertFalse($tracked);
   }
 
