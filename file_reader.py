@@ -88,7 +88,7 @@ def shared_properties(contents):
 
     Processes the analytics.log file.
 
-    Requires: analytics (pip install analytics)
+    Requires: analytics-python (pip install analytics-python)
 
     Usage:
         python file_reader.py [--file /path/to/analytics.log]
