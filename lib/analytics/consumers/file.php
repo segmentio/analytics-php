@@ -21,14 +21,16 @@ class Analytics_FileConsumer extends Analytics_Consumer {
     try {
       $this->file_handle = fopen($options["filename"], "a");
     } catch (Exception $e) {
-
+      $this->file_handle = null;
       $this->handleError($e->getCode(), $e->getMessage());
     }
   }
 
   public function __destruct() {
-    if ($this->file_handle)
+    if ($this->file_handle &&
+        get_resource_type($this->file_handle) != "Unknown") {
       fclose($this->file_handle);
+    }
   }
 
   /**

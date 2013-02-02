@@ -36,6 +36,9 @@ class Analytics_Client {
     $this->consumer = new $Consumer($secret, $options);
   }
 
+  public function __destruct() {
+    $this->consumer->__destruct();
+  }
 
   /**
    * Tracks a user action
