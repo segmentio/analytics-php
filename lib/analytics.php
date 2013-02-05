@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('json_encode')) {
-    throw new Exception('Analytics nees the JSON PHP extension.');
+    throw new Exception('Analytics needs the JSON PHP extension.');
 }
 
 require(dirname(__FILE__) . '/analytics/client.php');
