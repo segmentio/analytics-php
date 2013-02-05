@@ -97,8 +97,8 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
 
     try {
       # Open our socket to the API Server.
-      $socket = fsockopen($protocol . "://" . $host, $port, $errno,
-                          $errstr, $timeout);
+      $socket = pfsockopen($protocol . "://" . $host, $port, $errno,
+                           $errstr, $timeout);
 
       # If we couldn't open the socket, handle the error.
       if ($errno != 0) {
@@ -128,7 +128,12 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
     $success = true;
 
     # Fire off the request without waiting for a response.
-    fwrite($socket, $req);
+    $written = fwrite($socket, $req);
+
+    if (!$written) {
+      fclose($socket);
+      return false;
+    }
 
     if ($this->debug()) {
       $res = $this->parseResponse(fread($socket, 2048));
@@ -139,7 +144,6 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
       }
     }
 
-    fclose($socket);
     return $success;
   }
 

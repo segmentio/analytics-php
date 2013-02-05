@@ -1,3 +1,7 @@
+0.2.1 / 2-1-2013
+=============
+* Enabling pfsockopen for persistent connections
+
 0.2.0 / 2-1-2013
 =============
 * Updating consumer class to use shared functions.
