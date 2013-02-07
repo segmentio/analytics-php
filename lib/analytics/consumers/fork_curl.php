@@ -77,10 +77,10 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
       "secret" => $this->secret
     );
 
-    $payload = json_encode($body);
+    $payload = escapeshellarg(json_encode($body));
 
     # Replace our single quotes since we are using them in the terminal
-    $payload = str_replace("'", "'\''", $payload);
+    #$payload = #str_replace("'", "'\''", $payload);
 
     $protocol = $this->ssl() ? "https://" : "http://";
     $host = "api.segment.io";
@@ -88,12 +88,13 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
     $url = $protocol . $host . $path;
 
     $cmd = "curl -X POST -H 'Content-Type: application/json'";
-    $cmd.= " -d '" . $payload . "' " . "'" . $url . "'";
+    $cmd.= " -d " . $payload . " '" . $url . "'";
 
     if (!$this->debug()) {
       $cmd .= " > /dev/null 2>&1 &";
     }
 
+    echo $cmd;
     exec($cmd, $output, $exit);
 
     if ($exit != 0) {
