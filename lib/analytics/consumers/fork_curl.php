@@ -77,7 +77,10 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
       "secret" => $this->secret
     );
 
-    $payload = escapeshellarg(json_encode($body));
+    $payload = json_encode($body);
+
+    # Escape for shell usage.
+    $payload = escapeshellarg($payload);
 
     $protocol = $this->ssl() ? "https://" : "http://";
     $host = "api.segment.io";
@@ -91,7 +94,6 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
       $cmd .= " > /dev/null 2>&1 &";
     }
 
-    echo $cmd;
     exec($cmd, $output, $exit);
 
     if ($exit != 0) {

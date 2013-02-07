@@ -14,7 +14,7 @@ class ForkCurlConsumerTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "PHP Fork Curl'd Event");
+    $tracked = $this->client->track("some_user", "PHP Fork Curl'd\" Event");
     $this->assertTrue($tracked);
   }
 
