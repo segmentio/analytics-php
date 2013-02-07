@@ -79,9 +79,6 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
 
     $payload = escapeshellarg(json_encode($body));
 
-    # Replace our single quotes since we are using them in the terminal
-    #$payload = #str_replace("'", "'\''", $payload);
-
     $protocol = $this->ssl() ? "https://" : "http://";
     $host = "api.segment.io";
     $path = "/v1/import";
