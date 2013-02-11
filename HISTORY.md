@@ -1,3 +1,7 @@
+0.2.2 / 2-11-2013
+=============
+* Adding default args for properties
+
 0.2.1 / 2-1-2013
 =============
 * Enabling pfsockopen for persistent connections

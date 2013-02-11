@@ -29,7 +29,7 @@ class Analytics {
    * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
    * @return [boolean] whether the track call succeeded
    */
-  public static function track($user_id, $event, $properties = null,
+  public static function track($user_id, $event, $properties = array(),
                                 $timestamp = null, $context = array()) {
     self::check_client();
     return self::$client->track($user_id, $event, $properties, $timestamp,

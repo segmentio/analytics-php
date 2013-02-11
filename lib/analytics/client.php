@@ -48,7 +48,7 @@ class Analytics_Client {
    * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
    * @return [boolean] whether the track call succeeded
    */
-  public function track($user_id, $event, $properties = null,
+  public function track($user_id, $event, $properties = array(),
                         $timestamp = null, $context = array()) {
 
     $context = array_merge($context, $this->getContext());
