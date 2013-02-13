@@ -19,5 +19,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"
+  },
+  "autoload": {
+    "files": ["lib/analytics.php"]
   }
 }
