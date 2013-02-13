@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . "/../lib/analytics.php");
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
-    Analytics::init("testsecret", array("debug"=>true));
+    Analytics::init("testsecret", array("debug" => true ));
   }
 
   function testTrack() {

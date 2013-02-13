@@ -48,12 +48,17 @@ class Analytics_Client {
    * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
    * @return [boolean] whether the track call succeeded
    */
-  public function track($user_id, $event, $properties = array(),
+  public function track($user_id, $event, $properties = null,
                         $timestamp = null, $context = array()) {
 
     $context = array_merge($context, $this->getContext());
 
     $timestamp = $this->formatTime($timestamp);
+
+    // json_encode will serialize as []
+    if (count($properties) == 0) {
+      $properties = null;
+    }
 
     return $this->consumer->track($user_id, $event, $properties, $context,
                                     $timestamp);

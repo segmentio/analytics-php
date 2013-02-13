@@ -1,3 +1,7 @@
+0.2.3 / 2-12-2013
+=============
+* Adding check for count in properties length.
+
 0.2.2 / 2-11-2013
 =============
 * Adding default args for properties
