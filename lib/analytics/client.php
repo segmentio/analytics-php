@@ -78,6 +78,11 @@ class Analytics_Client {
 
     $timestamp = $this->formatTime($timestamp);
 
+    // json_encode will serialize as []
+    if (count($traits) == 0) {
+      $traits = null;
+    }
+
     return $this->consumer->identify($user_id, $traits, $context,
                                       $timestamp);
   }
