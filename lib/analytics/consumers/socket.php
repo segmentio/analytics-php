@@ -123,17 +123,35 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
    * @param  string  $req    request body
    * @return boolean $success
    */
-  private function makeRequest($socket, $req) {
+  private function makeRequest($socket, $req, $retry = true) {
 
-    $success = true;
+    $bytes_written = 0;
+    $bytes_total = strlen($req);
+    $closed = false;
 
-    # Fire off the request without waiting for a response.
-    $written = fwrite($socket, $req);
+    # Write the request
+    while (!$closed && $bytes_written < $bytes_total) {
+      $written = fwrite($socket, $req);
+      if (!$written) {
+        $closed = true;
+      } else {
+        $bytes_written += $written;
+      }
+    }
 
-    if (!$written) {
+    # If the socket has been closed, attempt to retry a single time.
+    if ($closed) {
       fclose($socket);
+
+      if ($retry) {
+        $socket = $this->createSocket();
+        if ($socket) return $this->makeRequest($socket, $req, false);
+      }
       return false;
     }
+
+
+    $success = true;
 
     if ($this->debug()) {
       $res = $this->parseResponse(fread($socket, 2048));

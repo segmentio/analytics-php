@@ -1,3 +1,7 @@
+0.2.4 / 2-19-2013
+=============
+* Support fwrite retry on closed socket.
+
 0.2.3 / 2-12-2013
 =============
 * Adding check for count in properties and traits length.
