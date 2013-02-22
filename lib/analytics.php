@@ -60,5 +60,4 @@ class Analytics {
                           "before track or identify");
     }
   }
-};
-?>
+}
