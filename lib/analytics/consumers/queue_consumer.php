@@ -76,4 +76,3 @@ abstract class Analytics_QueueConsumer extends Analytics_Consumer {
    */
   abstract function flushBatch($batch);
 }
-?>

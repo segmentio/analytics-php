@@ -109,4 +109,3 @@ class Analytics_Client {
     return array( "library" => "analytics-php" );
   }
 }
-?>
