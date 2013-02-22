@@ -209,5 +209,3 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
     );
   }
 }
-?>
-

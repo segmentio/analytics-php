@@ -92,5 +92,3 @@ class Analytics_FileConsumer extends Analytics_Consumer {
     return fwrite($this->file_handle, $content) == strlen($content);
   }
 }
-?>
-

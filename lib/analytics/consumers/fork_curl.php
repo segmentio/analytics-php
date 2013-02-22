@@ -103,4 +103,3 @@ class Analytics_ForkCurlConsumer extends Analytics_QueueConsumer {
     return $exit == 0;
   }
 }
-?>
