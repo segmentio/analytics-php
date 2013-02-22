@@ -1,3 +1,7 @@
+0.2.5 / 2-22-2013
+=============
+* Trailing whitespace/end php tags fix by [jimrubenstein](https://github.com/jimrubenstein)
+
 0.2.4 / 2-19-2013
 =============
 * Support fwrite retry on closed socket.
