@@ -1,3 +1,7 @@
+0.2.6 / 3-15-2013
+=============
+* Rename analytics.php -> Analytics.php to allow autoloading by [Cethy](https://github.com/Cethy)
+
 0.2.5 / 2-22-2013
 =============
 * Trailing whitespace/end php tags fix by [jimrubenstein](https://github.com/jimrubenstein)

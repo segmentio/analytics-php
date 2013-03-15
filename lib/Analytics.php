@@ -23,11 +23,11 @@ class Analytics {
 
   /**
    * Tracks a user action
-   * @param  [string] $user_id    user id string
-   * @param  [string] $event      name of the event
-   * @param  [array]  $properties properties associated with the event [optional]
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
-   * @return [boolean] whether the track call succeeded
+   * @param  string $user_id    user id string
+   * @param  string $event      name of the event
+   * @param  array  $properties properties associated with the event [optional]
+   * @param  number $timestamp  unix seconds since epoch (time()) [optional]
+   * @return boolean whether the track call succeeded
    */
   public static function track($user_id, $event, $properties = null,
                                 $timestamp = null, $context = array()) {

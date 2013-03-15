@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/analytics.php");
+require_once(dirname(__FILE__) . "/../lib/Analytics.php");
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
