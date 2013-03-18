@@ -119,6 +119,6 @@ if __name__ == '__main__':
     os.unlink(processing_filename)
 
     for client in clients.values():
-        client.flush()
+        client.flush(async=False)
 
     print 'Finished uploading analytics data'
