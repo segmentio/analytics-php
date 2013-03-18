@@ -1,4 +1,3 @@
-import analytics
 import argparse
 import json
 import os
@@ -6,6 +5,7 @@ import random
 import sys
 import tempfile
 import dateutil.parser as date_parser
+from analytics.client import Client
 
 
 clients = {}
@@ -42,7 +42,7 @@ def get_client(secret):
     '''Returns or creates a new client by the secret'''
 
     if secret not in clients:
-        clients[secret] = analytics.Client(secret)
+        clients[secret] = Client(secret)
 
     return clients[secret]
 

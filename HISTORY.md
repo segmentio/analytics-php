@@ -1,3 +1,7 @@
+0.2.7 / 3-17-2013
+=============
+* Adding file_reader.py fix
+
 0.2.6 / 3-15-2013
 =============
 * Rename analytics.php -> Analytics.php to allow autoloading by [Cethy](https://github.com/Cethy)
