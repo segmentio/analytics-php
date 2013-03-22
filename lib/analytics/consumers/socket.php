@@ -131,7 +131,12 @@ class Analytics_SocketConsumer extends Analytics_QueueConsumer {
 
     # Write the request
     while (!$closed && $bytes_written < $bytes_total) {
-      $written = fwrite($socket, $req);
+      try {
+        $written = fwrite($socket, $req);
+      } catch (Exception $e) {
+        $this->handleError($e->getCode(), $e->getMessage());
+        $closed = true;
+      }
       if (!$written) {
         $closed = true;
       } else {

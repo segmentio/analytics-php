@@ -1,3 +1,7 @@
+0.3.0 / 3-22-2013
+=============
+* Adding try-catch around fwrite call
+
 0.2.7 / 3-17-2013
 =============
 * Adding file_reader.py fix
