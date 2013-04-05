@@ -1,12 +1,10 @@
 <?php
 
-require(dirname(__FILE__) . '/consumers/consumer.php');
-require(dirname(__FILE__) . '/consumers/queue_consumer.php');
-
-require(dirname(__FILE__) . '/consumers/file.php');
-require(dirname(__FILE__) . '/consumers/fork_curl.php');
-require(dirname(__FILE__) . '/consumers/socket.php');
-
+require(__DIR__ . '/Consumer.php');
+require(__DIR__ . '/QueueConsumer.php');
+require(__DIR__ . '/Consumer/File.php');
+require(__DIR__ . '/Consumer/ForkCurl.php');
+require(__DIR__ . '/Consumer/Socket.php');
 
 class Analytics_Client {
 
@@ -23,9 +21,9 @@ class Analytics_Client {
   public function __construct($secret, $options = array()) {
 
     $consumers = array(
-      "socket"     => "Analytics_SocketConsumer",
-      "file"       => "Analytics_FileConsumer",
-      "fork_curl"  => "Analytics_ForkCurlConsumer"
+      "socket"     => "Analytics_Consumer_Socket",
+      "file"       => "Analytics_Consumer_File",
+      "fork_curl"  => "Analytics_Consumer_ForkCurl"
     );
 
     # Use our socket consumer by default

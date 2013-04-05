@@ -2,7 +2,7 @@
 
 require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
 
-class ForkCurlConsumerTest extends PHPUnit_Framework_TestCase {
+class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
 
   private $client;
 

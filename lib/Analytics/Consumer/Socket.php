@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_SocketConsumer extends Analytics_QueueConsumer {
+class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
 
   protected $type = "Socket";
   private $socket_failed;

@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_FileConsumer extends Analytics_Consumer {
+class Analytics_Consumer_File extends Analytics_Consumer {
 
   private $file_handle;
   protected $type = "File";
