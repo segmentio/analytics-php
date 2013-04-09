@@ -32,6 +32,8 @@ def process_line(line):
             track(secret, contents)
         elif action == 'identify':
             identify(secret, contents)
+        elif action == 'alias':
+            alias(secret, contents)
         else:
             print 'Error processing call'
     except Exception as e:
@@ -72,6 +74,20 @@ def identify(secret, contents):
         body['traits'] = contents['traits']
 
     return client.identify(**body)
+
+
+def alias(secret, contents):
+    '''Aliases from one user to the other'''
+
+    client = get_client(secret)
+    body = {
+        'from':      contents['from'],
+        'to':        contents['to'],
+        'timestamp': date_parser.parse(contents['timestamp']),
+        'context':   contents['context']
+    }
+
+    return client.alias(**body)
 
 
 def shared_properties(contents):
