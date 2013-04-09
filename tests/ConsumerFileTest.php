@@ -1,8 +1,8 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/analytics/client.php");
+require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
 
-class FileConsumerTest extends PHPUnit_Framework_TestCase {
+class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   private $client;
   private $filename = "/tmp/analytics.log";

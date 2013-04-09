@@ -4,7 +4,7 @@ if (!function_exists('json_encode')) {
     throw new Exception('Analytics needs the JSON PHP extension.');
 }
 
-require(dirname(__FILE__) . '/analytics/client.php');
+require(dirname(__FILE__) . '/Analytics/Client.php');
 
 
 class Analytics {
