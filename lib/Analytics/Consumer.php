@@ -37,10 +37,15 @@ abstract class Analytics_Consumer {
    */
   abstract public function identify($user_id, $traits, $context, $timestamp);
 
-  protected function enqueue($item) {
-
-  }
-
+  /**
+   * Aliases from one user id to another
+   * @param  string $from
+   * @param  string $to
+   * @param  array  $context
+   * @param  string $timestamp   iso8601 of the timestamp
+   * @return boolean whether the alias call succeeded
+   */
+  abstract public function alias($from, $to, $context, $timestamp);
 
   /**
    * Check whether debug mode is enabled

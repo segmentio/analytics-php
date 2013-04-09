@@ -24,50 +24,6 @@ class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
     parent::__construct($secret, $options);
   }
 
-  /**
-   * Tracks a user action
-   * @param  string  $user_id    user id string
-   * @param  string  $event      name of the event
-   * @param  array   $properties properties associated with the event
-   * @param  string  $timestamp  iso8601 of the timestamp
-   * @return boolean whether the track call succeeded
-   */
-  public function track($user_id, $event, $properties, $context, $timestamp) {
-
-    $body = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "event"      => $event,
-      "properties" => $properties,
-      "timestamp"  => $timestamp,
-      "context"    => $context,
-      "action"     => "track"
-    );
-
-    return $this->enqueue($body);
-  }
-
-  /**
-   * Tags traits about the user.
-   * @param  string  $user_id
-   * @param  array   $traits
-   * @param  string  $timestamp   iso8601 of the timestamp
-   * @return boolean whether the track call succeeded
-   */
-  public function identify($user_id, $traits, $context, $timestamp) {
-
-    $body = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "traits"     => $traits,
-      "context"    => $context,
-      "timestamp"  => $timestamp,
-      "action"     => "identify"
-    );
-
-    return $this->enqueue($body);
-  }
-
 
   public function flushBatch($batch) {
     $socket = $this->createSocket();

@@ -1,6 +1,6 @@
 
 test:
-	phpunit --colors test/
+	phpunit --colors tests/
 
 
 .PHONY: test

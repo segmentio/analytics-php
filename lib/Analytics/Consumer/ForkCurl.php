@@ -19,52 +19,6 @@ class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
   }
 
   /**
-   * Tracks a user action
-   * @param  string  $user_id    user id string
-   * @param  string  $event      name of the event
-   * @param  array   $properties properties associated with the event
-   * @param  array   $context
-   * @param  string  $timestamp  iso8601 of the timestamp
-   * @return boolean whether the track call succeeded
-   */
-  public function track($user_id, $event, $properties, $context, $timestamp) {
-
-    $track = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "event"      => $event,
-      "properties" => $properties,
-      "timestamp"  => $timestamp,
-      "context"    => $context,
-      "action"     => "track"
-    );
-
-    return $this->enqueue($track);
-  }
-
-  /**
-   * Tags traits about the user.
-   * @param  string  $user_id
-   * @param  array   $traits
-   * @param  array   $context
-   * @param  string  $timestamp   iso8601 of the timestamp
-   * @return boolean whether the track call succeeded
-   */
-  public function identify($user_id, $traits, $context, $timestamp) {
-
-    $identify = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "traits"     => $traits,
-      "context"    => $context,
-      "timestamp"  => $timestamp,
-      "action"     => "identify"
-    );
-
-    return $this->enqueue($identify);
-  }
-
-  /**
    * Make an async request to our API. Fork a curl process, immediately send
    * to the API. If debug is enabled, we wait for the response.
    * @param  array   $messages array of all the messages to send

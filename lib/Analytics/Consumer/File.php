@@ -77,6 +77,28 @@ class Analytics_Consumer_File extends Analytics_Consumer {
   }
 
   /**
+   * Aliases from one user id to another
+   * @param  string $from
+   * @param  string $to
+   * @param  array  $context
+   * @param  string $timestamp   iso8601 of the timestamp
+   * @return boolean whether the alias call succeeded
+   */
+  public function alias($from, $to, $context, $timestamp) {
+
+    $body = array(
+      "secret"     => $this->secret,
+      "from"       => $from,
+      "to"         => $to,
+      "context"    => $context,
+      "timestamp"  => $timestamp,
+      "action"     => "alias"
+    );
+
+    return $this->write($body);
+  }
+
+  /**
    * Writes the API call to a file as line-delimited json
    * @param  [array]   $body post body content.
    * @return [boolean] whether the request succeeded

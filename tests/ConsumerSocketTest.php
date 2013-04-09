@@ -26,6 +26,11 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($identified);
   }
 
+  function testAlias() {
+    $aliased = $this->client->alias("some_user", "new_user");
+    $this->assertTrue($aliased);
+  }
+
   function testShortTimeout() {
     $client = new Analytics_Client("testsecret",
                                    array( "timeout"  => 0.01,

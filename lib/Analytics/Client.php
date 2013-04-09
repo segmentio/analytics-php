@@ -86,6 +86,23 @@ class Analytics_Client {
   }
 
   /**
+   * Aliases from one user id to another
+   * @param  string $from
+   * @param  string $to
+   * @param  number $timestamp unix seconds since epoch (time()) [optional]
+   * @param  array  $context   [optional]
+   * @return boolean whether the alias call succeeded
+   */
+  public function alias($from, $to, $timestamp = null, $context = array()) {
+
+    $context = array_merge($context, $this->getContext());
+
+    $timestamp = $this->formatTime($timestamp);
+
+    return $this->consumer->alias($from, $to, $context, $timestamp);
+  }
+
+  /**
    * Formats a timestamp by making sure it is set, and then converting it to
    * iso8601 format.
    * @param  time $timestamp - time in seconds (time())

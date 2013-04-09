@@ -1,3 +1,8 @@
+0.4.0 / 4-8-2013
+=============
+* Full Autoloading an PEAR naming by [Cethy](https://github.com/Cethy)
+* Adding alias call
+
 0.3.0 / 3-22-2013
 =============
 * Adding try-catch around fwrite call

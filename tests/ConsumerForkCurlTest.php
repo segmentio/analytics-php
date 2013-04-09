@@ -27,5 +27,10 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
 
     $this->assertTrue($identified);
   }
+
+  function testAlias() {
+    $aliased = $this->client->alias("some_user", "new_user");
+    $this->assertTrue($aliased);
+  }
 }
 ?>

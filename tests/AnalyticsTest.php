@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . "/../lib/Analytics.php");
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
-    Analytics::init("testsecret");//, array("debug" => true ));
+    Analytics::init("testsecret");
   }
 
   function testTrack() {
@@ -23,5 +23,9 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($identified);
   }
 
+  function testAlias() {
+    $aliased = Analytics::alias("some_user", "new_user");
+    $this->assertTrue($aliased);
+  }
 }
 ?>

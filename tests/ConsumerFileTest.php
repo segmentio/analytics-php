@@ -34,6 +34,12 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     $this->checkWritten();
   }
 
+  function testAlias () {
+    $aliased = $this->client->alias("some_user", "new_user");
+    $this->assertTrue($aliased);
+    $this->checkWritten();
+  }
+
   function testProductionProblems() {
     # Open to a place where we should not have write access.
     $client = new Analytics_Client("testsecret",
