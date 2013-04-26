@@ -1,3 +1,7 @@
+0.4.1 / 4-25-2013
+=============
+* Adding fix to file_reader alias
+
 0.4.0 / 4-8-2013
 =============
 * Full Autoloading an PEAR naming by [Cethy](https://github.com/Cethy)
