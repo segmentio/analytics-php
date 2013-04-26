@@ -93,7 +93,7 @@ class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
         $this->handleError($e->getCode(), $e->getMessage());
         $closed = true;
       }
-      if (!$written) {
+      if (!isset($written)) {
         $closed = true;
       } else {
         $bytes_written += $written;
