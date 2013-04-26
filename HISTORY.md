@@ -1,3 +1,7 @@
+0.4.2 / 4-26-2013
+=============
+* Fix for $written var on connection error thanks to [@gmoreira](https://github.com/gmoreira)
+
 0.4.1 / 4-25-2013
 =============
 * Adding fix to file_reader alias
@@ -9,7 +13,7 @@
 
 0.3.0 / 3-22-2013
 =============
-* Adding try-catch around fwrite call
+* Adding try-catch around fwrite cal
 
 0.2.7 / 3-17-2013
 =============
