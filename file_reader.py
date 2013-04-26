@@ -81,8 +81,8 @@ def alias(secret, contents):
 
     client = get_client(secret)
     body = {
-        'from':      contents['from'],
-        'to':        contents['to'],
+        'from_id':      contents['from'],
+        'to_id':        contents['to'],
         'timestamp': date_parser.parse(contents['timestamp']),
         'context':   contents['context']
     }
