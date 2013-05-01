@@ -119,10 +119,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     default_file = os.path.join(tempfile.gettempdir(), 'analytics.log')
-    processing_filename = os.path.join(tempfile.gettempdir(),
-                                'analytics-%d.log' % random.randint(0, 1000))
 
     filename = args.file or default_file
+
+    # Use the same directory for processing the log as where it is stored.
+    # This prevents "Invalid cross-device link" errors.
+    processing_dir = os.path.dirname(filename)
+
+    processing_filename = os.path.join(processing_dir,
+                                'analytics-%d.log' % random.randint(0, 1000))
 
     if not os.path.exists(filename):
         print 'Error: The filename you specified doesn\'t exist: ', filename
