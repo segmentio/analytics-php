@@ -1,3 +1,7 @@
+0.4.3 / 5-1-2013
+=============
+* Make file_reader rename to a file in the same directory as the log file thanks to [@marshally](https://github.com/marshally)
+
 0.4.2 / 4-26-2013
 =============
 * Fix for $written var on connection error thanks to [@gmoreira](https://github.com/gmoreira)
