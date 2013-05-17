@@ -17,7 +17,11 @@ class Analytics {
    * @param  array  $options  passed straight to the client
    */
   public static function init($secret, $options = array()) {
-
+	  
+	if ( ! $secret ){
+		throw new Exception("Analytics:: Secret parameter is required");
+	}
+	
     self::$client = new Analytics_Client($secret, $options);
   }
 
