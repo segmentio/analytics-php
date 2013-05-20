@@ -1,6 +1,6 @@
 <?php
 
-//require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
+require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
 
 class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 

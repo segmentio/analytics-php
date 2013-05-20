@@ -1,3 +1,7 @@
+0.4.5 / 5-20-2013
+=============
+* Check for empty secret thanks to [@mustela](https://github.com/mustela).
+
 0.4.3 / 5-1-2013
 =============
 * Make file_reader rename to a file in the same directory as the log file thanks to [@marshally](https://github.com/marshally)
