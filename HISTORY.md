@@ -1,3 +1,8 @@
+0.4.6 / 5-25-2013
+=============
+* Check for status existing on response thanks to [@gmoreira](https://github.com/gmoreira)
+
+
 0.4.5 / 5-20-2013
 =============
 * Check for empty secret thanks to [@mustela](https://github.com/mustela).
