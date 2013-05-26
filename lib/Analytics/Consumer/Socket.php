@@ -165,7 +165,7 @@ class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
     $result = $contents[count($contents) - 1];
 
     return array(
-      "status"  => $status[1],
+      "status"  => isset($status[1]) ? $status[1] : null,
       "message" => $result
     );
   }
