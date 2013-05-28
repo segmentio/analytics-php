@@ -1,7 +1,10 @@
+0.4.7 / 5-28-2013
+=============
+* `chmod` the log file to 0777 so that the file_reader.py can read it
+
 0.4.6 / 5-25-2013
 =============
-* Check for status existing on response thanks to [@gmoreira](https://github.com/gmoreira)
-
+* Check for status existing on response thanks to [@gmoreira](https://github.om/gmoreira)
 
 0.4.5 / 5-20-2013
 =============
