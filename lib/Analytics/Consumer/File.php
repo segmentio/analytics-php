@@ -1,5 +1,7 @@
 <?php
 
+namespace SegmentIO;
+
 class Analytics_Consumer_File extends Analytics_Consumer {
 
   private $file_handle;

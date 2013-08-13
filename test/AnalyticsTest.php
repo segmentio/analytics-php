@@ -2,6 +2,8 @@
 
 require_once(dirname(__FILE__) . "/../lib/Analytics.php");
 
+use SegmentIO\Analytics;
+
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {

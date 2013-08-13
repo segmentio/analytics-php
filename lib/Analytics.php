@@ -1,5 +1,7 @@
 <?php
 
+namespace SegmentIO;
+
 if (!function_exists('json_encode')) {
     throw new Exception('Analytics needs the JSON PHP extension.');
 }
@@ -19,7 +21,7 @@ class Analytics {
   public static function init($secret, $options = array()) {
 
   	if (!$secret){
-  		throw new Exception("Analytics::init Secret parameter is required");
+  		throw new \Exception("Analytics::init Secret parameter is required");
   	}
 
     self::$client = new Analytics_Client($secret, $options);
@@ -75,7 +77,7 @@ class Analytics {
   private static function check_client() {
 
     if (self::$client == null) {
-      throw new Exception("Analytics::init must be called " .
+      throw new \Exception("Analytics::init must be called " .
                           "before track or identify");
     }
   }
