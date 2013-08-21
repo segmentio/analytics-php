@@ -1,3 +1,7 @@
+0.4.8 / 8-21-2013
+=============
+* adding fix for socket requests which might complete in multiple fwrites
+
 0.4.7 / 5-28-2013
 =============
 * `chmod` the log file to 0777 so that the file_reader.py can read it

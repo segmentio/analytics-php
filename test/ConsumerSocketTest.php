@@ -41,6 +41,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
     $identified = $client->identify("some_user");
     $this->assertTrue($identified);
+    $client->__destruct();
   }
 
   function testProductionProblems() {
@@ -67,6 +68,28 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
     # Should error out with debug on.
     $client->track("some_user", "Socket PHP Event");
+    $client->__destruct();
+  }
+
+
+  function testLargeMessage () {
+    $options = array(
+      "debug"    => true,
+      "consumer" => "socket"
+    );
+
+    $client = new Analytics_Client("testsecret", $options);
+
+    $big_property = "";
+
+    for ($i = 0; $i < 10000; $i++) {
+      $big_property .= "a";
+    }
+
+    $client->track("some_user", "Super large PHP Event", array(
+      "big_property" => $big_property
+    ));
+
     $client->__destruct();
   }
 }
