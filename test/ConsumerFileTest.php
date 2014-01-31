@@ -50,9 +50,28 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse($tracked);
   }
 
+  function testFileSecurity() {
+    $client = new Analytics_Client("testsecret",
+                          array("consumer" => "file",
+                                "filename" => $this->filename,
+                                "filepermissions" => 0700 ));
+
+    $tracked = $client->track("some_user", "File PHP Event");
+    $this->assertEquals(0700, (fileperms($this->filename) & 0777));
+  }
+
+  function testFileSecurityDefaults() {
+    $client = new Analytics_Client("testsecret",
+                          array("consumer" => "file",
+                                "filename" => $this->filename ));
+
+    $tracked = $client->track("some_user", "File PHP Event");
+    $this->assertEquals(0777, (fileperms($this->filename) & 0777));
+  }
+
   function checkWritten() {
     exec("wc -l " . $this->filename, $output);
-    $this->assertEquals($output[0], "1 " . $this->filename);
+    $this->assertEquals(trim($output[0]), "1 " . $this->filename);
     unlink($this->filename);
   }
 
