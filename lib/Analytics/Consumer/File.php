@@ -20,7 +20,11 @@ class Analytics_Consumer_File extends Analytics_Consumer {
 
     try {
       $this->file_handle = fopen($options["filename"], "a");
-      chmod($options["filename"], 0777);
+      if (isset($options["filepermissions"])) {
+        chmod($options["filename"], $options["filepermissions"]);
+      } else {
+        chmod($options["filename"], 0777);
+      }
     } catch (Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
     }
