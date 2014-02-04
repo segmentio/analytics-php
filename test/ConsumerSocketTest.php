@@ -2,6 +2,8 @@
 
 require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
 
+use SegmentIO\Analytics_Client;
+
 class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
   private $client;

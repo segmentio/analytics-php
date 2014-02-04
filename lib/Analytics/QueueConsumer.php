@@ -1,4 +1,7 @@
 <?php
+
+namespace SegmentIO;
+
 abstract class Analytics_QueueConsumer extends Analytics_Consumer {
 
   protected $type = "QueueConsumer";

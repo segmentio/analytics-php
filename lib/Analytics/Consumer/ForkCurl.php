@@ -1,5 +1,7 @@
 <?php
 
+namespace SegmentIO;
+
 class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
 
   protected $type = "ForkCurl";
