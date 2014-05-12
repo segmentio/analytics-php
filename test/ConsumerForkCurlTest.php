@@ -14,23 +14,27 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "PHP Fork Curl'd\" Event");
-    $this->assertTrue($tracked);
+    $this->assertTrue($this->client->track(array(
+      "user_id" => "some-user",
+      "event" => "PHP Fork Curl'd\" Event"
+    )));
   }
 
   function testIdentify() {
-    $identified = $this->client->identify("some_user", array(
-                    "name"      => "Calvin",
-                    "loves_php" => false,
-                    "birthday"  => time(),
-                    ));
-
-    $this->assertTrue($identified);
+    $this->assertTrue($this->client->identify(array(
+      "user_id" => "user-id",
+      "traits"  => array(
+        "loves_php" => false,
+        "birthday" => time()
+      )
+    )));
   }
 
   function testAlias() {
-    $aliased = $this->client->alias("some_user", "new_user");
-    $this->assertTrue($aliased);
+    $this->assertTrue($this->client->alias(array(
+      "previous_id" => "previous-id",
+      "user_id" => "user-id"
+    )));
   }
 }
 ?>

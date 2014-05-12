@@ -23,25 +23,29 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "File PHP Event");
-    $this->assertTrue($tracked);
+    $this->assertTrue($this->client->track(array(
+      "user_id" => "some-user",
+      "event" => "File PHP Event"
+    )));
     $this->checkWritten("track");
   }
 
   function testIdentify() {
-    $identified = $this->client->identify("some_user", array(
-                    "name"      => "Calvin",
-                    "loves_php" => false,
-                    "birthday"  => time(),
-                    ));
-
-    $this->assertTrue($identified);
+    $this->assertTrue($this->client->identify(array(
+      "user_id" => "Calvin",
+      "traits" => array(
+        "loves_php" => false,
+        "birthday" => time()
+      )
+    )));
     $this->checkWritten("identify");
   }
 
   function testAlias () {
-    $aliased = $this->client->alias("some_user", "new_user");
-    $this->assertTrue($aliased);
+    $this->assertTrue($this->client->alias(array(
+      "previous_id" => "previous-id",
+      "user_id" => "user-id"
+    )));
     $this->checkWritten("alias");
   }
 
@@ -61,7 +65,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($out, "1 " . $this->filename());
     $str = file_get_contents($this->filename());
     $json = json_decode(trim($str));
-    $this->assertEquals($type, $json->action);
+    $this->assertEquals($type, $json->type);
     unlink($this->filename());
   }
 

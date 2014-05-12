@@ -12,23 +12,28 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = $this->client->track("some_user", "Socket PHP Event");
+    $this->assertTrue($this->client->track(array(
+      "user_id" => "some-user",
+      "event" => "Socket PHP Event"
+    )));
     $this->assertTrue($tracked);
   }
 
   function testIdentify() {
-    $identified = $this->client->identify("some_user", array(
-                    "name"      => "Calvin",
-                    "loves_php" => false,
-                    "birthday"  => time(),
-                    ));
-
-    $this->assertTrue($identified);
+    $this->assertTrue($this->client->identify(array(
+      "user_id" => "Calvin",
+      "traits" => array(
+        "loves_php" => false,
+        "birthday" => time()
+      )
+    )));
   }
 
   function testAlias() {
-    $aliased = $this->client->alias("some_user", "new_user");
-    $this->assertTrue($aliased);
+    $this->assertTrue($this->client->alias(array(
+      "previous_id" => "some-user",
+      "user_id" => "new-user"
+    )));
   }
 
   function testShortTimeout() {
@@ -36,11 +41,16 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
                                    array( "timeout"  => 0.01,
                                           "consumer" => "socket" ));
 
-    $tracked = $client->track("some_user", "Socket PHP Event");
-    $this->assertTrue($tracked);
+    $this->assertTrue($client->track(array(
+      "user_id" => "some-user",
+      "event" => "Socket PHP Event"
+    )));
 
-    $identified = $client->identify("some_user");
-    $this->assertTrue($identified);
+    $this->assertTrue($client->identify(array(
+      "user_id" => "some-user",
+      "traits" => array()
+    )));
+
     $client->__destruct();
   }
 
@@ -50,7 +60,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
         "error_handler" => function () { throw new Exception("Was called"); }));
 
     # Shouldn't error out without debug on.
-    $client->track("some_user", "Socket PHP Event");
+    $client->track(array("user_id" => "some-user", "event" => "Production Problems"));
     $client->__destruct();
   }
 
@@ -67,7 +77,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     $client = new Analytics_Client("x", $options);
 
     # Should error out with debug on.
-    $client->track("some_user", "Socket PHP Event");
+    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
     $client->__destruct();
   }
 
@@ -86,9 +96,11 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
       $big_property .= "a";
     }
 
-    $client->track("some_user", "Super large PHP Event", array(
-      "big_property" => $big_property
-    ));
+    $this->assertTrue($client->track(array(
+      "user_id" => "some-user",
+      "event" => "Super Large PHP Event",
+      "properties" => array("big_property" => $big_property)
+    )));
 
     $client->__destruct();
   }

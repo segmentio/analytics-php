@@ -9,23 +9,27 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testTrack() {
-    $tracked = Analytics::track("some_user", "Module PHP Event");
-    $this->assertTrue($tracked);
+    $this->assertTrue(Analytics::track(array(
+      "user_id" => "john",
+      "event" => "Module PHP Event"
+    )));
   }
 
   function testIdentify() {
-    $identified = Analytics::identify("some_user", array(
-                    "name"      => "Calvin",
-                    "loves_php" => false,
-                    "birthday"  => time(),
-                    ));
-
-    $this->assertTrue($identified);
+    $this->assertTrue(Analytics::identify(array(
+      "user_id" => "doe",
+      "traits" => array(
+        "loves_php" => false,
+        "birthday" => time()
+      )
+    )));
   }
 
   function testAlias() {
-    $aliased = Analytics::alias("some_user", "new_user");
-    $this->assertTrue($aliased);
+    $this->assertTrue(Analytics::alias(array(
+      "previous_id" => "previous-id",
+      "user_id" => "user-id"
+    )));
   }
 }
 ?>
