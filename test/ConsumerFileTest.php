@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
+require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
 
 class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
@@ -10,7 +10,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     if (file_exists($this->filename()))
       unlink($this->filename());
 
-    $this->client = new Analytics_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("oq0vdlg7yi",
                           array("consumer" => "file",
                                 "filename" => $this->filename()));
 
@@ -86,7 +86,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testProductionProblems() {
     # Open to a place where we should not have write access.
-    $client = new Analytics_Client("testsecret",
+    $client = new Segment_Client("testsecret",
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 

@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
+class Segment_Consumer_Socket extends Segment_QueueConsumer {
 
   protected $type = "Socket";
   private $socket_failed;

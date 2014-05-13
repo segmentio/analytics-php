@@ -22,6 +22,6 @@
     "phpunit/phpunit": "3.7.*"
   },
   "autoload": {
-    "files": ["lib/Analytics.php"]
+    "files": ["lib/Segment.php"]
   }
 }

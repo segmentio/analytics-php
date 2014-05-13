@@ -1,6 +1,6 @@
 <?php
 
-class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
+class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
   protected $type = "ForkCurl";
 

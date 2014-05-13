@@ -4,7 +4,7 @@
  * require client
  */
 
-require(__DIR__ . "/lib/Analytics.php");
+require(__DIR__ . "/lib/Segment.php");
 
 /**
  * Args
@@ -30,7 +30,7 @@ $lines = explode("\n", $contents);
  * Initialize the client.
  */
 
-Analytics::init($args["secret"], array(
+Segment::init($args["secret"], array(
   "batch_size" => 1,
   "on_error" => function($code, $msg){
     print("$code: $msg\n");
@@ -46,7 +46,7 @@ foreach ($lines as $line) {
   if (!trim($line)) continue;
   $payload = json_decode($line, true);
   $type = $payload["type"];
-  call_user_func_array(array("Analytics", $type), array($payload));
+  call_user_func_array(array("Segment", $type), array($payload));
 }
 
 /**

@@ -1,22 +1,22 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Analytics.php");
+require_once(dirname(__FILE__) . "/../lib/Segment.php");
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
-    Analytics::init("oq0vdlg7yi");
+    Segment::init("oq0vdlg7yi");
   }
 
   function testTrack() {
-    $this->assertTrue(Analytics::track(array(
+    $this->assertTrue(Segment::track(array(
       "userId" => "john",
       "event" => "Module PHP Event"
     )));
   }
 
   function testGroup(){
-    $this->assertTrue(Analytics::group(array(
+    $this->assertTrue(Segment::group(array(
       "groupId" => "group-id",
       "userId" => "user-id",
       "traits" => array(
@@ -26,7 +26,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testPage(){
-    $this->assertTrue(Analytics::page(array(
+    $this->assertTrue(Segment::page(array(
       "anonymousId" => "user-id",
       "name" => "analytics-php",
       "category" => "docs",
@@ -38,7 +38,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testScreen(){
-    $this->assertTrue(Analytics::screen(array(
+    $this->assertTrue(Segment::screen(array(
       "anonymousId" => "anonymous-id",
       "name" => "2048",
       "category" => "game built with php :)",
@@ -49,7 +49,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testIdentify() {
-    $this->assertTrue(Analytics::identify(array(
+    $this->assertTrue(Segment::identify(array(
       "userId" => "doe",
       "traits" => array(
         "loves_php" => false,
@@ -59,7 +59,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testAlias() {
-    $this->assertTrue(Analytics::alias(array(
+    $this->assertTrue(Segment::alias(array(
       "previousId" => "previous-id",
       "userId" => "user-id"
     )));

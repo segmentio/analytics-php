@@ -6,7 +6,7 @@ require(__DIR__ . '/Consumer/File.php');
 require(__DIR__ . '/Consumer/ForkCurl.php');
 require(__DIR__ . '/Consumer/Socket.php');
 
-class Analytics_Client {
+class Segment_Client {
 
   /**
    * VERSION
@@ -27,9 +27,9 @@ class Analytics_Client {
   public function __construct($secret, $options = array()) {
 
     $consumers = array(
-      "socket"     => "Analytics_Consumer_Socket",
-      "file"       => "Analytics_Consumer_File",
-      "fork_curl"  => "Analytics_Consumer_ForkCurl"
+      "socket"     => "Segment_Consumer_Socket",
+      "file"       => "Segment_Consumer_File",
+      "fork_curl"  => "Segment_Consumer_ForkCurl"
     );
 
     # Use our socket consumer by default

@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Analytics/Client.php");
+require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
 
 class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
 
@@ -8,7 +8,7 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
 
-    $this->client = new Analytics_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("oq0vdlg7yi",
                           array("consumer" => "fork_curl",
                                 "debug"    => true));
   }

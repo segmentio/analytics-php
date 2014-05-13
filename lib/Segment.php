@@ -1,13 +1,13 @@
 <?php
 
 if (!function_exists('json_encode')) {
-    throw new Exception('Analytics needs the JSON PHP extension.');
+    throw new Exception('Segment needs the JSON PHP extension.');
 }
 
-require(dirname(__FILE__) . '/Analytics/Client.php');
+require(dirname(__FILE__) . '/Segment/Client.php');
 
 
-class Analytics {
+class Segment {
 
   private static $client;
 
@@ -19,10 +19,10 @@ class Analytics {
   public static function init($secret, $options = array()) {
 
   	if (!$secret){
-  		throw new Exception("Analytics::init Secret parameter is required");
+  		throw new Exception("Segment::init Secret parameter is required");
   	}
 
-    self::$client = new Analytics_Client($secret, $options);
+    self::$client = new Segment_Client($secret, $options);
   }
 
   /**
@@ -97,7 +97,7 @@ class Analytics {
   private static function check_client() {
 
     if (self::$client == null) {
-      throw new Exception("Analytics::init must be called " .
+      throw new Exception("Segment::init must be called " .
                           "before track or identify");
     }
   }

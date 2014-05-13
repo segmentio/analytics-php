@@ -1,5 +1,5 @@
 <?php
-abstract class Analytics_QueueConsumer extends Analytics_Consumer {
+abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   protected $type = "QueueConsumer";
 

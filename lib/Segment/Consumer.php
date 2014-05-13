@@ -1,5 +1,5 @@
 <?php
-abstract class Analytics_Consumer {
+abstract class Segment_Consumer {
 
   protected $type = "Consumer";
 
