@@ -43,18 +43,46 @@ abstract class Analytics_QueueConsumer extends Analytics_Consumer {
    * Tags traits about the user.
    * 
    * @param  array  $message
-   * @return boolean whether the track call succeeded
+   * @return boolean whether the identify call succeeded
    */
   public function identify(array $message) {
     return $this->enqueue($message);
   }
 
   /**
+   * Tags traits about the group.
+   * 
+   * @param  array  $message
+   * @return boolean whether the group call succeeded
+   */
+  public function group(array $message) {
+    return $this->enqueue($message);
+  }
+
+  /**
+   * Tracks a page view.
+   * 
+   * @param  array  $message
+   * @return boolean whether the page call succeeded
+   */
+  public function page(array $message) {
+    return $this->enqueue($message);
+  }
+
+  /**
+   * Tracks a screen view.
+   * 
+   * @param  array  $message
+   * @return boolean whether the screen call succeeded
+   */
+  public function screen(array $message) {
+    return $this->enqueue($message);
+  }
+
+  /**
    * Aliases from one user id to another
-   * @param  string $from
-   * @param  string $to
-   * @param  array  $context
-   * @param  string $timestamp   iso8601 of the timestamp
+   * 
+   * @param  array $message
    * @return boolean whether the alias call succeeded
    */
   public function alias(array $message) {

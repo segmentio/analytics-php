@@ -35,10 +35,41 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
       "userId" => "Calvin",
       "traits" => array(
         "loves_php" => false,
+        "type" => "analytics.log",
         "birthday" => time()
       )
     )));
     $this->checkWritten("identify");
+  }
+
+  function testGroup(){
+    $this->assertTrue($this->client->group(array(
+      "userId" => "user-id",
+      "groupId" => "group-id",
+      "traits" => array(
+        "type" => "consumer analytics.log test",
+      )
+    )));
+  }
+
+  function testPage(){
+    $this->assertTrue($this->client->group(array(
+      "userId" => "user-id",
+      "name" => "analytics-php",
+      "category" => "analytics.log",
+      "properties" => array(
+        "url" => "https://a.url/"
+      )
+    )));
+  }
+
+  function testScreen(){
+    $this->assertTrue($this->client->page(array(
+      "userId" => "userId",
+      "name" => "grand theft auto",
+      "category" => "analytics.log",
+      "properties" => array()
+    )));
   }
 
   function testAlias () {

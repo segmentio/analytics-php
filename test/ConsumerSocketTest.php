@@ -28,10 +28,40 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     )));
   }
 
+  function testGroup(){
+    $this->assertTrue($this->client->group(array(
+      "userId" => "user-id",
+      "groupId" => "group-id",
+      "traits" => array(
+        "type" => "consumer socket test"
+      )
+    )));
+  }
+
+  function testPage(){
+    $this->assertTrue($this->client->group(array(
+      "anonymousId" => "anonymousId",
+      "name" => "analytics-php",
+      "category" => "socket",
+      "properties" => array(
+        "url" => "https://a.url/"
+      )
+    )));
+  }
+
+  function testScreen(){
+    $this->assertTrue($this->client->page(array(
+      "anonymousId" => "anonymousId",
+      "name" => "grand theft auto",
+      "category" => "socket",
+      "properties" => array()
+    )));
+  }
+
   function testAlias() {
     $this->assertTrue($this->client->alias(array(
-      "previousId" => "some-user",
-      "userId" => "new-user"
+      "previousId" => "some-socket",
+      "userId" => "new-socket"
     )));
   }
 

@@ -28,7 +28,7 @@ class Analytics {
   /**
    * Tracks a user action
    * 
-   * @param  array $user_id    user id string
+   * @param  array $message
    * @return boolean whether the track call succeeded
    */
   public static function track(array $message) {
@@ -40,11 +40,44 @@ class Analytics {
    * Tags traits about the user.
    * 
    * @param  array  $message
-   * @return boolean whether the track call succeeded
+   * @return boolean whether the identify call succeeded
    */
   public static function identify(array $message) {
     self::check_client();
     return self::$client->identify($message);
+  }
+
+  /**
+   * Tags traits about the group.
+   * 
+   * @param  array  $message
+   * @return boolean whether the group call succeeded
+   */
+  public static function group(array $message) {
+    self::check_client();
+    return self::$client->group($message);
+  }
+
+  /**
+   * Tracks a page view
+   * 
+   * @param  array $message
+   * @return boolean whether the page call succeeded
+   */
+  public static function page(array $message) {
+    self::check_client();
+    return self::$client->page($message);
+  }
+
+  /**
+   * Tracks a screen view
+   * 
+   * @param  array $message
+   * @return boolean whether the screen call succeeded
+   */
+  public static function screen(array $message) {
+    self::check_client();
+    return self::$client->screen($message);
   }
 
   /**

@@ -28,7 +28,6 @@ class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
 
     $body = array(
       "batch"  => $messages,
-      "secret" => $this->secret
     );
 
     $payload = json_encode($body);
@@ -41,7 +40,7 @@ class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
     $path = "/v1/import";
     $url = $protocol . $host . $path;
 
-    $cmd = "curl -X POST -H 'Content-Type: application/json'";
+    $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
     $cmd.= " -d " . $payload . " '" . $url . "'";
 
     if (!$this->debug()) {

@@ -69,6 +69,42 @@ class Analytics_Client {
   }
 
   /**
+   * Tags traits about the group.
+   * 
+   * @param  [array] $message
+   * @return [boolean] whether the group call succeeded
+   */
+  public function group(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "group";
+    return $this->consumer->group($message);
+  }
+
+  /**
+   * Tracks a page view.
+   * 
+   * @param  [array] $message
+   * @return [boolean] whether the page call succeeded
+   */
+  public function page(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "page";
+    return $this->consumer->page($message);
+  }
+
+  /**
+   * Tracks a screen view.
+   * 
+   * @param  [array] $message
+   * @return [boolean] whether the screen call succeeded
+   */
+  public function screen(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "screen";
+    return $this->consumer->screen($message);
+  }
+
+  /**
    * Aliases from one user id to another
    * 
    * @param  array $message
@@ -104,7 +140,28 @@ class Analytics_Client {
     if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
     $msg["context"] = array_merge($msg["context"], $this->getContext());
     $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
+    $msg["messageId"] = self::messageId();
     return $msg;
+  }
+
+  /**
+   * Generate a random messageId.
+   * 
+   * https://gist.github.com/dahnielson/508447#file-uuid-php-L74
+   * 
+   * @return string
+   */
+
+  private static function messageId(){
+    return sprintf("%04x%04x-%04x-%04x-%04x-%04x%04x%04x"
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0x0fff) | 0x4000
+      , mt_rand(0, 0x3fff) | 0x8000
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff));
   }
 
   /**

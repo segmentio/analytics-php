@@ -47,9 +47,39 @@ class Analytics_Consumer_File extends Analytics_Consumer {
    * Tags traits about the user.
    * 
    * @param  array $message
-   * @return [boolean] whether the track call succeeded
+   * @return [boolean] whether the identify call succeeded
    */
   public function identify(array $message) {
+    return $this->write($message);
+  }
+
+  /**
+   * Tags traits about the group.
+   * 
+   * @param  array $message
+   * @return [boolean] whether the group call succeeded
+   */
+  public function group(array $message) {
+    return $this->write($message);
+  }
+
+  /**
+   * Tracks a page view.
+   * 
+   * @param  array $message
+   * @return [boolean] whether the page call succeeded
+   */
+  public function page(array $message) {
+    return $this->write($message);
+  }
+
+  /**
+   * Tracks a screen view.
+   * 
+   * @param  array $message
+   * @return [boolean] whether the screen call succeeded
+   */
+  public function screen(array $message) {
     return $this->write($message);
   }
 

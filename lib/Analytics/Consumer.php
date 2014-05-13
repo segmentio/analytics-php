@@ -29,9 +29,33 @@ abstract class Analytics_Consumer {
    * Tags traits about the user.
    * 
    * @param  array  $message
-   * @return boolean whether the track call succeeded
+   * @return boolean whether the identify call succeeded
    */
   abstract public function identify(array $message);
+
+  /**
+   * Tags traits about the group.
+   * 
+   * @param  array  $message
+   * @return boolean whether the group call succeeded
+   */
+  abstract public function group(array $message);
+
+  /**
+   * Tracks a page view.
+   * 
+   * @param  array  $message
+   * @return boolean whether the page call succeeded
+   */
+  abstract public function page(array $message);
+
+  /**
+   * Tracks a screen view.
+   * 
+   * @param  array  $message
+   * @return boolean whether the group call succeeded
+   */
+  abstract public function screen(array $message);
 
   /**
    * Aliases from one user id to another
