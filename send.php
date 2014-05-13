@@ -45,6 +45,7 @@ Segment::init($args["secret"], array(
 foreach ($lines as $line) {
   if (!trim($line)) continue;
   $payload = json_decode($line, true);
+  $payload["timestamp"] = strtotime($payload["timestamp"]);
   $type = $payload["type"];
   call_user_func_array(array("Segment", $type), array($payload));
 }
@@ -61,7 +62,7 @@ exit(0);
  */
 
 function parse($argv){
-  $ret = [];
+  $ret = array();
 
   for ($i = 0; $i < count($argv); ++$i) {
     $arg = $argv[$i];
