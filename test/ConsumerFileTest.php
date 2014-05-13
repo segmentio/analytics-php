@@ -7,7 +7,6 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   private $client;
 
   function setUp() {
-
     if (file_exists($this->filename()))
       unlink($this->filename());
 
@@ -78,6 +77,11 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
       "userId" => "user-id"
     )));
     $this->checkWritten("alias");
+  }
+
+  function testSend(){
+    exec("php send.php --secret weee --file test/file.log", $output);
+    $this->assertEquals("sent analytics data", trim($output[0]));
   }
 
   function testProductionProblems() {

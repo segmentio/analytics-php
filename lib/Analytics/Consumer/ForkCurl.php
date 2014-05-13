@@ -34,6 +34,7 @@ class Analytics_Consumer_ForkCurl extends Analytics_QueueConsumer {
 
     # Escape for shell usage.
     $payload = escapeshellarg($payload);
+    $secret = $this->secret;
 
     $protocol = $this->ssl() ? "https://" : "http://";
     $host = "api.segment.io";

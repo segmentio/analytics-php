@@ -14,6 +14,7 @@ clean:
 	rm -rf \
 		composer.phar \
 		vendor \
-		composer.lock
+		composer.lock \
+		test/analytics.log
 
 .PHONY: test

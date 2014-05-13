@@ -123,6 +123,7 @@ class Analytics_Client {
    */
   private function formatTime($timestamp) {
     if ($timestamp == null) $timestamp = time();
+    if ('string' == gettype($timestamp)) return $timestamp;
 
     # Format for iso8601
     return date("c", $timestamp);
