@@ -27,46 +27,35 @@ class Analytics {
 
   /**
    * Tracks a user action
-   * @param  string $user_id    user id string
-   * @param  string $event      name of the event
-   * @param  array  $properties properties associated with the event [optional]
-   * @param  number $timestamp  unix seconds since epoch (time()) [optional]
-   * @param  array  $context    [optional]
+   * 
+   * @param  array $user_id    user id string
    * @return boolean whether the track call succeeded
    */
-  public static function track($user_id, $event, $properties = null,
-                                $timestamp = null, $context = array()) {
+  public static function track(array $message) {
     self::check_client();
-    return self::$client->track($user_id, $event, $properties, $timestamp,
-                                $context);
+    return self::$client->track($message);
   }
 
   /**
    * Tags traits about the user.
-   * @param  string  $user_id
-   * @param  array   $traits
-   * @param  number  $timestamp  unix seconds since epoch (time()) [optional]
-   * @param  array   $context    [optional]
+   * 
+   * @param  array  $message
    * @return boolean whether the track call succeeded
    */
-  public static function identify($user_id, $traits = array(),
-                                    $timestamp = null, $context = array()) {
+  public static function identify(array $message) {
     self::check_client();
-    return self::$client->identify($user_id, $traits, $timestamp, $context);
+    return self::$client->identify($message);
   }
 
   /**
    * Aliases the user id from a temporary id to a permanent one
-   * @param  string $from      user id to alias from
-   * @param  string $to        user id to alias to
-   * @param  number $timestamp unix seconds since epoch (time()) [optional]
-   * @param  array  $context   [optional]
+   * 
+   * @param  array $from      user id to alias from
    * @return boolean whether the alias call succeeded
    */
-  public static function alias($from, $to, $timestamp = null,
-                                $context = array()) {
+  public static function alias(array $message) {
     self::check_client();
-    return self::$client->alias($from, $to, $timestamp, $context);
+    return self::$client->alias($message);
   }
 
   /**

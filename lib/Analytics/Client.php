@@ -8,6 +8,12 @@ require(__DIR__ . '/Consumer/Socket.php');
 
 class Analytics_Client {
 
+  /**
+   * VERSION
+   */
+
+  const VERSION = "1.0.0";
+
   private $consumer;
 
   /**
@@ -40,66 +46,38 @@ class Analytics_Client {
 
   /**
    * Tracks a user action
-   * @param  [string] $user_id    user id string
-   * @param  [string] $event      name of the event
-   * @param  [array]  $properties properties associated with the event [optional]
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * 
+   * @param  array $message
    * @return [boolean] whether the track call succeeded
    */
-  public function track($user_id, $event, $properties = null,
-                        $timestamp = null, $context = array()) {
-
-    $context = array_merge($context, $this->getContext());
-
-    $timestamp = $this->formatTime($timestamp);
-
-    // json_encode will serialize as []
-    if (count($properties) == 0) {
-      $properties = null;
-    }
-
-    return $this->consumer->track($user_id, $event, $properties, $context,
-                                    $timestamp);
+  public function track(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "track";
+    return $this->consumer->track($message);
   }
 
   /**
    * Tags traits about the user.
-   * @param  [string] $user_id
-   * @param  [array]  $traits
-   * @param  [number] $timestamp  unix seconds since epoch (time()) [optional]
+   * 
+   * @param  [array] $message
    * @return [boolean] whether the track call succeeded
    */
-  public function identify($user_id, $traits = array(), $timestamp = null,
-                            $context = array()) {
-
-    $context = array_merge($context, $this->getContext());
-
-    $timestamp = $this->formatTime($timestamp);
-
-    // json_encode will serialize as []
-    if (count($traits) == 0) {
-      $traits = null;
-    }
-
-    return $this->consumer->identify($user_id, $traits, $context,
-                                      $timestamp);
+  public function identify(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "identify";
+    return $this->consumer->identify($message);
   }
 
   /**
    * Aliases from one user id to another
-   * @param  string $from
-   * @param  string $to
-   * @param  number $timestamp unix seconds since epoch (time()) [optional]
-   * @param  array  $context   [optional]
+   * 
+   * @param  array $message
    * @return boolean whether the alias call succeeded
    */
-  public function alias($from, $to, $timestamp = null, $context = array()) {
-
-    $context = array_merge($context, $this->getContext());
-
-    $timestamp = $this->formatTime($timestamp);
-
-    return $this->consumer->alias($from, $to, $context, $timestamp);
+  public function alias(array $message) {
+    $message = $this->message($message);
+    $message["type"] = "alias";
+    return $this->consumer->alias($message);
   }
 
   /**
@@ -108,19 +86,37 @@ class Analytics_Client {
    * @param  time $timestamp - time in seconds (time())
    */
   private function formatTime($timestamp) {
-
     if ($timestamp == null) $timestamp = time();
 
     # Format for iso8601
     return date("c", $timestamp);
   }
 
+  /**
+   * Add common fields to the gvien `message`
+   * 
+   * @param array $msg
+   * @return array
+   */
+
+  private function message($msg){
+    if (!isset($msg["context"])) $msg["context"] = array();
+    if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
+    $msg["context"] = array_merge($msg["context"], $this->getContext());
+    $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
+    return $msg;
+  }
 
   /**
    * Add the segment.io context to the request
    * @return array additional context
    */
   private function getContext () {
-    return array( "library" => "analytics-php" );
+    return array(
+      "library" => array(
+        "name" => "analytics-php",
+        "version" => self::VERSION
+      )
+    );
   }
 }

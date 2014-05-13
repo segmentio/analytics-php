@@ -31,8 +31,7 @@ class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
     if (!$socket)
       return;
 
-    $payload = array("secret" => $this->secret,
-                     "batch"  => $batch );
+    $payload = array("batch" => $batch);
 
     $payload = json_encode($payload);
 
@@ -139,6 +138,7 @@ class Analytics_Consumer_Socket extends Analytics_QueueConsumer {
     $req.= "POST /v1/import HTTP/1.1\r\n";
     $req.= "Host: " . $host . "\r\n";
     $req.= "Content-Type: application/json\r\n";
+    $req.= "Authorization: Basic " . base64_encode($this->secret . ":") . "\r\n";
     $req.= "Accept: application/json\r\n";
     $req.= "Content-length: " . strlen($content) . "\r\n";
     $req.= "\r\n";

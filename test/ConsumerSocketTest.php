@@ -7,21 +7,20 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   private $client;
 
   function setUp() {
-    $this->client = new Analytics_Client("testsecret",
+    $this->client = new Analytics_Client("oq0vdlg7yi",
                                           array("consumer" => "socket"));
   }
 
   function testTrack() {
     $this->assertTrue($this->client->track(array(
-      "user_id" => "some-user",
+      "userId" => "some-user",
       "event" => "Socket PHP Event"
     )));
-    $this->assertTrue($tracked);
   }
 
   function testIdentify() {
     $this->assertTrue($this->client->identify(array(
-      "user_id" => "Calvin",
+      "userId" => "Calvin",
       "traits" => array(
         "loves_php" => false,
         "birthday" => time()
@@ -31,23 +30,23 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
   function testAlias() {
     $this->assertTrue($this->client->alias(array(
-      "previous_id" => "some-user",
-      "user_id" => "new-user"
+      "previousId" => "some-user",
+      "userId" => "new-user"
     )));
   }
 
   function testShortTimeout() {
-    $client = new Analytics_Client("testsecret",
+    $client = new Analytics_Client("oq0vdlg7yi",
                                    array( "timeout"  => 0.01,
                                           "consumer" => "socket" ));
 
     $this->assertTrue($client->track(array(
-      "user_id" => "some-user",
+      "userId" => "some-user",
       "event" => "Socket PHP Event"
     )));
 
     $this->assertTrue($client->identify(array(
-      "user_id" => "some-user",
+      "userId" => "some-user",
       "traits" => array()
     )));
 
@@ -97,7 +96,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     }
 
     $this->assertTrue($client->track(array(
-      "user_id" => "some-user",
+      "userId" => "some-user",
       "event" => "Super Large PHP Event",
       "properties" => array("big_property" => $big_property)
     )));

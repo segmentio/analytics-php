@@ -19,33 +19,27 @@ abstract class Analytics_Consumer {
 
   /**
    * Tracks a user action
-   * @param  string  $user_id    user id string
-   * @param  string  $event      name of the event
-   * @param  array   $properties properties associated with the event
-   * @param  string  $timestamp  iso8601 of the timestamp
+   * 
+   * @param  array  $message
    * @return boolean whether the track call succeeded
    */
-  abstract public function track($user_id, $event, $properties, $context,
-                                  $timestamp);
+  abstract public function track(array $message);
 
   /**
    * Tags traits about the user.
-   * @param  string  $user_id
-   * @param  array   $traits
-   * @param  string  $timestamp   iso8601 of the timestamp
+   * 
+   * @param  array  $message
    * @return boolean whether the track call succeeded
    */
-  abstract public function identify($user_id, $traits, $context, $timestamp);
+  abstract public function identify(array $message);
 
   /**
    * Aliases from one user id to another
-   * @param  string $from
-   * @param  string $to
-   * @param  array  $context
-   * @param  string $timestamp   iso8601 of the timestamp
+   * 
+   * @param  array $message
    * @return boolean whether the alias call succeeded
    */
-  abstract public function alias($from, $to, $context, $timestamp);
+  abstract public function alias(array $message);
 
   /**
    * Check whether debug mode is enabled

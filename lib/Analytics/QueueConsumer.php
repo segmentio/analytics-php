@@ -31,46 +31,22 @@ abstract class Analytics_QueueConsumer extends Analytics_Consumer {
 
   /**
    * Tracks a user action
-   * @param  string  $user_id    user id string
-   * @param  string  $event      name of the event
-   * @param  array   $properties properties associated with the event
-   * @param  string  $timestamp  iso8601 of the timestamp
+   * 
+   * @param  array  $message
    * @return boolean whether the track call succeeded
    */
-  public function track($user_id, $event, $properties, $context, $timestamp) {
-
-    $body = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "event"      => $event,
-      "properties" => $properties,
-      "timestamp"  => $timestamp,
-      "context"    => $context,
-      "action"     => "track"
-    );
-
-    return $this->enqueue($body);
+  public function track(array $message) {
+    return $this->enqueue($message);
   }
 
   /**
    * Tags traits about the user.
-   * @param  string  $user_id
-   * @param  array   $traits
-   * @param  string  $timestamp   iso8601 of the timestamp
+   * 
+   * @param  array  $message
    * @return boolean whether the track call succeeded
    */
-  public function identify($user_id, $traits, $context, $timestamp) {
-
-    $body = array(
-      "secret"     => $this->secret,
-      "userId"     => $user_id,
-      "traits"     => $traits,
-      "context"    => $context,
-      "timestamp"  => $timestamp,
-      "action"     => "identify"
-    );
-
-    return $this->enqueue($body);
+  public function identify(array $message) {
+    return $this->enqueue($message);
   }
 
   /**
@@ -81,18 +57,8 @@ abstract class Analytics_QueueConsumer extends Analytics_Consumer {
    * @param  string $timestamp   iso8601 of the timestamp
    * @return boolean whether the alias call succeeded
    */
-  public function alias($from, $to, $context, $timestamp) {
-
-    $body = array(
-      "secret"     => $this->secret,
-      "from"       => $from,
-      "to"         => $to,
-      "context"    => $context,
-      "timestamp"  => $timestamp,
-      "action"     => "alias"
-    );
-
-    return $this->enqueue($body);
+  public function alias(array $message) {
+    return $this->enqueue($message);
   }
 
   /**

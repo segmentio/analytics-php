@@ -11,7 +11,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     if (file_exists($this->filename()))
       unlink($this->filename());
 
-    $this->client = new Analytics_Client("testsecret",
+    $this->client = new Analytics_Client("oq0vdlg7yi",
                           array("consumer" => "file",
                                 "filename" => $this->filename()));
 
@@ -24,7 +24,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testTrack() {
     $this->assertTrue($this->client->track(array(
-      "user_id" => "some-user",
+      "userId" => "some-user",
       "event" => "File PHP Event"
     )));
     $this->checkWritten("track");
@@ -32,7 +32,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testIdentify() {
     $this->assertTrue($this->client->identify(array(
-      "user_id" => "Calvin",
+      "userId" => "Calvin",
       "traits" => array(
         "loves_php" => false,
         "birthday" => time()
@@ -43,8 +43,8 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testAlias () {
     $this->assertTrue($this->client->alias(array(
-      "previous_id" => "previous-id",
-      "user_id" => "user-id"
+      "previousId" => "previous-id",
+      "userId" => "user-id"
     )));
     $this->checkWritten("alias");
   }
@@ -55,7 +55,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 
-    $tracked = $client->track("some_user", "File PHP Event");
+    $tracked = $client->track(array("userId" => "some-user", "event" => "my event"));
     $this->assertFalse($tracked);
   }
 

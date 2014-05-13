@@ -5,19 +5,19 @@ require_once(dirname(__FILE__) . "/../lib/Analytics.php");
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
-    Analytics::init("testsecret");
+    Analytics::init("oq0vdlg7yi");
   }
 
   function testTrack() {
     $this->assertTrue(Analytics::track(array(
-      "user_id" => "john",
+      "userId" => "john",
       "event" => "Module PHP Event"
     )));
   }
 
   function testIdentify() {
     $this->assertTrue(Analytics::identify(array(
-      "user_id" => "doe",
+      "userId" => "doe",
       "traits" => array(
         "loves_php" => false,
         "birthday" => time()
@@ -27,8 +27,8 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function testAlias() {
     $this->assertTrue(Analytics::alias(array(
-      "previous_id" => "previous-id",
-      "user_id" => "user-id"
+      "previousId" => "previous-id",
+      "userId" => "user-id"
     )));
   }
 }
