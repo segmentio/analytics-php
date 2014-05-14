@@ -31,7 +31,7 @@ $lines = explode("\n", $contents);
  */
 
 Segment::init($args["secret"], array(
-  "batch_size" => 1,
+  "debug" => true,
   "on_error" => function($code, $msg){
     print("$code: $msg\n");
     exit(1);
@@ -42,19 +42,23 @@ Segment::init($args["secret"], array(
  * Payloads
  */
 
+$total = 0;
+$successful = 0;
 foreach ($lines as $line) {
   if (!trim($line)) continue;
   $payload = json_decode($line, true);
   $payload["timestamp"] = strtotime($payload["timestamp"]);
   $type = $payload["type"];
-  call_user_func_array(array("Segment", $type), array($payload));
+  $ret = call_user_func_array(array("Segment", $type), array($payload));
+  if ($ret) $successful++;
+  $total++;
 }
 
 /**
  * Sent
  */
 
-print("sent analytics data");
+print("sent $successful from $total requests successfully");
 exit(0);
 
 /**

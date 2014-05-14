@@ -81,7 +81,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testSend(){
     exec("php send.php --secret weee --file test/file.log", $output);
-    $this->assertEquals("sent analytics data", trim($output[0]));
+    $this->assertEquals("sent 6 from 6 requests successfully", trim($output[0]));
   }
 
   function testProductionProblems() {
