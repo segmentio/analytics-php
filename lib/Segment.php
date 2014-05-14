@@ -17,11 +17,7 @@ class Segment {
    * @param  array  $options  passed straight to the client
    */
   public static function init($secret, $options = array()) {
-
-  	if (!$secret){
-  		throw new Exception("Segment::init Secret parameter is required");
-  	}
-
+    self::assert($secret, "Segment::init() requires secret");
     self::$client = new Segment_Client($secret, $options);
   }
 
@@ -32,7 +28,10 @@ class Segment {
    * @return boolean whether the track call succeeded
    */
   public static function track(array $message) {
-    self::check_client();
+    self::checkClient();
+    $event = !empty($message["event"]);
+    self::assert($event, "Segment::track() expects an event");
+    self::validate($message, "track");
     return self::$client->track($message);
   }
 
@@ -43,7 +42,9 @@ class Segment {
    * @return boolean whether the identify call succeeded
    */
   public static function identify(array $message) {
-    self::check_client();
+    self::checkClient();
+    $message["type"] = "identify";
+    self::validate($message, "identify");
     return self::$client->identify($message);
   }
 
@@ -54,7 +55,10 @@ class Segment {
    * @return boolean whether the group call succeeded
    */
   public static function group(array $message) {
-    self::check_client();
+    self::checkClient();
+    $groupId = !empty($message["groupId"]);
+    $userId = !empty($message["userId"]);
+    self::assert($groupId && $userId, "Segment::group() expects userId and groupId");
     return self::$client->group($message);
   }
 
@@ -65,7 +69,10 @@ class Segment {
    * @return boolean whether the page call succeeded
    */
   public static function page(array $message) {
-    self::check_client();
+    self::checkClient();
+    $name = !empty($message["name"]);
+    self::assert($name, "Segment::page() requires userId or anonymousId");
+    self::validate($message, "page");
     return self::$client->page($message);
   }
 
@@ -76,7 +83,9 @@ class Segment {
    * @return boolean whether the screen call succeeded
    */
   public static function screen(array $message) {
-    self::check_client();
+    self::checkClient();
+    $name = !empty($message["name"]);
+    self::validate($message, "screen");
     return self::$client->screen($message);
   }
 
@@ -87,18 +96,44 @@ class Segment {
    * @return boolean whether the alias call succeeded
    */
   public static function alias(array $message) {
-    self::check_client();
+    self::checkClient();
+    $userId = !empty($message["userId"]);
+    $previousId = !empty($message["previousId"]);
+    self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
     return self::$client->alias($message);
   }
 
   /**
-   * Ensures that the client is indeed set. Throws an exception when not set.
+   * Validate common properties.
+   * 
+   * @param array $msg
+   * @param string $type
    */
-  private static function check_client() {
-
-    if (self::$client == null) {
-      throw new Exception("Segment::init must be called " .
-                          "before track or identify");
-    }
+  public static function validate($msg, $type){
+    $userId = !empty($msg["userId"]);
+    $anonId = !empty($msg["anonymousId"]);
+    self::assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
   }
+
+  /**
+   * Check the client.
+   * 
+   * @throws Exception
+   */
+  private static function checkClient(){
+    if (null != self::$client) return;
+    throw new Exception("Analytics::init() must be called before any other tracking method.");
+  }
+
+  /**
+   * Assert `value` or throw.
+   * 
+   * @param array $value
+   * @param string $msg
+   * @throws Exception
+   */
+  private static function assert($value, $msg){
+    if (!$value) throw new Exception($msg);
+  }
+
 }

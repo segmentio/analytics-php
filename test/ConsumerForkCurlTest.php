@@ -42,7 +42,7 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
   }
 
   function testPage(){
-    $this->assertTrue($this->client->group(array(
+    $this->assertTrue($this->client->page(array(
       "userId" => "userId",
       "name" => "analytics-php",
       "category" => "fork-curl",

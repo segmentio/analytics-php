@@ -39,8 +39,8 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testPage(){
-    $this->assertTrue($this->client->group(array(
-      "anonymousId" => "anonymousId",
+    $this->assertTrue($this->client->page(array(
+      "userId" => "user-id",
       "name" => "analytics-php",
       "category" => "socket",
       "properties" => array(
