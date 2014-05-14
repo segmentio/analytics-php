@@ -9,6 +9,7 @@ composer.phar:
 
 test: install
 	@vendor/bin/phpunit --colors test/
+	@php ./composer.phar validate
 
 clean:
 	rm -rf \
