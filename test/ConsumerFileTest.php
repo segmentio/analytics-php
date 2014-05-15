@@ -5,6 +5,7 @@ require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
 class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   private $client;
+  private $filename = "/tmp/analytics.log";
 
   function setUp() {
     if (file_exists($this->filename()))
@@ -12,13 +13,13 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
     $this->client = new Segment_Client("oq0vdlg7yi",
                           array("consumer" => "file",
-                                "filename" => $this->filename()));
+                                "filename" => $this->filename));
 
   }
 
   function tearDown(){
-    if (file_exists($this->filename()))
-      unlink($this->filename());    
+    if (file_exists($this->filename))
+      unlink($this->filename);    
   }
 
   function testTrack() {
@@ -95,17 +96,17 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   }
 
   function checkWritten($type) {
-    exec("wc -l " . $this->filename(), $output);
+    exec("wc -l " . $this->filename, $output);
     $out = trim($output[0]);
-    $this->assertEquals($out, "1 " . $this->filename());
-    $str = file_get_contents($this->filename());
+    $this->assertEquals($out, "1 " . $this->filename);
+    $str = file_get_contents($this->filename);
     $json = json_decode(trim($str));
     $this->assertEquals($type, $json->type);
-    unlink($this->filename());
+    unlink($this->filename);
   }
 
   function filename(){
-    return dirname(__FILE__) . '/analytics.log';
+    return '/tmp/analytics.log';
   }
 
 }
