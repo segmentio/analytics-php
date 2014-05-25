@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import json
 import os
@@ -14,7 +15,7 @@ clients = {}
 def process_file(filename):
     '''Processes the log file line by line'''
 
-    print 'Processing file', filename
+    print('Processing file %s' % filename)
 
     with open(filename) as f:
         for line in f:
@@ -35,9 +36,9 @@ def process_line(line):
         elif action == 'alias':
             alias(secret, contents)
         else:
-            print 'Error processing call'
+            print('Error processing call')
     except Exception as e:
-        print 'Malformed JSON', e
+        print('Malformed JSON: %s' % e)
 
 
 def get_client(secret):
@@ -130,7 +131,7 @@ if __name__ == '__main__':
                                 'analytics-%d.log' % random.randint(0, 1000))
 
     if not os.path.exists(filename):
-        print 'Error: The filename you specified doesn\'t exist: ', filename
+        print('Error: The filename you specified doesn\'t exist: %s' % filename)
         sys.exit(1)
 
     # Move the file so that we don't read from constantly appended file.
@@ -142,4 +143,4 @@ if __name__ == '__main__':
     for client in clients.values():
         client.flush(async=False)
 
-    print 'Finished uploading analytics data'
+    print('Finished uploading analytics data')
