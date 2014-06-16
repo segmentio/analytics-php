@@ -5,6 +5,7 @@ require_once(dirname(__FILE__) . "/../lib/Segment.php");
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
+    date_default_timezone_set("UTC");
     Segment::init("oq0vdlg7yi");
   }
 

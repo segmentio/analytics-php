@@ -19,11 +19,14 @@ $args = parse($argv);
 if (!isset($args["secret"])) die("--secret must be given");
 if (!isset($args["file"])) die("--file must be given");
 
+$file = $args["file"];
+if ($file[0] != '/') $file = __DIR__ . "/" . $file;
+
 /**
  * File contents.
  */
 
-$contents = file_get_contents(__DIR__ . "/" . $args["file"]);
+$contents = file_get_contents($file);
 $lines = explode("\n", $contents);
 
 /**

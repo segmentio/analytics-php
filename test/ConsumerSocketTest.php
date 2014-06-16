@@ -7,6 +7,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   private $client;
 
   function setUp() {
+    date_default_timezone_set("UTC");
     $this->client = new Segment_Client("oq0vdlg7yi",
                                           array("consumer" => "socket"));
   }

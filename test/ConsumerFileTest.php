@@ -8,6 +8,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   private $filename = "/tmp/analytics.log";
 
   function setUp() {
+    date_default_timezone_set("UTC");
     if (file_exists($this->filename()))
       unlink($this->filename());
 
@@ -19,7 +20,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function tearDown(){
     if (file_exists($this->filename))
-      unlink($this->filename);    
+      unlink($this->filename);
   }
 
   function testTrack() {
@@ -81,7 +82,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   }
 
   function testSend(){
-    exec("php send.php --secret weee --file test/file.log", $output);
+    exec("php --define date.timezone=UTC send.php --secret weee --file test/file.log", $output);
     $this->assertEquals("sent 6 from 6 requests successfully", trim($output[0]));
   }
 
