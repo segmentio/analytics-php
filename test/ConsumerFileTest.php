@@ -82,8 +82,15 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   }
 
   function testSend(){
-    exec("php --define date.timezone=UTC send.php --secret weee --file test/file.log", $output);
-    $this->assertEquals("sent 6 from 6 requests successfully", trim($output[0]));
+    for ($i = 0; $i < 200; $i++) {
+      $this->client->track(array(
+        "userId" => "userId",
+        "event" => "event"
+      ));
+    }
+    exec("php --define date.timezone=UTC send.php --secret weee --file /tmp/analytics.log", $output);
+    $this->assertEquals("sent 200 from 200 requests successfully", trim($output[0]));
+    $this->assertFalse(file_exists($this->filename()));
   }
 
   function testProductionProblems() {

@@ -31,7 +31,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the track call succeeded
    */
@@ -41,7 +41,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the identify call succeeded
    */
@@ -51,7 +51,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the group call succeeded
    */
@@ -61,7 +61,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Tracks a page view.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the page call succeeded
    */
@@ -71,7 +71,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Tracks a screen view.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the screen call succeeded
    */
@@ -81,7 +81,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
   /**
    * Aliases from one user id to another
-   * 
+   *
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */
@@ -113,7 +113,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   /**
    * Flushes our queue of messages by batching them to the server
    */
-  protected function flush() {
+  public function flush() {
 
     $count = count($this->queue);
     $success = true;

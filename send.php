@@ -23,6 +23,20 @@ $file = $args["file"];
 if ($file[0] != '/') $file = __DIR__ . "/" . $file;
 
 /**
+ * Rename the file so we don't write the same calls
+ * multiple times
+ */
+
+$dir = dirname($file);
+$old = $file;
+$file = $dir . '/analytics-' . rand() . '.log';
+
+if (!rename($old, $file)) {
+  print("error renaming from $old to $new\n");
+  exit(1);
+}
+
+/**
  * File contents.
  */
 
@@ -55,7 +69,11 @@ foreach ($lines as $line) {
   $ret = call_user_func_array(array("Segment", $type), array($payload));
   if ($ret) $successful++;
   $total++;
+  if ($total % 100 === 0) Segment::flush();
 }
+
+Segment::flush();
+unlink($file);
 
 /**
  * Sent

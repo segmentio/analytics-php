@@ -46,7 +46,7 @@ class Segment_Client {
 
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the track call succeeded
    */
@@ -58,7 +58,7 @@ class Segment_Client {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  [array] $message
    * @return [boolean] whether the track call succeeded
    */
@@ -70,7 +70,7 @@ class Segment_Client {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  [array] $message
    * @return [boolean] whether the group call succeeded
    */
@@ -82,7 +82,7 @@ class Segment_Client {
 
   /**
    * Tracks a page view.
-   * 
+   *
    * @param  [array] $message
    * @return [boolean] whether the page call succeeded
    */
@@ -94,7 +94,7 @@ class Segment_Client {
 
   /**
    * Tracks a screen view.
-   * 
+   *
    * @param  [array] $message
    * @return [boolean] whether the screen call succeeded
    */
@@ -106,7 +106,7 @@ class Segment_Client {
 
   /**
    * Aliases from one user id to another
-   * 
+   *
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */
@@ -114,6 +114,14 @@ class Segment_Client {
     $message = $this->message($message);
     $message["type"] = "alias";
     return $this->consumer->alias($message);
+  }
+
+  /**
+   * Flush any async consumers
+   */
+  public function flush() {
+    if (!method_exists($this->consumer, 'flush')) return;
+    $this->consumer->flush();
   }
 
   /**
@@ -129,7 +137,7 @@ class Segment_Client {
 
   /**
    * Add common fields to the gvien `message`
-   * 
+   *
    * @param array $msg
    * @return array
    */
@@ -145,9 +153,9 @@ class Segment_Client {
 
   /**
    * Generate a random messageId.
-   * 
+   *
    * https://gist.github.com/dahnielson/508447#file-uuid-php-L74
-   * 
+   *
    * @return string
    */
 

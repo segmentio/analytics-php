@@ -23,7 +23,7 @@ class Segment {
 
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array $message
    * @return boolean whether the track call succeeded
    */
@@ -37,7 +37,7 @@ class Segment {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the identify call succeeded
    */
@@ -50,7 +50,7 @@ class Segment {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the group call succeeded
    */
@@ -64,7 +64,7 @@ class Segment {
 
   /**
    * Tracks a page view
-   * 
+   *
    * @param  array $message
    * @return boolean whether the page call succeeded
    */
@@ -78,7 +78,7 @@ class Segment {
 
   /**
    * Tracks a screen view
-   * 
+   *
    * @param  array $message
    * @return boolean whether the screen call succeeded
    */
@@ -91,7 +91,7 @@ class Segment {
 
   /**
    * Aliases the user id from a temporary id to a permanent one
-   * 
+   *
    * @param  array $from      user id to alias from
    * @return boolean whether the alias call succeeded
    */
@@ -105,7 +105,7 @@ class Segment {
 
   /**
    * Validate common properties.
-   * 
+   *
    * @param array $msg
    * @param string $type
    */
@@ -116,8 +116,17 @@ class Segment {
   }
 
   /**
+   * Flush the client
+   */
+
+  public static function flush(){
+    self::checkClient();
+    return self::$client->flush();
+  }
+
+  /**
    * Check the client.
-   * 
+   *
    * @throws Exception
    */
   private static function checkClient(){
@@ -127,7 +136,7 @@ class Segment {
 
   /**
    * Assert `value` or throw.
-   * 
+   *
    * @param array $value
    * @param string $msg
    * @throws Exception
