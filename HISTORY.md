@@ -1,3 +1,20 @@
+
+1.0.0 / 2014-06-16
+==================
+
+ * update to work with new spec
+ * add ./composer.phar validation test
+ * better send.php output
+ * add validation
+ * use strtotime in send.php and support php5.3
+ * rename Analytics to Segment
+ * add send.php to replace file_reader.py
+ * add new methods implementation and tests
+ * implement spec changes
+ * change tests to reflect spec changes
+ * test changes:
+ * Fix typo in composer.json
+
 0.4.8 / 8-21-2013
 =============
 * adding fix for socket requests which might complete in multiple fwrites
