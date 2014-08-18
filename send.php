@@ -32,6 +32,7 @@ $old = $file;
 $file = $dir . '/analytics-' . rand() . '.log';
 
 if(!file_exists($old)) {
+  print("file: $old does not exist");
   exit(0);
 }
 
