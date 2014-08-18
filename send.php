@@ -32,7 +32,7 @@ $old = $file;
 $file = $dir . '/analytics-' . rand() . '.log';
 
 if(!file_exists($old)) {
-	exit(0);
+  exit(0);
 }
 
 if (!rename($old, $file)) {
