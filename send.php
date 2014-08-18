@@ -31,6 +31,10 @@ $dir = dirname($file);
 $old = $file;
 $file = $dir . '/analytics-' . rand() . '.log';
 
+if(!file_exists($old)) {
+  exit(0);
+}
+
 if (!rename($old, $file)) {
   print("error renaming from $old to $new\n");
   exit(1);
