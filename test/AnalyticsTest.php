@@ -28,13 +28,19 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function testPage(){
     $this->assertTrue(Segment::page(array(
-      "anonymousId" => "user-id",
+      "anonymousId" => "anonymous-id",
       "name" => "analytics-php",
       "category" => "docs",
       "properties" => array(
         "path" => "/docs/libraries/php/",
         "url" => "https://segment.io/docs/libraries/php/"
       )
+    )));
+  }
+
+  function testBasicPage(){
+    $this->assertTrue(Segment::page(array(
+      "anonymousId" => "anonymous-id"
     )));
   }
 
@@ -46,6 +52,12 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
       "properties" => array(
         "points" => 300
       )
+    )));
+  }
+
+  function testBasicScreen(){
+    $this->assertTrue(Segment::screen(array(
+      "anonymousId" => "anonymous-id"
     )));
   }
 

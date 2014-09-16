@@ -70,8 +70,6 @@ class Segment {
    */
   public static function page(array $message) {
     self::checkClient();
-    $name = !empty($message["name"]);
-    self::assert($name, "Segment::page() requires userId or anonymousId");
     self::validate($message, "page");
     return self::$client->page($message);
   }
@@ -84,7 +82,6 @@ class Segment {
    */
   public static function screen(array $message) {
     self::checkClient();
-    $name = !empty($message["name"]);
     self::validate($message, "screen");
     return self::$client->screen($message);
   }
