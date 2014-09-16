@@ -1,4 +1,11 @@
 
+1.0.1 / 2014-09-16
+==================
+
+ * fixing validation for Segment::page() calls
+ * updating send.php error message
+ * fix send.php to exit gracefully when there is no log file to process
+
 1.0.0 / 2014-06-16
 ==================
 
