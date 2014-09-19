@@ -52,7 +52,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
 
     try {
       # Open our socket to the API Server.
-      $socket = pfsockopen($protocol . "://" . $host, $port, $errno,
+      $socket = @pfsockopen($protocol . "://" . $host, $port, $errno,
                            $errstr, $timeout);
 
       # If we couldn't open the socket, handle the error.
