@@ -6,7 +6,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    Segment::init("oq0vdlg7yi");
+    Segment::init("oq0vdlg7yi", array("debug" => true));
   }
 
   function testTrack() {
@@ -68,6 +68,30 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
         "loves_php" => false,
         "birthday" => time()
       )
+    )));
+  }
+
+  function testEmptyTraits() {
+    $this->assertTrue(Segment::identify(array(
+      "userId" => "empty-traits"
+    )));
+
+    $this->assertTrue(Segment::group(array(
+      "userId" => "empty-traits",
+      "groupId" => "empty-traits"
+    )));
+  }
+
+  function testEmptyProperties() {
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "empty-properties"
+    )));
+
+    $this->assertTrue(Segment::page(array(
+      "category" => "empty-properties",
+      "name" => "empty-properties",
+      "userId" => "user-id"
     )));
   }
 
