@@ -64,6 +64,7 @@ class Segment_Client {
    */
   public function identify(array $message) {
     $message = $this->message($message);
+    if (!isset($message["traits"])) $message["traits"] = new stdClass;
     $message["type"] = "identify";
     return $this->consumer->identify($message);
   }
@@ -76,6 +77,7 @@ class Segment_Client {
    */
   public function group(array $message) {
     $message = $this->message($message);
+    if (!isset($message["traits"])) $message["traits"] = new stdClass;
     $message["type"] = "group";
     return $this->consumer->group($message);
   }

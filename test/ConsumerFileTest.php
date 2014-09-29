@@ -95,7 +95,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testProductionProblems() {
     # Open to a place where we should not have write access.
-    $client = new Segment_Client("testsecret",
+    $client = new Segment_Client("oq0vdlg7yi",
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 
