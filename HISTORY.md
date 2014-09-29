@@ -1,4 +1,11 @@
 
+1.0.2 / 2014-09-29
+==================
+
+ * fix: identify(), group() with empty traits
+ * suppressing logs generated when attempting to write to a reset socket [j0ew00ds]
+ * Added PHP 5.6, 5.5 and HHVM to travis.yml [Nyholm]
+
 1.0.1 / 2014-09-16
 ==================
 
