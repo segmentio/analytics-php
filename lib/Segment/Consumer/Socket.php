@@ -87,7 +87,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     # Write the request
     while (!$closed && $bytes_written < $bytes_total) {
       try {
-        $written = fwrite($socket, substr($req, $bytes_written));
+        $written = @fwrite($socket, substr($req, $bytes_written));
       } catch (Exception $e) {
         $this->handleError($e->getCode(), $e->getMessage());
         $closed = true;
