@@ -52,6 +52,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
 
     try {
       # Open our socket to the API Server.
+      # Since we're try catch'ing prevent PHP logs.
       $socket = @pfsockopen($protocol . "://" . $host, $port, $errno,
                            $errstr, $timeout);
 
@@ -87,6 +88,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     # Write the request
     while (!$closed && $bytes_written < $bytes_total) {
       try {
+        # Since we're try catch'ing prevent PHP logs.
         $written = @fwrite($socket, substr($req, $bytes_written));
       } catch (Exception $e) {
         $this->handleError($e->getCode(), $e->getMessage());
