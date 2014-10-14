@@ -82,6 +82,19 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     )));
   }
 
+  function testEmptyArrayTraits() {
+    $this->assertTrue(Segment::identify(array(
+      "userId" => "empty-traits",
+      "traits" => array()
+    )));
+
+    $this->assertTrue(Segment::group(array(
+      "userId" => "empty-traits",
+      "groupId" => "empty-traits",
+      "traits" => array()
+    )));
+  }
+
   function testEmptyProperties() {
     $this->assertTrue(Segment::track(array(
       "userId" => "user-id",
@@ -92,6 +105,21 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
       "category" => "empty-properties",
       "name" => "empty-properties",
       "userId" => "user-id"
+    )));
+  }
+
+  function testEmptyArrayProperties(){
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "empty-properties",
+      "properties" => array()
+    )));
+
+    $this->assertTrue(Segment::page(array(
+      "category" => "empty-properties",
+      "name" => "empty-properties",
+      "userId" => "user-id",
+      "properties" => array()
     )));
   }
 
