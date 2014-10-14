@@ -51,7 +51,7 @@ class Segment_Client {
    * @return [boolean] whether the track call succeeded
    */
   public function track(array $message) {
-    $message = $this->message($message);
+    $message = $this->message($message, "properties");
     $message["type"] = "track";
     return $this->consumer->track($message);
   }
@@ -63,8 +63,7 @@ class Segment_Client {
    * @return [boolean] whether the track call succeeded
    */
   public function identify(array $message) {
-    $message = $this->message($message);
-    if (!isset($message["traits"])) $message["traits"] = new stdClass;
+    $message = $this->message($message, "traits");
     $message["type"] = "identify";
     return $this->consumer->identify($message);
   }
@@ -76,8 +75,7 @@ class Segment_Client {
    * @return [boolean] whether the group call succeeded
    */
   public function group(array $message) {
-    $message = $this->message($message);
-    if (!isset($message["traits"])) $message["traits"] = new stdClass;
+    $message = $this->message($message, "traits");
     $message["type"] = "group";
     return $this->consumer->group($message);
   }
@@ -89,7 +87,7 @@ class Segment_Client {
    * @return [boolean] whether the page call succeeded
    */
   public function page(array $message) {
-    $message = $this->message($message);
+    $message = $this->message($message, "properties");
     $message["type"] = "page";
     return $this->consumer->page($message);
   }
@@ -101,7 +99,7 @@ class Segment_Client {
    * @return [boolean] whether the screen call succeeded
    */
   public function screen(array $message) {
-    $message = $this->message($message);
+    $message = $this->message($message, "properties");
     $message["type"] = "screen";
     return $this->consumer->screen($message);
   }
@@ -141,10 +139,13 @@ class Segment_Client {
    * Add common fields to the gvien `message`
    *
    * @param array $msg
+   * @param string $def
    * @return array
    */
 
-  private function message($msg){
+  private function message($msg, $def = ""){
+    if ($def && !isset($msg[$def])) $msg[$def] = array();
+    if ($def && empty($msg[$def])) $msg[$def] = (object)$msg[$def];
     if (!isset($msg["context"])) $msg["context"] = array();
     if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
     $msg["context"] = array_merge($msg["context"], $this->getContext());
