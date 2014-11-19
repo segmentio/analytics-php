@@ -3,7 +3,7 @@ analytics-php
 
 [![Build Status](https://travis-ci.org/segmentio/analytics-php.png?branch=master)](https://travis-ci.org/segmentio/analytics-php)
 
-analytics-php is a php client for [Segment.io](https://segment.io)
+analytics-php is a php client for [Segment](https://segment.com)
 
 ## Documentation
 
