@@ -26,7 +26,8 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   function testTrack() {
     $this->assertTrue($this->client->track(array(
       "userId" => "some-user",
-      "event" => "File PHP Event"
+      "event" => "File PHP Event - Microtime",
+      "timestamp" => microtime(true),
     )));
     $this->checkWritten("track");
   }

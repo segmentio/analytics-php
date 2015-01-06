@@ -26,6 +26,19 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     )));
   }
 
+  function testMicrotime(){
+    $this->assertTrue(Segment::page(array(
+      "anonymousId" => "anonymous-id",
+      "name" => "analytics-php-microtime",
+      "category" => "docs",
+      "timestamp" => microtime(true),
+      "properties" => array(
+        "path" => "/docs/libraries/php/",
+        "url" => "https://segment.io/docs/libraries/php/"
+      )
+    )));    
+  }
+
   function testPage(){
     $this->assertTrue(Segment::page(array(
       "anonymousId" => "anonymous-id",
