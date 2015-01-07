@@ -125,14 +125,26 @@ class Segment_Client {
   }
 
   /**
-   * Formats a timestamp by making sure it is set, and then converting it to
-   * iso8601 format.
+   * Formats a timestamp by making sure it is set
+   * and converting it to iso8601.
+   *
+   * The timestamp can be time in seconds `time()` or `microseconds(true)`.
+   * any other input is considered an error and the method will return a new date.
+   *
+   * Note: php's date() "u" format (for microseconds) has a bug in it
+   * it always shows `.000` for microseconds since `date()` only accepts
+   * ints, so we have to construct the date ourselves if microtime is passed.
+   * 
    * @param  time $timestamp - time in seconds (time())
    */
-  private function formatTime($timestamp) {
-    if ($timestamp == null) $timestamp = time();
-    # Format for iso8601
-    return date("c", $timestamp);
+  private function formatTime($ts) {
+    if ($ts == null) $ts = time();
+    if ("integer" == gettype($ts)) return date("c", $ts);
+    if (-1 == ($pos = strrpos($ts, "."))) return date("c");
+    $sec = substr($ts, 0, $pos);
+    $usec = substr($ts, $pos);
+    $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
+    return date($fmt, (int)$sec);
   }
 
   /**
