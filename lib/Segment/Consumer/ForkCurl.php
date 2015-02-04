@@ -26,10 +26,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
    */
   public function flushBatch($messages) {
 
-    $body = array(
-      "batch"  => $messages,
-    );
-
+    $body = $this->payload($messages);
     $payload = json_encode($body);
 
     # Escape for shell usage.
