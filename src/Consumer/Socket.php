@@ -1,6 +1,10 @@
 <?php
 
-class Segment_Consumer_Socket extends Segment_QueueConsumer {
+namespace Segment\Consumer;
+
+use Segment\QueueConsumer;
+
+class Socket extends QueueConsumer {
 
   protected $type = "Socket";
   private $socket_failed;

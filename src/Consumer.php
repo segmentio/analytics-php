@@ -1,5 +1,8 @@
 <?php
-abstract class Segment_Consumer {
+
+namespace Segment;
+
+abstract class Consumer {
 
   protected $type = "Consumer";
 
@@ -19,7 +22,7 @@ abstract class Segment_Consumer {
 
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the track call succeeded
    */
@@ -27,7 +30,7 @@ abstract class Segment_Consumer {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the identify call succeeded
    */
@@ -35,7 +38,7 @@ abstract class Segment_Consumer {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the group call succeeded
    */
@@ -43,7 +46,7 @@ abstract class Segment_Consumer {
 
   /**
    * Tracks a page view.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the page call succeeded
    */
@@ -51,7 +54,7 @@ abstract class Segment_Consumer {
 
   /**
    * Tracks a screen view.
-   * 
+   *
    * @param  array  $message
    * @return boolean whether the group call succeeded
    */
@@ -59,7 +62,7 @@ abstract class Segment_Consumer {
 
   /**
    * Aliases from one user id to another
-   * 
+   *
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */
