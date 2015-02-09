@@ -130,6 +130,20 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   }
 
   /**
+   * Given a batch of messages the method returns
+   * a valid payload.
+   * 
+   * @param {Array} batch
+   * @return {Array}
+   **/
+  protected function payload($batch){
+    return array(
+      "batch" => $batch,
+      "sentAt" => date("c"),
+    );
+  }
+
+  /**
    * Flushes a batch of messages.
    * @param  [type] $batch [description]
    * @return [type]        [description]

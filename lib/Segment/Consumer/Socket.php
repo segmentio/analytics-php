@@ -31,8 +31,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     if (!$socket)
       return;
 
-    $payload = array("batch" => $batch);
-
+    $payload = $this->payload($batch);
     $payload = json_encode($payload);
 
     $body = $this->createBody($this->options["host"], $payload);
