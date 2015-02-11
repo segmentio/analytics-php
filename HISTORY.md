@@ -1,4 +1,11 @@
 
+1.1.1 / 2015-02-11
+==================
+
+  * Add updated PHP version requirement for @phpunit
+  * add .sentAt
+
+
 1.1.0 / 2015-01-07
 ==================
 
