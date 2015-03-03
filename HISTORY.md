@@ -1,4 +1,11 @@
 
+1.1.2 / 2015-03-03
+==================
+
+  * send.php: fix error handling
+  * client: fix float timestamp handling
+
+
 1.1.1 / 2015-02-11
 ==================
 

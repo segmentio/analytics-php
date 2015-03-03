@@ -12,7 +12,7 @@ class Segment_Client {
    * VERSION
    */
 
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
 
   private $consumer;
 
