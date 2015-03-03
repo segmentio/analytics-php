@@ -140,13 +140,18 @@ class Segment_Client {
   private function formatTime($ts) {
     // time()
     if ($ts == null) $ts = time();
-    if ("integer" == gettype($ts)) return date("c", $ts);
+    if (is_integer($ts)) return date("c", $ts);
 
     // anything else return a new date.
-    if ("double" != gettype($ts)) return date("c");
+    if (!is_float($ts)) return date("c");
+
+    // fix for floatval casting in send.php
+    $parts = explode(".", (string)$ts);
+    if (!isset($parts[1])) return date("c", (int)$parts[0]);
 
     // microtime(true)
-    list($sec, $usec) = explode(".", (string)$ts);
+    $sec = (int)$parts[0];
+    $usec = (int)$parts[1];
     $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
     return date($fmt, (int)$sec);  
   }

@@ -70,7 +70,7 @@ foreach ($lines as $line) {
   if (!trim($line)) continue;
   $payload = json_decode($line, true);
   $dt = new DateTime($payload["timestamp"]);
-  $ts = doubleval($dt->getTimestamp() . "." . $dt->format("u"));
+  $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
   $payload["timestamp"] = $ts;
   $type = $payload["type"];
   $ret = call_user_func_array(array("Segment", $type), array($payload));
