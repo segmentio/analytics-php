@@ -138,13 +138,17 @@ class Segment_Client {
    * @param  time $timestamp - time in seconds (time())
    */
   private function formatTime($ts) {
+    // time()
     if ($ts == null) $ts = time();
     if ("integer" == gettype($ts)) return date("c", $ts);
-    if (-1 == ($pos = strrpos($ts, "."))) return date("c");
-    $sec = substr($ts, 0, $pos);
-    $usec = substr($ts, $pos);
+
+    // anything else return a new date.
+    if ("double" != gettype($ts)) return date("c");
+
+    // microtime(true)
+    list($sec, $usec) = explode(".", (string)$ts);
     $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
-    return date($fmt, (int)$sec);
+    return date($fmt, (int)$sec);  
   }
 
   /**
