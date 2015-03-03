@@ -89,8 +89,18 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
         "event" => "event"
       ));
     }
-    exec("php --define date.timezone=UTC send.php --secret weee --file /tmp/analytics.log", $output);
+    exec("php --define date.timezone=UTC send.php --secret oq0vdlg7yi --file /tmp/analytics.log", $output);
     $this->assertEquals("sent 200 from 200 requests successfully", trim($output[0]));
+    $this->assertFalse(file_exists($this->filename()));
+  }
+
+  function testError(){
+    $this->client->track(array(
+      "userId" => "userId",
+      "event" => "event"
+    ));
+    exec("php --define date.timezone=UTC send.php --secret invalid-key --file /tmp/analytics.log", $output);
+    $this->assertEquals('400: {"message":"You must authenticate with a valid `writeKey`.","code":"invalid_request_error"}', trim($output[0]));
     $this->assertFalse(file_exists($this->filename()));
   }
 
