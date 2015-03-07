@@ -1,12 +1,12 @@
 <?php
 
-require(__DIR__ . '/Consumer.php');
-require(__DIR__ . '/QueueConsumer.php');
-require(__DIR__ . '/Consumer/File.php');
-require(__DIR__ . '/Consumer/ForkCurl.php');
-require(__DIR__ . '/Consumer/Socket.php');
+namespace Segment;
 
-class Segment_Client {
+use Segment\Consumer\File;
+use Segment\Consumer\FolkCurl;
+use Segment\Consumer\Socket;
+
+class Client {
 
   /**
    * VERSION
@@ -27,9 +27,9 @@ class Segment_Client {
   public function __construct($secret, $options = array()) {
 
     $consumers = array(
-      "socket"     => "Segment_Consumer_Socket",
-      "file"       => "Segment_Consumer_File",
-      "fork_curl"  => "Segment_Consumer_ForkCurl"
+      "socket"     => "Segment\Consumer\Socket",
+      "file"       => "Segment\Consumer\File",
+      "fork_curl"  => "Segment\Consumer\ForkCurl"
     );
 
     # Use our socket consumer by default
@@ -134,7 +134,7 @@ class Segment_Client {
    * Note: php's date() "u" format (for microseconds) has a bug in it
    * it always shows `.000` for microseconds since `date()` only accepts
    * ints, so we have to construct the date ourselves if microtime is passed.
-   * 
+   *
    * @param  time $timestamp - time in seconds (time())
    */
   private function formatTime($ts) {

@@ -1,6 +1,9 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment.php");
+namespace Segment\Tests\Segment;
+
+use PHPUnit_Framework_TestCase;
+use Segment\Segment;
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
@@ -36,7 +39,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
         "path" => "/docs/libraries/php/",
         "url" => "https://segment.io/docs/libraries/php/"
       )
-    )));    
+    )));
   }
 
   function testPage(){

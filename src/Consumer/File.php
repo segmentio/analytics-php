@@ -1,6 +1,10 @@
 <?php
 
-class Segment_Consumer_File extends Segment_Consumer {
+namespace Segment\Consumer;
+
+use Segment\Consumer;
+
+class File extends Consumer {
 
   private $file_handle;
   protected $type = "File";
@@ -35,7 +39,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the track call succeeded
    */
@@ -45,7 +49,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the identify call succeeded
    */
@@ -55,7 +59,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the group call succeeded
    */
@@ -65,7 +69,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tracks a page view.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the page call succeeded
    */
@@ -75,7 +79,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tracks a screen view.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the screen call succeeded
    */
@@ -85,7 +89,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Aliases from one user id to another
-   * 
+   *
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */

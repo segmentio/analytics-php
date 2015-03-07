@@ -1,6 +1,9 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
+namespace Segment\Tests\Segment;
+
+use PHPUnit_Framework_TestCase;
+use Segment\Client;
 
 class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
@@ -8,7 +11,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Client("oq0vdlg7yi",
                                           array("consumer" => "socket"));
   }
 
@@ -67,7 +70,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testShortTimeout() {
-    $client = new Segment_Client("oq0vdlg7yi",
+    $client = new Client("oq0vdlg7yi",
                                    array( "timeout"  => 0.01,
                                           "consumer" => "socket" ));
 
@@ -85,7 +88,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testProductionProblems() {
-    $client = new Segment_Client("x", array(
+    $client = new Client("x", array(
         "consumer"      => "socket",
         "error_handler" => function () { throw new Exception("Was called"); }));
 
@@ -104,7 +107,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
                               throw new Exception("Response is not 400"); }
     );
 
-    $client = new Segment_Client("x", $options);
+    $client = new Client("x", $options);
 
     # Should error out with debug on.
     $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
@@ -118,7 +121,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
       "consumer" => "socket"
     );
 
-    $client = new Segment_Client("testsecret", $options);
+    $client = new Client("testsecret", $options);
 
     $big_property = "";
 

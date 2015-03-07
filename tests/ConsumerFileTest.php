@@ -1,6 +1,9 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
+namespace Segment\Tests\Segment;
+
+use PHPUnit_Framework_TestCase;
+use Segment\Client;
 
 class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
@@ -12,7 +15,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     if (file_exists($this->filename()))
       unlink($this->filename());
 
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Client("oq0vdlg7yi",
                           array("consumer" => "file",
                                 "filename" => $this->filename));
 
@@ -106,7 +109,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
 
   function testProductionProblems() {
     # Open to a place where we should not have write access.
-    $client = new Segment_Client("oq0vdlg7yi",
+    $client = new Client("oq0vdlg7yi",
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 

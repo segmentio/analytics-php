@@ -1,13 +1,19 @@
 language: php
+
 php:
-  - 5.6
-  - 5.5
   - 5.4
-  - 5.3
+  - 5.5
+  - 5.6
   - hhvm
 
-matrix:
-  allow_failures:
-    - php: hhvm
+sudo: false
 
-script: phpunit --colors test
+install: travis_retry composer install --no-interaction --no-scripts --prefer-source
+
+script:
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then vendor/bin/phpunit; fi;'
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml; fi;'
+
+after_script:
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi;'
+  - bash -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml; fi;'

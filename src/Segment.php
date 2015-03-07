@@ -1,11 +1,12 @@
 <?php
 
+namespace Segment;
+
 if (!function_exists('json_encode')) {
     throw new Exception('Segment needs the JSON PHP extension.');
 }
 
-require(dirname(__FILE__) . '/Segment/Client.php');
-
+use Segment\Client;
 
 class Segment {
 
@@ -18,7 +19,7 @@ class Segment {
    */
   public static function init($secret, $options = array()) {
     self::assert($secret, "Segment::init() requires secret");
-    self::$client = new Segment_Client($secret, $options);
+    self::$client = new Client($secret, $options);
   }
 
   /**

@@ -1,5 +1,8 @@
 <?php
-abstract class Segment_QueueConsumer extends Segment_Consumer {
+
+namespace Segment;
+
+abstract class QueueConsumer extends Consumer {
 
   protected $type = "QueueConsumer";
 
