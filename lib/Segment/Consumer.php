@@ -76,11 +76,11 @@ abstract class Segment_Consumer {
   /**
    * Check whether we should connect to the API using SSL. This is enabled by
    * default with connections which make batching requests. For connections
-   * which can save on round-trip times, we disable it.
+   * which can save on round-trip times, you may disable it.
    * @return boolean
    */
   protected function ssl() {
-    return isset($this->options["ssl"]) ? $this->options["ssl"] : false;
+    return isset($this->options["ssl"]) ? $this->options["ssl"] : true;
   }
 
 
