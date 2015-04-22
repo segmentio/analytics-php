@@ -16,7 +16,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
   public function __construct($secret, $options = array()) {
 
     if (!isset($options["timeout"]))
-      $options["timeout"] = 0.5;
+      $options["timeout"] = 5;
 
     if (!isset($options["host"]))
       $options["host"] = "api.segment.io";
