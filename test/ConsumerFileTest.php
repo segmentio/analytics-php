@@ -94,16 +94,6 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     $this->assertFalse(file_exists($this->filename()));
   }
 
-  function testError(){
-    $this->client->track(array(
-      "userId" => "userId",
-      "event" => "event"
-    ));
-    exec("php --define date.timezone=UTC send.php --secret invalid-key --file /tmp/analytics.log", $output);
-    $this->assertEquals('400: {"message":"You must authenticate with a valid `writeKey`.","code":"invalid_request_error"}', trim($output[0]));
-    $this->assertFalse(file_exists($this->filename()));
-  }
-
   function testProductionProblems() {
     # Open to a place where we should not have write access.
     $client = new Segment_Client("oq0vdlg7yi",
