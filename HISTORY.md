@@ -1,4 +1,11 @@
 
+1.2.0 / 2015-04-27
+==================
+
+ * removing outdated test
+ * enabling ssl by default
+ * socket: bump timeout to 5s
+
 1.1.3 / 2015-03-03
 ==================
 
