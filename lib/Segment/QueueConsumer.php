@@ -103,7 +103,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
     $count = array_push($this->queue, $item);
 
-    if ($count > $this->batch_size)
+    if ($count >= $this->batch_size)
       $this->flush();
 
     return true;
