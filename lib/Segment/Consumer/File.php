@@ -1,5 +1,7 @@
 <?php
 
+namespace Segment;
+
 class Segment_Consumer_File extends Segment_Consumer {
 
   private $file_handle;

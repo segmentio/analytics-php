@@ -1,5 +1,7 @@
 <?php
 
+namespace Segment;
+
 class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
   protected $type = "ForkCurl";
