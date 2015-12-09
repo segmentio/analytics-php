@@ -9,16 +9,16 @@ require(dirname(__FILE__) . '/Segment/Client.php');
 
 class Segment {
 
-  private static $client;
+  private $client;
 
   /**
    * Initializes the default client to use. Uses the socket consumer by default.
    * @param  string $secret   your project's secret key
    * @param  array  $options  passed straight to the client
    */
-  public static function init($secret, $options = array()) {
-    self::assert($secret, "Segment::init() requires secret");
-    self::$client = new Segment_Client($secret, $options);
+  public function __construct($secret, $options = array()) {
+    $this->assert($secret, "Segment::__construct() requires secret");
+    $this->client = new Segment_Client($secret, $options);
   }
 
   /**
@@ -27,12 +27,12 @@ class Segment {
    * @param  array $message
    * @return boolean whether the track call succeeded
    */
-  public static function track(array $message) {
-    self::checkClient();
+  public function track(array $message) {
+    $this->checkClient();
     $event = !empty($message["event"]);
-    self::assert($event, "Segment::track() expects an event");
-    self::validate($message, "track");
-    return self::$client->track($message);
+    $this->assert($event, "Segment::track() expects an event");
+    $this->validate($message, "track");
+    return $this->client->track($message);
   }
 
   /**
@@ -41,11 +41,11 @@ class Segment {
    * @param  array  $message
    * @return boolean whether the identify call succeeded
    */
-  public static function identify(array $message) {
-    self::checkClient();
+  public function identify(array $message) {
+    $this->checkClient();
     $message["type"] = "identify";
-    self::validate($message, "identify");
-    return self::$client->identify($message);
+    $this->validate($message, "identify");
+    return $this->client->identify($message);
   }
 
   /**
@@ -54,12 +54,12 @@ class Segment {
    * @param  array  $message
    * @return boolean whether the group call succeeded
    */
-  public static function group(array $message) {
-    self::checkClient();
+  public function group(array $message) {
+    $this->checkClient();
     $groupId = !empty($message["groupId"]);
     $userId = !empty($message["userId"]);
-    self::assert($groupId && $userId, "Segment::group() expects userId and groupId");
-    return self::$client->group($message);
+    $this->assert($groupId && $userId, "Segment::group() expects userId and groupId");
+    return $this->client->group($message);
   }
 
   /**
@@ -68,10 +68,10 @@ class Segment {
    * @param  array $message
    * @return boolean whether the page call succeeded
    */
-  public static function page(array $message) {
-    self::checkClient();
-    self::validate($message, "page");
-    return self::$client->page($message);
+  public function page(array $message) {
+    $this->checkClient();
+    $this->validate($message, "page");
+    return $this->client->page($message);
   }
 
   /**
@@ -80,10 +80,10 @@ class Segment {
    * @param  array $message
    * @return boolean whether the screen call succeeded
    */
-  public static function screen(array $message) {
-    self::checkClient();
-    self::validate($message, "screen");
-    return self::$client->screen($message);
+  public function screen(array $message) {
+    $this->checkClient();
+    $this->validate($message, "screen");
+    return $this->client->screen($message);
   }
 
   /**
@@ -92,12 +92,12 @@ class Segment {
    * @param  array $from      user id to alias from
    * @return boolean whether the alias call succeeded
    */
-  public static function alias(array $message) {
-    self::checkClient();
+  public function alias(array $message) {
+    $this->checkClient();
     $userId = !empty($message["userId"]);
     $previousId = !empty($message["previousId"]);
-    self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
-    return self::$client->alias($message);
+    $this->assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
+    return $this->client->alias($message);
   }
 
   /**
@@ -106,19 +106,19 @@ class Segment {
    * @param array $msg
    * @param string $type
    */
-  public static function validate($msg, $type){
+  public function validate($msg, $type){
     $userId = !empty($msg["userId"]);
     $anonId = !empty($msg["anonymousId"]);
-    self::assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
+    $this->assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
   }
 
   /**
    * Flush the client
    */
 
-  public static function flush(){
-    self::checkClient();
-    return self::$client->flush();
+  public function flush(){
+    $this->checkClient();
+    return $this->client->flush();
   }
 
   /**
@@ -126,9 +126,9 @@ class Segment {
    *
    * @throws Exception
    */
-  private static function checkClient(){
-    if (null != self::$client) return;
-    throw new Exception("Analytics::init() must be called before any other tracking method.");
+  private function checkClient(){
+    if (null != $this->client) return;
+    throw new Exception("Segment::__construct() must be called before any other tracking method.");
   }
 
   /**
@@ -138,7 +138,7 @@ class Segment {
    * @param string $msg
    * @throws Exception
    */
-  private static function assert($value, $msg){
+  private function assert($value, $msg){
     if (!$value) throw new Exception($msg);
   }
 
