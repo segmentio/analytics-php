@@ -4,6 +4,8 @@
  * require client
  */
 
+use Segment\Segment;
+
 require(__DIR__ . "/lib/Segment.php");
 
 /**
@@ -73,7 +75,7 @@ foreach ($lines as $line) {
   $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
   $payload["timestamp"] = $ts;
   $type = $payload["type"];
-  $ret = call_user_func_array(array("Segment", $type), array($payload));
+  $ret = call_user_func_array(array("Segment\\Segment", $type), array($payload));
   if ($ret) $successful++;
   $total++;
   if ($total % 100 === 0) Segment::flush();

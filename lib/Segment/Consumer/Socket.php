@@ -66,7 +66,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
 
       return $socket;
 
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
       $this->socket_failed = true;
       return false;
@@ -91,7 +91,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
       try {
         # Since we're try catch'ing prevent PHP logs.
         $written = @fwrite($socket, substr($req, $bytes_written));
-      } catch (Exception $e) {
+      } catch (\Exception $e) {
         $this->handleError($e->getCode(), $e->getMessage());
         $closed = true;
       }
