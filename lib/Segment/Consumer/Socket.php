@@ -56,7 +56,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
                            $errstr, $timeout);
 
       # If we couldn't open the socket, handle the error.
-      if ($errno != 0) {
+      if (false === $socket) {
         $this->handleError($errno, $errstr);
         $this->socket_failed = true;
         return false;
