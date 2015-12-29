@@ -1,18 +1,19 @@
 {
   "name": "segmentio/analytics-php",
-  "version": "1.2.0",
-  "description": "Segmentio Analytics PHP Library",
+  "version": "1.2.1",
+  "description": "Segment Analytics PHP Library",
   "keywords": [
     "analytics",
     "segmentio",
+    "segment"
     "analytics.js"
   ],
-  "homepage": "https://segment.io/libraries/php",
+  "homepage": "https://segment.com/libraries/php",
   "license": "MIT",
   "authors": [
     {
-      "name": "Segment.io <friends@segment.io>",
-      "homepage": "https://segment.io/"
+      "name": "Segment.io <friends@segment.com>",
+      "homepage": "https://segment.com/"
     }
   ],
   "require": {

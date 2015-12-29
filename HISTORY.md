@@ -1,4 +1,11 @@
 
+1.2.1 / 2015-12-29
+==================
+
+  * socket open error checking fix
+  * Fix batch size check before flushing tracking queue
+  * Fix bug in send.php
+
 1.2.0 / 2015-04-27
 ==================
 
