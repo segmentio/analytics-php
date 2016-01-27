@@ -139,11 +139,17 @@ class Segment_Client {
    */
   private function formatTime($ts) {
     // time()
-    if ($ts == null) $ts = time();
-    if (is_integer($ts)) return date("c", $ts);
+    if ($ts == null || !$ts) $ts = time();
+    if (filter_var($ts, FILTER_VALIDATE_INT) !== false) return date("c", (int) $ts);
 
-    // anything else return a new date.
-    if (!is_float($ts)) return date("c");
+    // anything else try to strtotime the date.
+    if (filter_var($ts, FILTER_VALIDATE_FLOAT) === false) {
+      if (is_string($ts)) {
+        return date("c", strtotime($ts));
+      } else {
+        return date("c");
+      }
+    }
 
     // fix for floatval casting in send.php
     $parts = explode(".", (string)$ts);
