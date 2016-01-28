@@ -142,5 +142,49 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
       "userId" => "user-id"
     )));
   }
+
+  function testTimestamps() {
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "integer-timestamp",
+      "timestamp" => (int) mktime(0, 0, 0, date('n'), 1, date('Y'))
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "string-integer-timestamp",
+      "timestamp" => (string) mktime(0, 0, 0, date('n'), 1, date('Y'))
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "iso8630-timestamp",
+      "timestamp" => date(DATE_ATOM, mktime(0, 0, 0, date('n'), 1, date('Y')))
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "iso8601-timestamp",
+      "timestamp" => date(DATE_ATOM, mktime(0, 0, 0, date('n'), 1, date('Y')))
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "strtotime-timestamp",
+      "timestamp" => strtotime('1 week ago')
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "microtime-timestamp",
+      "timestamp" => microtime(true)
+    )));
+
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "invalid-float-timestamp",
+      "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) + '.';
+    )));
+  }
 }
 ?>
