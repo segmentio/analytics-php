@@ -183,7 +183,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(Segment::track(array(
       "userId" => "user-id",
       "event" => "invalid-float-timestamp",
-      "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) + '.';
+      "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) . '.'
     )));
   }
 }
