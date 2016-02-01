@@ -1,4 +1,9 @@
 
+1.2.3 / 2016-02-01
+==================
+
+  * instead of using just is_int and is_float for checking timestamp, use filter_var since that can detect string ints and floats - if its not a string or float, consider it might be a ISO8601 or some other string, so use strtotime() to support other strings
+
 1.2.1 / 2015-12-29
 ==================
 
