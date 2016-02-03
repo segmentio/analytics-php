@@ -52,7 +52,7 @@ $lines = explode("\n", $contents);
  * Initialize the client.
  */
 
-Segment::init($args["secret"], array(
+$segment = new Segment($args["secret"], array(
   "debug" => true,
   "error_handler" => function($code, $msg){
     print("$code: $msg\n");
@@ -73,13 +73,13 @@ foreach ($lines as $line) {
   $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
   $payload["timestamp"] = $ts;
   $type = $payload["type"];
-  $ret = call_user_func_array(array("Segment", $type), array($payload));
+  $ret = call_user_func_array(array($segment, $type), array($payload));
   if ($ret) $successful++;
   $total++;
-  if ($total % 100 === 0) Segment::flush();
+  if ($total % 100 === 0) $segment->flush();
 }
 
-Segment::flush();
+$segment->flush();
 unlink($file);
 
 /**

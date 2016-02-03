@@ -3,21 +3,22 @@
 require_once(dirname(__FILE__) . "/../lib/Segment.php");
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase {
+  protected $segment;
 
   function setUp() {
     date_default_timezone_set("UTC");
-    Segment::init("oq0vdlg7yi", array("debug" => true));
+    $this->segment = new Segment("oq0vdlg7yi", array("debug" => true));
   }
 
   function testTrack() {
-    $this->assertTrue(Segment::track(array(
+    $this->assertTrue($this->segment->track(array(
       "userId" => "john",
       "event" => "Module PHP Event"
     )));
   }
 
   function testGroup(){
-    $this->assertTrue(Segment::group(array(
+    $this->assertTrue($this->segment->group(array(
       "groupId" => "group-id",
       "userId" => "user-id",
       "traits" => array(
@@ -27,7 +28,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testMicrotime(){
-    $this->assertTrue(Segment::page(array(
+    $this->assertTrue($this->segment->page(array(
       "anonymousId" => "anonymous-id",
       "name" => "analytics-php-microtime",
       "category" => "docs",
@@ -40,7 +41,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testPage(){
-    $this->assertTrue(Segment::page(array(
+    $this->assertTrue($this->segment->page(array(
       "anonymousId" => "anonymous-id",
       "name" => "analytics-php",
       "category" => "docs",
@@ -52,13 +53,13 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testBasicPage(){
-    $this->assertTrue(Segment::page(array(
+    $this->assertTrue($this->segment->page(array(
       "anonymousId" => "anonymous-id"
     )));
   }
 
   function testScreen(){
-    $this->assertTrue(Segment::screen(array(
+    $this->assertTrue($this->segment->screen(array(
       "anonymousId" => "anonymous-id",
       "name" => "2048",
       "category" => "game built with php :)",
@@ -69,13 +70,13 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testBasicScreen(){
-    $this->assertTrue(Segment::screen(array(
+    $this->assertTrue($this->segment->screen(array(
       "anonymousId" => "anonymous-id"
     )));
   }
 
   function testIdentify() {
-    $this->assertTrue(Segment::identify(array(
+    $this->assertTrue($this->segment->identify(array(
       "userId" => "doe",
       "traits" => array(
         "loves_php" => false,
@@ -85,23 +86,23 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testEmptyTraits() {
-    $this->assertTrue(Segment::identify(array(
+    $this->assertTrue($this->segment->identify(array(
       "userId" => "empty-traits"
     )));
 
-    $this->assertTrue(Segment::group(array(
+    $this->assertTrue($this->segment->group(array(
       "userId" => "empty-traits",
       "groupId" => "empty-traits"
     )));
   }
 
   function testEmptyArrayTraits() {
-    $this->assertTrue(Segment::identify(array(
+    $this->assertTrue($this->segment->identify(array(
       "userId" => "empty-traits",
       "traits" => array()
     )));
 
-    $this->assertTrue(Segment::group(array(
+    $this->assertTrue($this->segment->group(array(
       "userId" => "empty-traits",
       "groupId" => "empty-traits",
       "traits" => array()
@@ -109,12 +110,12 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testEmptyProperties() {
-    $this->assertTrue(Segment::track(array(
+    $this->assertTrue($this->segment->track(array(
       "userId" => "user-id",
       "event" => "empty-properties"
     )));
 
-    $this->assertTrue(Segment::page(array(
+    $this->assertTrue($this->segment->page(array(
       "category" => "empty-properties",
       "name" => "empty-properties",
       "userId" => "user-id"
@@ -122,13 +123,13 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testEmptyArrayProperties(){
-    $this->assertTrue(Segment::track(array(
+    $this->assertTrue($this->segment->track(array(
       "userId" => "user-id",
       "event" => "empty-properties",
       "properties" => array()
     )));
 
-    $this->assertTrue(Segment::page(array(
+    $this->assertTrue($this->segment->page(array(
       "category" => "empty-properties",
       "name" => "empty-properties",
       "userId" => "user-id",
@@ -137,7 +138,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
   }
 
   function testAlias() {
-    $this->assertTrue(Segment::alias(array(
+    $this->assertTrue($this->segment->alias(array(
       "previousId" => "previous-id",
       "userId" => "user-id"
     )));
