@@ -1,7 +1,9 @@
 <?php
 
+namespace Segment;
+
 if (!function_exists('json_encode')) {
-    throw new Exception('Segment needs the JSON PHP extension.');
+    throw new \Exception('Segment needs the JSON PHP extension.');
 }
 
 require(dirname(__FILE__) . '/Segment/Client.php');
@@ -124,11 +126,11 @@ class Segment {
   /**
    * Check the client.
    *
-   * @throws Exception
+   * @throws \Exception
    */
   private static function checkClient(){
     if (null != self::$client) return;
-    throw new Exception("Analytics::init() must be called before any other tracking method.");
+    throw new \Exception("Analytics::init() must be called before any other tracking method.");
   }
 
   /**
@@ -136,10 +138,10 @@ class Segment {
    *
    * @param array $value
    * @param string $msg
-   * @throws Exception
+   * @throws \Exception
    */
   private static function assert($value, $msg){
-    if (!$value) throw new Exception($msg);
+    if (!$value) throw new \Exception($msg);
   }
 
 }

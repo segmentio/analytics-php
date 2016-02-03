@@ -1,5 +1,7 @@
 <?php
 
+use Segment\Segment_Client;
+
 require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
 
 class ConsumerSocketTest extends PHPUnit_Framework_TestCase {

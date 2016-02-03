@@ -1,4 +1,7 @@
 <?php
+
+namespace Segment;
+
 abstract class Segment_Consumer {
 
   protected $type = "Consumer";

@@ -1,5 +1,7 @@
 <?php
 
+use Segment\Segment;
+
 require_once(dirname(__FILE__) . "/../lib/Segment.php");
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase {

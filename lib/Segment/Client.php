@@ -1,5 +1,7 @@
 <?php
 
+namespace Segment;
+
 require(__DIR__ . '/Consumer.php');
 require(__DIR__ . '/QueueConsumer.php');
 require(__DIR__ . '/Consumer/File.php');
@@ -35,7 +37,7 @@ class Segment_Client {
     # Use our socket consumer by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
                                                    "socket";
-    $Consumer = $consumers[$consumer_type];
+    $Consumer = __NAMESPACE__ . '\\' . $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
   }
