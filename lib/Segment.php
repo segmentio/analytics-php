@@ -128,7 +128,7 @@ class Segment {
    */
   private static function checkClient(){
     if (null != self::$client) return;
-    throw new Exception("Analytics::init() must be called before any other tracking method.");
+    throw new Exception("Segment::init() must be called before any other tracking method.");
   }
 
   /**

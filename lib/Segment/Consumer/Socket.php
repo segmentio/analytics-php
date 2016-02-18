@@ -121,6 +121,14 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
         $this->handleError($res["status"], $res["message"]);
         $success = false;
       }
+    } else {
+      // we have to read from the socket to avoid getting into
+      // states where the socket doesn't properly re-open.
+      // as long as we keep the recv buffer empty, php will
+      // properly reconnect
+      stream_set_timeout($socket, 0, 50000);
+      fread($socket, 2048);
+      stream_set_timeout($socket, 5);
     }
 
     return $success;
