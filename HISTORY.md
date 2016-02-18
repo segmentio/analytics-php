@@ -1,4 +1,11 @@
 
+1.2.4 / 2016-02-17
+=============
+
+  * core: fix error name
+  * send: make send.php executable
+  * socket: adding fix for FIN packets from remote
+
 1.2.3 / 2016-02-01
 ==================
 
