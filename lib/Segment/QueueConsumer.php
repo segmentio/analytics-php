@@ -92,19 +92,21 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   /**
    * Adds an item to our queue.
    * @param  mixed   $item
-   * @return boolean whether the queue has room
+   * @return boolean whether call has succeeded
    */
   protected function enqueue($item) {
 
     $count = count($this->queue);
 
-    if ($count > $this->max_queue_size)
+    if ($count > $this->max_queue_size) {
       return false;
+    }
 
     $count = array_push($this->queue, $item);
 
-    if ($count >= $this->batch_size)
-      $this->flush();
+    if ($count >= $this->batch_size) {
+      return $this->flush(); // return ->flush() result: true on success
+    }
 
     return true;
   }
