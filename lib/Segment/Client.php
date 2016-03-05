@@ -9,12 +9,6 @@ require(__DIR__ . '/Version.php');
 
 class Segment_Client {
 
-  /**
-   * VERSION
-   */
-
-  const VERSION = $SEGMENT_VERSION;
-
   private $consumer;
 
   /**
@@ -213,7 +207,7 @@ class Segment_Client {
     return array(
       "library" => array(
         "name" => "analytics-php",
-        "version" => self::VERSION
+        "version" => $SEGMENT_VERSION
       )
     );
   }
