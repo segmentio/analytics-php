@@ -1,4 +1,10 @@
 
+1.2.5 / 2016-03-04
+==================
+
+  * Adding release script, fixing version
+  * Pass back ->flush() result to allow caller code know if flushed successfully
+
 1.2.4 / 2016-02-17
 =============
 
