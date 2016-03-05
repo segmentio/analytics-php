@@ -11,10 +11,17 @@ test: install
 	@vendor/bin/phpunit --colors test/
 	@php ./composer.phar validate
 
+release:
+	@echo "releasing ${VERSION}..."
+	@echo '<?php $$SEGMENT_VERSION = "${VERSION}"; ?>' > ./lib/Segment/Version.php
+	@node -e "var fs = require('fs'), pkg = require('./composer'); pkg.version = '${VERSION}'; fs.writeFileSync('./composer.json', JSON.stringify(pkg, null, '\t'));"
+	@git changelog -t ${VERSION}
+	#@git release ${VERSION}
+
 clean:
 	rm -rf \
 		composer.phar \
 		vendor \
 		composer.lock
 
-.PHONY: test
+.PHONY: test release

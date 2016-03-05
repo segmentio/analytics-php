@@ -5,6 +5,7 @@ require(__DIR__ . '/QueueConsumer.php');
 require(__DIR__ . '/Consumer/File.php');
 require(__DIR__ . '/Consumer/ForkCurl.php');
 require(__DIR__ . '/Consumer/Socket.php');
+require(__DIR__ . '/Version.php');
 
 class Segment_Client {
 
@@ -12,7 +13,7 @@ class Segment_Client {
    * VERSION
    */
 
-  const VERSION = "1.1.3";
+  const VERSION = $SEGMENT_VERSION;
 
   private $consumer;
 

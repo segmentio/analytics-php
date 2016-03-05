@@ -9,6 +9,10 @@ analytics-php is a php client for [Segment](https://segment.com)
 
 Documentation is available at [segment.com/libraries/php](https://segment.com/libraries/php)
 
+## Releasing
+
+Run `make release VERSION=<version>`. It should automatically tag and release in composer
+
 ## License
 
 ```
