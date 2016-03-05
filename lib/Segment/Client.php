@@ -204,6 +204,7 @@ class Segment_Client {
    * @return array additional context
    */
   private function getContext () {
+    global $SEGMENT_VERSION;
     return array(
       "library" => array(
         "name" => "analytics-php",
