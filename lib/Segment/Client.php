@@ -4,6 +4,7 @@ require(__DIR__ . '/Consumer.php');
 require(__DIR__ . '/QueueConsumer.php');
 require(__DIR__ . '/Consumer/File.php');
 require(__DIR__ . '/Consumer/ForkCurl.php');
+require(__DIR__ . '/Consumer/LibCurl.php');
 require(__DIR__ . '/Consumer/Socket.php');
 require(__DIR__ . '/Version.php');
 
@@ -24,12 +25,13 @@ class Segment_Client {
     $consumers = array(
       "socket"     => "Segment_Consumer_Socket",
       "file"       => "Segment_Consumer_File",
-      "fork_curl"  => "Segment_Consumer_ForkCurl"
+      "fork_curl"  => "Segment_Consumer_ForkCurl",
+      "lib_curl"   => "Segment_Consumer_LibCurl"
     );
 
     # Use our socket consumer by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
-                                                   "socket";
+                                                   "lib_curl";
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
@@ -132,7 +134,7 @@ class Segment_Client {
    * Note: php's date() "u" format (for microseconds) has a bug in it
    * it always shows `.000` for microseconds since `date()` only accepts
    * ints, so we have to construct the date ourselves if microtime is passed.
-   * 
+   *
    * @param  time $timestamp - time in seconds (time())
    */
   private function formatTime($ts) {
@@ -157,7 +159,7 @@ class Segment_Client {
     $sec = (int)$parts[0];
     $usec = (int)$parts[1];
     $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
-    return date($fmt, (int)$sec);  
+    return date($fmt, (int)$sec);
   }
 
   /**
