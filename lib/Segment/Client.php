@@ -9,7 +9,7 @@ require(__DIR__ . '/Version.php');
 
 class Segment_Client {
 
-  private $consumer;
+  protected $consumer;
 
   /**
    * Create a new analytics object with your app's secret
