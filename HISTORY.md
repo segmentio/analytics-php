@@ -1,4 +1,10 @@
 
+1.3.0 / 2016-04-05
+==================
+
+  * Introducing libcurl consumer
+  * Change Consumer to protected instead of private
+
 1.2.7 / 2016-03-04
 ==================
 
