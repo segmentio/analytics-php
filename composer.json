@@ -26,5 +26,8 @@
 		"files": [
 			"lib/Segment.php"
 		]
-	}
+	},
+	"bin": [
+		"bin/analytics"
+	]
 }

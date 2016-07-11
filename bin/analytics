@@ -1,0 +1,115 @@
+#!/usr/bin/php
+<?php
+
+require(__DIR__ . '/../lib/Segment.php');
+
+if (in_array('--help', $argv)) {
+  print(usage());
+  exit;
+}
+
+if (empty($_ENV['SEGMENT_WRITE_KEY'])) {
+  error('$SEGMENT_WRITE_KEY environment variable required');
+}
+
+date_default_timezone_set('UTC');
+Segment::init($_ENV['SEGMENT_WRITE_KEY']);
+
+$options = getopt('', [
+  'method:',        // T I P G A
+  'event::',        // x
+  'userId::',      // x x x x x
+  'groupId::',     //       x
+  'previousId::',  //         x
+  'anonymousId::', // x x x x x
+  'properties::',   // x   x
+  'name::',         //     x
+  'traits::',       //   x   x
+  'context::',      // x x x x x
+  'timestamp::'     // x x x x x
+]);
+
+
+switch ($options['method']) {
+  case 'track':
+    Segment::track(array(
+      'userId' => $options['userId'],
+      'anonymousId' => $options['anonymousId'],
+      'event' => $options['event'],
+      'properties' => parse_json($options['properties']),
+      'timestamp' => parse_timestamp($options['timestamp']),
+      'context' => parse_json($options['context'])
+    ));
+    break;
+
+  case 'identify':
+    Segment::identify(array(
+      'userId' => $options['userId'],
+      'anonymousId' => $options['anonymousId'],
+      'traits' => parse_json($options['traits']),
+      'timestamp' => parse_timestamp($options['timestamp']),
+      'context' => parse_json($options['context'])
+    ));
+    break;
+
+  case 'page':
+    Segment::page(array(
+      'userId' => $options['userId'],
+      'anonymousId' => $options['anonymousId'],
+      'name' => $options['name'],
+      'category' => $options['category'],
+      'properties' => parse_json($options['properties']),
+      'timestamp' => parse_timestamp($options['timestamp']),
+      'context' => parse_json($options['context'])
+    ));
+    break;
+
+  case 'group':
+    Segment::identify(array(
+      'userId' => $options['userId'],
+      'anonymousId' => $options['anonymousId'],
+      'groupId' => $options['groupId'],
+      'traits' => parse_json($options['traits']),
+      'timestamp' => parse_timestamp($options['timestamp']),
+      'context' => parse_json($options['context'])
+    ));
+    break;
+
+  case 'alias':
+    Segment::alias(array(
+      'userId' => $options['userId'],
+      'previousId' => $options['previousId']
+    ));
+    break;
+
+  default:
+    error(usage());
+    break;
+}
+
+Segment::flush();
+
+function usage() {
+  return "\n  Usage: analytics --method <track|identify|page|group|alias> [options]\n\n";
+}
+
+function error($message) {
+  print("$message\n\n");
+  exit(1);
+}
+
+function parse_json($input) {
+  if (empty($input)) {
+    return null;
+  }
+
+  return json_decode($input);
+}
+
+function parse_timestamp($input) {
+  if (empty($input)) {
+    return null;
+  }
+
+  return strtotime($input);
+}
