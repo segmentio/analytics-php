@@ -1,4 +1,10 @@
 
+1.4.0 / 2016-07-11
+==================
+
+  * adding a simple wrapper CLI
+  * explicitly declare library version in global scope during creating new release to allow using library with custom autoload (composer for example)
+
 1.3.0 / 2016-04-05
 ==================
 
