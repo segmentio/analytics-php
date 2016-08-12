@@ -20,7 +20,6 @@ class Segment_Consumer_File extends Segment_Consumer {
 
     try {
       $this->file_handle = fopen($options["filename"], "a");
-      chmod($options["filename"], 0777);
     } catch (Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
     }
