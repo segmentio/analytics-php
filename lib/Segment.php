@@ -57,7 +57,7 @@ class Segment {
   public static function group(array $message) {
     self::checkClient();
     $groupId = !empty($message["groupId"]);
-    $userId = !empty($message["userId"]);
+    $userId = isset($message["userId"]);
     self::assert($groupId && $userId, "Segment::group() expects userId and groupId");
     return self::$client->group($message);
   }
@@ -94,8 +94,8 @@ class Segment {
    */
   public static function alias(array $message) {
     self::checkClient();
-    $userId = !empty($message["userId"]);
-    $previousId = !empty($message["previousId"]);
+    $userId = isset($message["userId"]);
+    $previousId = isset($message["previousId"]);
     self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
     return self::$client->alias($message);
   }
@@ -107,7 +107,7 @@ class Segment {
    * @param string $type
    */
   public static function validate($msg, $type){
-    $userId = !empty($msg["userId"]);
+    $userId = isset($msg["userId"]);
     $anonId = !empty($msg["anonymousId"]);
     self::assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
   }
