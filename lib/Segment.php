@@ -57,7 +57,7 @@ class Segment {
   public static function group(array $message) {
     self::checkClient();
     $groupId = !empty($message["groupId"]);
-    $userId = !empty($message["userId"]);
+    $userId = !(array_key_exists('userID', $message) && strlen((string) $message['userID']) > 0);
     self::assert($groupId && $userId, "Segment::group() expects userId and groupId");
     return self::$client->group($message);
   }
@@ -94,8 +94,8 @@ class Segment {
    */
   public static function alias(array $message) {
     self::checkClient();
-    $userId = !empty($message["userId"]);
-    $previousId = !empty($message["previousId"]);
+    $userId = !(array_key_exists('userID', $message) && strlen((string) $message['userID']) > 0);
+    $previousId = !(array_key_exists('previousId', $message) && strlen((string) $message['previousId']) > 0);
     self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
     return self::$client->alias($message);
   }
@@ -107,7 +107,7 @@ class Segment {
    * @param string $type
    */
   public static function validate($msg, $type){
-    $userId = !empty($msg["userId"]);
+    $userId = !(array_key_exists('userID', $msg) && strlen((string) $msg['userID']) > 0);
     $anonId = !empty($msg["anonymousId"]);
     self::assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
   }
