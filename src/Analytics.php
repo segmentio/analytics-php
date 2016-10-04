@@ -96,7 +96,7 @@ class Analytics {
   /**
    * Aliases the user id from a temporary id to a permanent one
    *
-   * @param  array $from      user id to alias from
+   * @param  array $message
    * @return boolean whether the alias call succeeded
    */
   public function alias(array $message) {
@@ -135,7 +135,7 @@ class Analytics {
    */
   private function checkClient(){
     if (null != $this->client) return;
-    throw new \Exception("Segment::init() must be called before any other tracking method.");
+    throw new \Exception("Client must be set before any other tracking method.");
   }
 
   /**

@@ -149,6 +149,10 @@ class AnalyticsTest extends TestCase
     )));
   }
 
+  function testFlush() {
+    $this->assertTrue($this->analytics->flush());
+  }
+
   function testTimestamps() {
     $this->assertTrue($this->analytics->track(array(
       "userId" => "user-id",

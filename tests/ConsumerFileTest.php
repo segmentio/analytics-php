@@ -67,7 +67,7 @@ class ConsumerFileTest extends TestCase
   }
 
   function testScreen(){
-    $this->assertTrue($this->client->page(array(
+    $this->assertTrue($this->client->screen(array(
       "userId" => "userId",
       "name" => "grand theft auto",
       "category" => "analytics.log",
@@ -81,6 +81,16 @@ class ConsumerFileTest extends TestCase
       "userId" => "user-id"
     )));
     $this->checkWritten("alias");
+  }
+
+  function testFlush() {
+    $this->assertTrue($this->client->flush());
+  }
+
+  function testConstructWithoutFilename() {
+    unlink(sys_get_temp_dir() . DIRECTORY_SEPARATOR . "analytics.log");
+    new  FileConsumer("oq0vdlg7yi");
+    $this->assertFileExists(sys_get_temp_dir() . DIRECTORY_SEPARATOR . "analytics.log");
   }
 
   function testProductionProblems() {
