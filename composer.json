@@ -27,6 +27,11 @@
 			"Segment\\": "src/"
 		}
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"SegmentTests\\": "tests/"
+		}
+	},
 	"bin": [
 		"bin/analytics"
 	]

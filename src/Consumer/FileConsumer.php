@@ -42,7 +42,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return [boolean] whether the track call succeeded
    */
-  public function track(array $message) {
+  protected function doTrack(array $message) {
     return $this->write($message);
   }
 
@@ -52,7 +52,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return [boolean] whether the identify call succeeded
    */
-  public function identify(array $message) {
+  protected function doIdentify(array $message) {
     return $this->write($message);
   }
 
@@ -62,7 +62,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return [boolean] whether the group call succeeded
    */
-  public function group(array $message) {
+  protected function doGroup(array $message) {
     return $this->write($message);
   }
 
@@ -72,7 +72,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return [boolean] whether the page call succeeded
    */
-  public function page(array $message) {
+  protected function doPage(array $message) {
     return $this->write($message);
   }
 
@@ -82,7 +82,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return [boolean] whether the screen call succeeded
    */
-  public function screen(array $message) {
+  protected function doScreen(array $message) {
     return $this->write($message);
   }
 
@@ -92,7 +92,7 @@ class FileConsumer extends BasicConsumer {
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */
-  public function alias(array $message) {
+  protected function doAlias(array $message) {
     return $this->write($message);
   }
 
@@ -102,6 +102,7 @@ class FileConsumer extends BasicConsumer {
   public function flush() {
     return true;
   }
+  
   /**
    * Writes the API call to a file as line-delimited json
    * @param  [array]   $body post body content.

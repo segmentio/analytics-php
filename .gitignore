@@ -1,5 +1,6 @@
+/.idea/
+/vendor/
+/build/
 composer.lock
-vendor
 composer.phar
 test/analytics.log
-.idea
