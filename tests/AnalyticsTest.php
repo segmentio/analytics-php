@@ -196,5 +196,17 @@ class AnalyticsTest extends TestCase
       "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) . '.'
     )));
   }
+
+  function testFactory()
+  {
+    $client = Analytics::factory("oq0vdlg7yi");
+    $this->assertInstanceOf(Analytics::class, $client);
+  }
+
+  function testExceptionForInvalidClassName()
+  {
+    $this->setExpectedException(\Exception::class);
+    $client = Analytics::factory("oq0vdlg7yi", ["consumer" => "ClassDoesNotExist"]);
+  }
 }
 
