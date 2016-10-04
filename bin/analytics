@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require(__DIR__ . '/../lib/Segment.php');
+require(__DIR__ . '/../vendor/autoload.php');
 
 if (in_array('--help', $argv)) {
   print(usage());
@@ -13,7 +13,7 @@ if (empty($_ENV['SEGMENT_WRITE_KEY'])) {
 }
 
 date_default_timezone_set('UTC');
-Segment::init($_ENV['SEGMENT_WRITE_KEY']);
+$analytics = \Segment\Analytics::factory($_ENV['SEGMENT_WRITE_KEY']);
 
 $options = getopt('', [
   'method:',        // T I P G A
@@ -32,7 +32,7 @@ $options = getopt('', [
 
 switch ($options['method']) {
   case 'track':
-    Segment::track(array(
+    $analytics->track(array(
       'userId' => $options['userId'],
       'anonymousId' => $options['anonymousId'],
       'event' => $options['event'],
@@ -43,7 +43,7 @@ switch ($options['method']) {
     break;
 
   case 'identify':
-    Segment::identify(array(
+    $analytics->identify(array(
       'userId' => $options['userId'],
       'anonymousId' => $options['anonymousId'],
       'traits' => parse_json($options['traits']),
@@ -53,7 +53,7 @@ switch ($options['method']) {
     break;
 
   case 'page':
-    Segment::page(array(
+    $analytics->page(array(
       'userId' => $options['userId'],
       'anonymousId' => $options['anonymousId'],
       'name' => $options['name'],
@@ -65,7 +65,7 @@ switch ($options['method']) {
     break;
 
   case 'group':
-    Segment::identify(array(
+    $analytics->group(array(
       'userId' => $options['userId'],
       'anonymousId' => $options['anonymousId'],
       'groupId' => $options['groupId'],
@@ -76,7 +76,7 @@ switch ($options['method']) {
     break;
 
   case 'alias':
-    Segment::alias(array(
+    $analytics->alias(array(
       'userId' => $options['userId'],
       'previousId' => $options['previousId']
     ));
@@ -87,7 +87,7 @@ switch ($options['method']) {
     break;
 }
 
-Segment::flush();
+$analytics->flush();
 
 function usage() {
   return "\n  Usage: analytics --method <track|identify|page|group|alias> [options]\n\n";

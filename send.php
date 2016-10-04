@@ -1,12 +1,7 @@
 <?php
 
-/**
- * require client
- */
-// register Composer autoloader 
+// register Composer autoloader
 require(__DIR__ . '/vendor/autoload.php');
-
-use Segment\Consumer\LibCurlConsumer;
 
 /**
  * Args
@@ -53,14 +48,13 @@ $lines = explode("\n", $contents);
 /**
  * Initialize the client.
  */
-$consumer = new LibCurlConsumer($args["secret"], array(
-  "debug" => true,
-  "error_handler" => function($code, $msg){
-    print("$code: $msg\n");
-    exit(1);
-  }
+$analytics = \Segment\Analytics::factory($args["secret"], array(
+    "debug" => true,
+    "error_handler" => function($code, $msg){
+      print("$code: $msg\n");
+      exit(1);
+    }
 ));
-$analytics = new \Segment\Analytics($consumer);
 
 /**
  * Payloads
