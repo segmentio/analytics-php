@@ -216,7 +216,7 @@ class AnalyticsTest extends TestCase
     function testFactory()
     {
         $client = Analytics::factory("oq0vdlg7yi");
-        $this->assertInstanceOf(Analytics::class, $client);
+        $this->assertInstanceOf('Segment\Analytics', $client);
     }
 
     function testExceptionForInvalidClassName()
