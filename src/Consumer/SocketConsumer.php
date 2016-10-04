@@ -2,7 +2,8 @@
 
 namespace Segment\Consumer;
 
-class SocketConsumer extends QueueConsumer {
+class SocketConsumer extends QueueConsumer
+{
 
     protected $type = "Socket";
 
@@ -11,17 +12,20 @@ class SocketConsumer extends QueueConsumer {
     /**
      * Creates a new socket consumer for dispatching async requests immediately
      * @param string $secret
-     * @param array  $options
+     * @param array $options
      *     number   "timeout" - the timeout for connecting
      *     function "error_handler" - function called back on errors.
      *     boolean  "debug" - whether to use debug output, wait for response.
      */
-    public function __construct($secret, $options = array()) {
-        if (!isset($options["timeout"]))
+    public function __construct($secret, $options = array())
+    {
+        if (!isset($options["timeout"])) {
             $options["timeout"] = 5;
+        }
 
-        if (!isset($options["host"]))
+        if (!isset($options["host"])) {
             $options["host"] = "api.segment.io";
+        }
 
         parent::__construct($secret, $options);
     }
@@ -30,11 +34,13 @@ class SocketConsumer extends QueueConsumer {
      * @param $batch
      * @return bool|void
      */
-    public function flushBatch($batch) {
+    public function flushBatch($batch)
+    {
         $socket = $this->createSocket();
 
-        if (!$socket)
+        if (!$socket) {
             return;
+        }
 
         $payload = $this->payload($batch);
         $payload = json_encode($payload);
@@ -47,10 +53,12 @@ class SocketConsumer extends QueueConsumer {
     /**
      * @return bool|resource
      */
-    private function createSocket() {
+    private function createSocket()
+    {
 
-        if ($this->socket_failed)
+        if ($this->socket_failed) {
             return false;
+        }
 
         $protocol = $this->ssl() ? "ssl" : "tcp";
         $host = $this->options["host"];
@@ -82,11 +90,12 @@ class SocketConsumer extends QueueConsumer {
     /**
      * Attempt to write the request to the socket, wait for response if debug
      * mode is enabled.
-     * @param  resource  $socket the handle for the socket
-     * @param  string  $req    request body
+     * @param  resource $socket the handle for the socket
+     * @param  string $req request body
      * @return boolean $success
      */
-    private function makeRequest($socket, $req, $retry = true) {
+    private function makeRequest($socket, $req, $retry = true)
+    {
 
         $bytes_written = 0;
         $bytes_total = strlen($req);
@@ -114,7 +123,9 @@ class SocketConsumer extends QueueConsumer {
 
             if ($retry) {
                 $socket = $this->createSocket();
-                if ($socket) return $this->makeRequest($socket, $req, false);
+                if ($socket) {
+                    return $this->makeRequest($socket, $req, false);
+                }
             }
             return false;
         }
@@ -149,17 +160,18 @@ class SocketConsumer extends QueueConsumer {
      * @param  string $content
      * @return string body
      */
-    private function createBody($host, $content) {
+    private function createBody($host, $content)
+    {
 
         $req = "";
-        $req.= "POST /v1/import HTTP/1.1\r\n";
-        $req.= "Host: " . $host . "\r\n";
-        $req.= "Content-Type: application/json\r\n";
-        $req.= "Authorization: Basic " . base64_encode($this->secret . ":") . "\r\n";
-        $req.= "Accept: application/json\r\n";
-        $req.= "Content-length: " . strlen($content) . "\r\n";
-        $req.= "\r\n";
-        $req.= $content;
+        $req .= "POST /v1/import HTTP/1.1\r\n";
+        $req .= "Host: " . $host . "\r\n";
+        $req .= "Content-Type: application/json\r\n";
+        $req .= "Authorization: Basic " . base64_encode($this->secret . ":") . "\r\n";
+        $req .= "Accept: application/json\r\n";
+        $req .= "Content-length: " . strlen($content) . "\r\n";
+        $req .= "\r\n";
+        $req .= $content;
 
         return $req;
     }
@@ -172,7 +184,8 @@ class SocketConsumer extends QueueConsumer {
      *     string $status  HTTP code, e.g. "200"
      *     string $message JSON response from the api
      */
-    private function parseResponse($res) {
+    private function parseResponse($res)
+    {
 
         $contents = explode("\n", $res);
 
@@ -182,7 +195,7 @@ class SocketConsumer extends QueueConsumer {
         $result = $contents[count($contents) - 1];
 
         return array(
-            "status"  => isset($status[1]) ? $status[1] : null,
+            "status" => isset($status[1]) ? $status[1] : null,
             "message" => $result
         );
     }

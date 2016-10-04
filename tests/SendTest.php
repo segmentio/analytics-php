@@ -27,6 +27,7 @@ class SendTest extends TestCase
             unlink($this->filename);
         }
     }
+
     function testSend()
     {
         for ($i = 0; $i < 200; $i++) {

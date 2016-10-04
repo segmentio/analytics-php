@@ -49,11 +49,11 @@ $lines = explode("\n", $contents);
  * Initialize the client.
  */
 $analytics = \Segment\Analytics::factory($args["secret"], array(
-    "debug" => true,
-    "error_handler" => function($code, $msg){
-      print("$code: $msg\n");
-      exit(1);
-    }
+	"debug" => true,
+	"error_handler" => function($code, $msg){
+	  print("$code: $msg\n");
+	  exit(1);
+	}
 ));
 
 /**
@@ -93,9 +93,9 @@ function parse($argv){
   $ret = array();
 
   for ($i = 0; $i < count($argv); ++$i) {
-    $arg = $argv[$i];
-    if ('--' != substr($arg, 0, 2)) continue;
-    $ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
+	$arg = $argv[$i];
+	if ('--' != substr($arg, 0, 2)) continue;
+	$ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
   }
 
   return $ret;
