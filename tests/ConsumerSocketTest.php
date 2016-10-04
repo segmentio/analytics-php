@@ -1,15 +1,18 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
+namespace SegmentTests;
 
-class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
+use PHPUnit_Framework_TestCase as TestCase;
+use Segment\Analytics;
+use \Segment\Consumer\SocketConsumer;
 
+class ConsumerSocketTest extends TestCase
+{
   private $client;
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
-                                          array("consumer" => "socket"));
+    $this->client = new SocketConsumer("oq0vdlg7yi");
   }
 
   function testTrack() {
@@ -67,9 +70,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testShortTimeout() {
-    $client = new Segment_Client("oq0vdlg7yi",
-                                   array( "timeout"  => 0.01,
-                                          "consumer" => "socket" ));
+    $client = new SocketConsumer("oq0vdlg7yi", array( "timeout"  => 0.01));
 
     $this->assertTrue($client->track(array(
       "userId" => "some-user",
@@ -85,11 +86,10 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testProductionProblems() {
-    $client = new Segment_Client("x", array(
-        "consumer"      => "socket",
-        "error_handler" => function () { throw new Exception("Was called"); }));
+    $client = new SocketConsumer("x", array(
+        "error_handler" => function () { throw new \Exception("Was called"); }));
 
-    # Shouldn't error out without debug on.
+    // Shouldn't error out without debug on.
     $client->track(array("user_id" => "some-user", "event" => "Production Problems"));
     $client->__destruct();
   }
@@ -98,13 +98,12 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
     $options = array(
       "debug"         => true,
-      "consumer"      => "socket",
       "error_handler" => function ($errno, $errmsg) {
                             if ($errno != 400)
-                              throw new Exception("Response is not 400"); }
+                              throw new \Exception("Response is not 400"); }
     );
 
-    $client = new Segment_Client("x", $options);
+    $client = new SocketConsumer("x", $options);
 
     # Should error out with debug on.
     $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
@@ -115,10 +114,9 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   function testLargeMessage () {
     $options = array(
       "debug"    => true,
-      "consumer" => "socket"
     );
 
-    $client = new Segment_Client("testsecret", $options);
+    $client = new SocketConsumer("testsecret", $options);
 
     $big_property = "";
 
@@ -139,8 +137,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
    * @expectedException \RuntimeException
    */
   function testConnectionError() {
-    $client = new Segment_Client("x", array(
-      "consumer"      => "socket",
+    $client = new SocketConsumer("x", array(
       "host"          => "api.segment.ioooooo",
       "error_handler" => function ($errno, $errmsg) {
         throw new \RuntimeException($errmsg, $errno);
@@ -151,4 +148,3 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     $client->__destruct();
   }
 }
-?>
