@@ -1,16 +1,18 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
+namespace SegmentTests;
 
-class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
+use PHPUnit_Framework_TestCase as TestCase;
+use Segment\Analytics;
+use \Segment\Consumer\ForkCurlConsumer;
 
+class ConsumerForkCurlTest extends TestCase
+{
   private $client;
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
-                          array("consumer" => "fork_curl",
-                                "debug"    => true));
+    $this->client = new ForkCurlConsumer("oq0vdlg7yi", array("debug"    => true));
   }
 
   function testTrack() {

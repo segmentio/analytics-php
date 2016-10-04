@@ -1,16 +1,18 @@
 <?php
 
-require_once(dirname(__FILE__) . "/../lib/Segment/Client.php");
+namespace SegmentTests;
 
-class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase {
+use PHPUnit_Framework_TestCase as TestCase;
+use Segment\Analytics;
+use \Segment\Consumer\LibCurlConsumer;
 
+class ConsumerLibCurlTest extends TestCase
+{
   private $client;
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
-                          array("consumer" => "lib_curl",
-                                "debug"    => true));
+    $this->client = new LibCurlConsumer("oq0vdlg7yi", array("debug"    => true));
   }
 
   function testTrack() {
