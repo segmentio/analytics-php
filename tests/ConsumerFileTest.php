@@ -83,19 +83,6 @@ class ConsumerFileTest extends TestCase
     $this->checkWritten("alias");
   }
 
-  function testSend(){
-    $this->markTestSkipped('Until send.php is updated');
-    for ($i = 0; $i < 200; $i++) {
-      $this->client->track(array(
-        "userId" => "userId",
-        "event" => "event"
-      ));
-    }
-    exec("php --define date.timezone=UTC send.php --secret oq0vdlg7yi --file /tmp/analytics.log", $output);
-    $this->assertEquals("sent 200 from 200 requests successfully", trim($output[0]));
-    $this->assertFalse(file_exists($this->filename));
-  }
-
   function testProductionProblems() {
     # Open to a place where we should not have write access.
     $client = new FileConsumer("oq0vdlg7yi", array("filename" => "/dev/xxxxxxx" ));

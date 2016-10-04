@@ -3,8 +3,10 @@
 /**
  * require client
  */
+// register Composer autoloader 
+require(__DIR__ . '/vendor/autoload.php');
 
-require(__DIR__ . "/lib/Segment.php");
+use Segment\Consumer\LibCurlConsumer;
 
 /**
  * Args
@@ -51,14 +53,14 @@ $lines = explode("\n", $contents);
 /**
  * Initialize the client.
  */
-
-Segment::init($args["secret"], array(
+$consumer = new LibCurlConsumer($args["secret"], array(
   "debug" => true,
   "error_handler" => function($code, $msg){
     print("$code: $msg\n");
     exit(1);
   }
 ));
+$analytics = new \Segment\Analytics($consumer);
 
 /**
  * Payloads
@@ -73,13 +75,13 @@ foreach ($lines as $line) {
   $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
   $payload["timestamp"] = $ts;
   $type = $payload["type"];
-  $ret = call_user_func_array(array("Segment", $type), array($payload));
+  $ret = call_user_func_array(array($analytics, $type), array($payload));
   if ($ret) $successful++;
   $total++;
-  if ($total % 100 === 0) Segment::flush();
+  if ($total % 100 === 0) $analytics->flush();
 }
 
-Segment::flush();
+$analytics->flush();
 unlink($file);
 
 /**
