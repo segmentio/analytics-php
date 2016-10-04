@@ -221,7 +221,7 @@ class AnalyticsTest extends TestCase
 
     function testExceptionForInvalidClassName()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->setExpectedException('Exception');
         $client = Analytics::factory("oq0vdlg7yi", ["consumer" => "ClassDoesNotExist"]);
     }
 }
