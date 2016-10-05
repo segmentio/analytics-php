@@ -16,11 +16,17 @@ $args = parse($argv);
  * Make sure both are set
  */
 
-if (!isset($args["secret"])) die("--secret must be given");
-if (!isset($args["file"])) die("--file must be given");
+if (!isset($args["secret"])) {
+    die("--secret must be given");
+}
+if (!isset($args["file"])) {
+    die("--file must be given");
+}
 
 $file = $args["file"];
-if ($file[0] != '/') $file = __DIR__ . "/" . $file;
+if ($file[0] != '/') {
+    $file = __DIR__ . "/" . $file;
+}
 
 /**
  * Rename the file so we don't write the same calls
@@ -31,14 +37,14 @@ $dir = dirname($file);
 $old = $file;
 $file = $dir . '/analytics-' . rand() . '.log';
 
-if(!file_exists($old)) {
-  print("file: $old does not exist");
-  exit(0);
+if (!file_exists($old)) {
+    print("file: $old does not exist");
+    exit(0);
 }
 
 if (!rename($old, $file)) {
-  print("error renaming from $old to $file\n");
-  exit(1);
+    print("error renaming from $old to $file\n");
+    exit(1);
 }
 
 /**
@@ -53,11 +59,11 @@ $lines = explode("\n", $contents);
  */
 
 Segment::init($args["secret"], array(
-  "debug" => true,
-  "error_handler" => function($code, $msg){
-    print("$code: $msg\n");
-    exit(1);
-  }
+    "debug" => true,
+    "error_handler" => function ($code, $msg) {
+        print("$code: $msg\n");
+        exit(1);
+    }
 ));
 
 /**
@@ -67,16 +73,22 @@ Segment::init($args["secret"], array(
 $total = 0;
 $successful = 0;
 foreach ($lines as $line) {
-  if (!trim($line)) continue;
-  $payload = json_decode($line, true);
-  $dt = new DateTime($payload["timestamp"]);
-  $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
-  $payload["timestamp"] = $ts;
-  $type = $payload["type"];
-  $ret = call_user_func_array(array("Segment", $type), array($payload));
-  if ($ret) $successful++;
-  $total++;
-  if ($total % 100 === 0) Segment::flush();
+    if (!trim($line)) {
+        continue;
+    }
+    $payload = json_decode($line, true);
+    $dt = new DateTime($payload["timestamp"]);
+    $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
+    $payload["timestamp"] = $ts;
+    $type = $payload["type"];
+    $ret = call_user_func_array(array("Segment", $type), array($payload));
+    if ($ret) {
+        $successful++;
+    }
+    $total++;
+    if ($total % 100 === 0) {
+        Segment::flush();
+    }
 }
 
 Segment::flush();
@@ -93,14 +105,17 @@ exit(0);
  * Parse arguments
  */
 
-function parse($argv){
-  $ret = array();
+function parse($argv)
+{
+    $ret = array();
 
-  for ($i = 0; $i < count($argv); ++$i) {
-    $arg = $argv[$i];
-    if ('--' != substr($arg, 0, 2)) continue;
-    $ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
-  }
+    for ($i = 0; $i < count($argv); ++$i) {
+        $arg = $argv[$i];
+        if ('--' != substr($arg, 0, 2)) {
+            continue;
+        }
+        $ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
+    }
 
-  return $ret;
+    return $ret;
 }
