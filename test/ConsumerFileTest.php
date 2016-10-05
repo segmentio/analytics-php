@@ -66,7 +66,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
   }
 
   function testScreen(){
-    $this->assertTrue($this->client->page(array(
+    $this->assertTrue($this->client->screen(array(
       "userId" => "userId",
       "name" => "grand theft auto",
       "category" => "analytics.log",
