@@ -8,7 +8,7 @@ composer.phar:
 	@curl -sS https://getcomposer.org/installer | php
 
 test: install
-	@vendor/bin/phpunit --colors test/
+	@vendor/bin/phpunit --colors tests/
 	@php ./composer.phar validate
 
 release:

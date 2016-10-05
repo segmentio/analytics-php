@@ -23,9 +23,14 @@
 		"phpunit/phpunit": "~4.0"
 	},
 	"autoload": {
-		"files": [
-			"lib/Segment.php"
-		]
+		"psr-4": {
+			"Segment\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"SegmentTests\\": "tests/"
+		}
 	},
 	"bin": [
 		"bin/analytics"

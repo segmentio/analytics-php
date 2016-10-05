@@ -10,4 +10,8 @@ matrix:
   allow_failures:
     - php: hhvm
 
-script: phpunit --colors test
+before_script:
+  - travis_retry composer self-update
+  - travis_retry composer update --no-interaction --prefer-source
+
+script: phpunit --colors tests

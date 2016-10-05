@@ -1,10 +1,7 @@
 <?php
 
-/**
- * require client
- */
-
-require(__DIR__ . "/lib/Segment.php");
+// register Composer autoloader
+require(__DIR__ . '/vendor/autoload.php');
 
 /**
  * Args
@@ -51,13 +48,12 @@ $lines = explode("\n", $contents);
 /**
  * Initialize the client.
  */
-
-Segment::init($args["secret"], array(
-  "debug" => true,
-  "error_handler" => function($code, $msg){
-    print("$code: $msg\n");
-    exit(1);
-  }
+$analytics = \Segment\Analytics::factory($args["secret"], array(
+	"debug" => true,
+	"error_handler" => function($code, $msg){
+	  print("$code: $msg\n");
+	  exit(1);
+	}
 ));
 
 /**
@@ -73,13 +69,13 @@ foreach ($lines as $line) {
   $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
   $payload["timestamp"] = $ts;
   $type = $payload["type"];
-  $ret = call_user_func_array(array("Segment", $type), array($payload));
+  $ret = call_user_func_array(array($analytics, $type), array($payload));
   if ($ret) $successful++;
   $total++;
-  if ($total % 100 === 0) Segment::flush();
+  if ($total % 100 === 0) $analytics->flush();
 }
 
-Segment::flush();
+$analytics->flush();
 unlink($file);
 
 /**
@@ -97,9 +93,9 @@ function parse($argv){
   $ret = array();
 
   for ($i = 0; $i < count($argv); ++$i) {
-    $arg = $argv[$i];
-    if ('--' != substr($arg, 0, 2)) continue;
-    $ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
+	$arg = $argv[$i];
+	if ('--' != substr($arg, 0, 2)) continue;
+	$ret[substr($arg, 2, strlen($arg))] = trim($argv[++$i]);
   }
 
   return $ret;
