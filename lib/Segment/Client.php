@@ -31,7 +31,7 @@ class Segment_Client {
 
     # Use our socket consumer by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
-                                                   "lib_curl";
+                                                   "socket";
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
