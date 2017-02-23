@@ -5,8 +5,7 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
   protected $type = "LibCurl";
 
   /**
-   * Creates a new queued fork consumer which queues fork and identify
-   * calls before adding them to
+   * Creates a new queued libcurl consumer
    * @param string $secret
    * @param array  $options
    *     boolean  "debug" - whether to use debug output, wait for response.
@@ -18,8 +17,9 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
   }
 
   /**
-   * Make an async request to our API. Fork a curl process, immediately send
-   * to the API. If debug is enabled, we wait for the response.
+   * Make a sync request to our API. If debug is
+   * enabled, we wait for the response
+   * and retry once to diminish impact on performance.
    * @param  array   $messages array of all the messages to send
    * @return boolean whether the request succeeded
    */
@@ -49,21 +49,30 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
-    // execute post
-    curl_exec($ch);
+    // retry failed requests just once to diminish impact on performance
+    $httpResponse = $this->executePost($ch);
 
-    if ($this->debug()) {
+    if ($httpResponse != 200) {
 
-      $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      // log error
+      $this->handleError($ch, $httpResponse);
 
-      if ($httpCode != 200) {
-        $this->handleError($ch, $httpCode);
-      }
-
-      return $httpCode;
+      // try to post one more time
+      $secondHttpResponse = $this->executePost($ch);
+      $this->handleError($ch, $secondHttpResponse);
     }
 
     //close connection
     curl_close($ch);
+
+    return $httpResponse;
+  }
+
+  public function executePost($ch) {
+
+    curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    return $httpCode;
+
   }
 }
