@@ -18,7 +18,8 @@ class Segment_Client {
    *
    * @param string $secret
    * @param array  $options array of consumer options [optional]
-   * @param string Consumer constructor to use, socket by default.
+   * @param string Consumer constructor to use, libcurl by default.
+   *
    */
   public function __construct($secret, $options = array()) {
 
@@ -29,12 +30,14 @@ class Segment_Client {
       "lib_curl"   => "Segment_Consumer_LibCurl"
     );
 
-    # Use our socket consumer by default
+    # Use our socket libcurl by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
                                                    "lib_curl";
+
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
+
   }
 
   public function __destruct() {
