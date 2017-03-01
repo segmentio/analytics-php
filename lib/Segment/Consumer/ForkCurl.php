@@ -4,6 +4,11 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
   protected $type = "ForkCurl";
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
 
   /**
    * Creates a new queued fork consumer which queues fork and identify

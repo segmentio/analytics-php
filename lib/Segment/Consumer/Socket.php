@@ -5,6 +5,11 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
   protected $type = "Socket";
   private $socket_failed;
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
   /**
    * Creates a new socket consumer for dispatching async requests immediately
    * @param string $secret

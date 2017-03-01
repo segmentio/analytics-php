@@ -12,7 +12,7 @@ class Segment {
   private static $client;
 
   /**
-   * Initializes the default client to use. Uses the socket consumer by default.
+   * Initializes the default client to use. Uses the libcurl consumer by default.
    * @param  string $secret   your project's secret key
    * @param  array  $options  passed straight to the client
    */

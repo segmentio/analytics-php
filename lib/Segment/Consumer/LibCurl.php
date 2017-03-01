@@ -4,6 +4,11 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
 
   protected $type = "LibCurl";
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
   /**
    * Creates a new queued libcurl consumer
    * @param string $secret
