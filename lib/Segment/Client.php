@@ -176,9 +176,13 @@ class Segment_Client {
   private function message($msg, $def = ""){
     if ($def && !isset($msg[$def])) $msg[$def] = array();
     if ($def && empty($msg[$def])) $msg[$def] = (object)$msg[$def];
-    if (!isset($msg["context"])) $msg["context"] = array();
+
+    if (!isset($msg["context"])) {
+      $msg["context"] = array();
+      $msg["context"] = array_merge($msg["context"], $this->getContext());
+    }
+
     if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
-    $msg["context"] = array_merge($msg["context"], $this->getContext());
     $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
     $msg["messageId"] = self::messageId();
     return $msg;
@@ -213,7 +217,8 @@ class Segment_Client {
     return array(
       "library" => array(
         "name" => "analytics-php",
-        "version" => $SEGMENT_VERSION
+        "version" => $SEGMENT_VERSION,
+        "consumer" => $this->consumer->getConsumer()
       )
     );
   }
