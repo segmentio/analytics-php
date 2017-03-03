@@ -1,4 +1,12 @@
 
+1.5.0 / 2017-03-03
+==================
+
+  * Adding context.library.consumer to all PHP events
+  * libcurl consumer will retry once if http response is not 200
+  * update link to php docs
+  * improve portability and reliability of Makefile accros different platforms (#74)
+
 1.4.2 / 2016-07-11
 ==================
 
