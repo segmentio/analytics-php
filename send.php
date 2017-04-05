@@ -4,7 +4,7 @@
  * require client
  */
 
-require(__DIR__ . "/lib/Segment.php");
+require_once(__DIR__ . "/lib/Segment.php");
 
 /**
  * Args

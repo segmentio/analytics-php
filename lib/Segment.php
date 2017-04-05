@@ -4,7 +4,7 @@ if (!function_exists('json_encode')) {
     throw new Exception('Segment needs the JSON PHP extension.');
 }
 
-require(dirname(__FILE__) . '/Segment/Client.php');
+require_once(dirname(__FILE__) . '/Segment/Client.php');
 
 
 class Segment {
