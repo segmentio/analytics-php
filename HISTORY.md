@@ -1,4 +1,9 @@
 
+1.5.1 / 2017-04-06
+==================
+
+  * Use require_once() instead of require(). Fixes issue where seperate plugins in systems such as Moodle break because of class redeclaration when using seperate internal versions of Segment.io.
+
 1.5.0 / 2017-03-03
 ==================
 
