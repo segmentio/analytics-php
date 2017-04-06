@@ -1,12 +1,12 @@
 <?php
 
-require(__DIR__ . '/Consumer.php');
-require(__DIR__ . '/QueueConsumer.php');
-require(__DIR__ . '/Consumer/File.php');
-require(__DIR__ . '/Consumer/ForkCurl.php');
-require(__DIR__ . '/Consumer/LibCurl.php');
-require(__DIR__ . '/Consumer/Socket.php');
-require(__DIR__ . '/Version.php');
+require_once(__DIR__ . '/Consumer.php');
+require_once(__DIR__ . '/QueueConsumer.php');
+require_once(__DIR__ . '/Consumer/File.php');
+require_once(__DIR__ . '/Consumer/ForkCurl.php');
+require_once(__DIR__ . '/Consumer/LibCurl.php');
+require_once(__DIR__ . '/Consumer/Socket.php');
+require_once(__DIR__ . '/Version.php');
 
 class Segment_Client {
 
