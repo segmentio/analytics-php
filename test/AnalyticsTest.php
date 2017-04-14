@@ -6,7 +6,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    Segment::init("oq0vdlg7yi", array("debug" => true));
+    Segment::init("4txshy8l73", array("debug" => true));
   }
 
   function testTrack() {
@@ -36,7 +36,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
         "path" => "/docs/libraries/php/",
         "url" => "https://segment.io/docs/libraries/php/"
       )
-    )));    
+    )));
   }
 
   function testPage(){
@@ -140,6 +140,18 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(Segment::alias(array(
       "previousId" => "previous-id",
       "userId" => "user-id"
+    )));
+  }
+
+  function testSetContext(){
+    $this->assertTrue(Segment::track(array(
+      "anonymousId" => "set context",
+      "event" => "set context",
+      "context" => array(
+          "Google Analytics" => array(
+              "clientId" => "123"
+          )
+      )
     )));
   }
 

@@ -8,7 +8,7 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("4txshy8l73",
                           array("consumer" => "lib_curl",
                                 "debug"    => true));
   }
@@ -45,7 +45,7 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($this->client->page(array(
       "userId" => "lib-curl-page",
       "name" => "analytics-php",
-      "category" => "fork-curl",
+      "category" => "lib-curl",
       "properties" => array(
         "url" => "https://a.url/"
       )
@@ -56,11 +56,10 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($this->client->page(array(
       "anonymousId" => "lib-curl-screen",
       "name" => "grand theft auto",
-      "category" => "fork-curl",
+      "category" => "lib-curl",
       "properties" => array()
     )));
   }
-
 
   function testAlias() {
     $this->assertTrue($this->client->alias(array(
