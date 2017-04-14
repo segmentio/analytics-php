@@ -12,7 +12,7 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
     if (file_exists($this->filename()))
       unlink($this->filename());
 
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("4txshy8l73",
                           array("consumer" => "file",
                                 "filename" => $this->filename));
 
@@ -89,14 +89,14 @@ class ConsumerFileTest extends PHPUnit_Framework_TestCase {
         "event" => "event"
       ));
     }
-    exec("php --define date.timezone=UTC send.php --secret oq0vdlg7yi --file /tmp/analytics.log", $output);
+    exec("php --define date.timezone=UTC send.php --secret 4txshy8l73 --file /tmp/analytics.log", $output);
     $this->assertEquals("sent 200 from 200 requests successfully", trim($output[0]));
     $this->assertFalse(file_exists($this->filename()));
   }
 
   function testProductionProblems() {
     # Open to a place where we should not have write access.
-    $client = new Segment_Client("oq0vdlg7yi",
+    $client = new Segment_Client("4txshy8l73",
                           array("consumer" => "file",
                                 "filename" => "/dev/xxxxxxx" ));
 

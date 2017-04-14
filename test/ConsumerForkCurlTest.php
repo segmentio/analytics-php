@@ -8,7 +8,7 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("4txshy8l73",
                           array("consumer" => "fork_curl",
                                 "debug"    => true));
   }
@@ -60,7 +60,6 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase {
       "properties" => array()
     )));
   }
-
 
   function testAlias() {
     $this->assertTrue($this->client->alias(array(

@@ -8,7 +8,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client("oq0vdlg7yi",
+    $this->client = new Segment_Client("4txshy8l73",
                                           array("consumer" => "socket"));
   }
 
@@ -67,7 +67,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
   }
 
   function testShortTimeout() {
-    $client = new Segment_Client("oq0vdlg7yi",
+    $client = new Segment_Client("4txshy8l73",
                                    array( "timeout"  => 0.01,
                                           "consumer" => "socket" ));
 

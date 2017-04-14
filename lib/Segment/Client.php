@@ -166,7 +166,7 @@ class Segment_Client {
   }
 
   /**
-   * Add common fields to the gvien `message`
+   * Add common fields to the given `message`
    *
    * @param array $msg
    * @param string $def
@@ -177,8 +177,10 @@ class Segment_Client {
     if ($def && !isset($msg[$def])) $msg[$def] = array();
     if ($def && empty($msg[$def])) $msg[$def] = (object)$msg[$def];
 
-    if (!isset($msg["context"])) {
-      $msg["context"] = array();
+    if (!isset($msg["context"]["library"])) {
+      // must set $msg["context"]["library"] to empty array
+      // otherwise library will return "undefined index" error
+      $msg["context"]["library"] = array();
       $msg["context"] = array_merge($msg["context"], $this->getContext());
     }
 
