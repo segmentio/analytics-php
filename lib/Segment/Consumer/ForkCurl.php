@@ -26,13 +26,10 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
   /**
    * Make an async request to our API. Fork a curl process, immediately send
    * to the API. If debug is enabled, we wait for the response.
-   * @param  array   $messages array of all the messages to send
+   * @param  string   $payload JSON object of all the messages to send
    * @return boolean whether the request succeeded
    */
-  public function flushBatch($messages) {
-
-    $body = $this->payload($messages);
-    $payload = json_encode($body);
+  public function flushBatch($payload) {
 
     # Escape for shell usage.
     $payload = escapeshellarg($payload);

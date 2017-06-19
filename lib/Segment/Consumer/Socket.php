@@ -30,14 +30,11 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
   }
 
 
-  public function flushBatch($batch) {
+  public function flushBatch($payload) {
     $socket = $this->createSocket();
 
     if (!$socket)
       return;
-
-    $payload = $this->payload($batch);
-    $payload = json_encode($payload);
 
     $body = $this->createBody($this->options["host"], $payload);
     return $this->makeRequest($socket, $body);
