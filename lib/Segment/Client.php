@@ -179,8 +179,8 @@ class Segment_Client {
 
     if (!isset($msg["context"])) {
       $msg["context"] = array();
-      $msg["context"] = array_merge($msg["context"], $this->getContext());
     }
+    $msg["context"] = array_merge($this->getDefaultContext(), $msg["context"]);
 
     if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
     $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
@@ -212,7 +212,7 @@ class Segment_Client {
    * Add the segment.io context to the request
    * @return array additional context
    */
-  private function getContext () {
+  private function getDefaultContext () {
     global $SEGMENT_VERSION;
     return array(
       "library" => array(

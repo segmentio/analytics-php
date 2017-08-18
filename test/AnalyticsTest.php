@@ -36,7 +36,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
         "path" => "/docs/libraries/php/",
         "url" => "https://segment.io/docs/libraries/php/"
       )
-    )));    
+    )));
   }
 
   function testPage(){
@@ -140,6 +140,24 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(Segment::alias(array(
       "previousId" => "previous-id",
       "userId" => "user-id"
+    )));
+  }
+
+  function testContextEmpty() {
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "Context Test",
+      "context" => array()
+    )));
+  }
+
+  function testContextCustom() {
+    $this->assertTrue(Segment::track(array(
+      "userId" => "user-id",
+      "event" => "Context Test",
+      "context" => array(
+        "active" => false
+      )
     )));
   }
 
