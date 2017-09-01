@@ -57,8 +57,8 @@ class Segment {
   public static function group(array $message) {
     self::checkClient();
     $groupId = !empty($message["groupId"]);
-    $userId = !empty($message["userId"]);
-    self::assert($groupId && $userId, "Segment::group() expects userId and groupId");
+    self::assert($groupId, "Segment::group() expects groupId");
+    self::validate($message, "group");
     return self::$client->group($message);
   }
 

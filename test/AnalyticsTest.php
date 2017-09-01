@@ -26,6 +26,29 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
     )));
   }
 
+  function testGroupAnonymous(){
+    $this->assertTrue(Segment::group(array(
+        "groupId" => "group-id",
+        "anonymousId" => "anonymous-id",
+        "traits" => array(
+            "plan" => "startup"
+        )
+    )));
+  }
+
+  /**
+   * @expectedException \Exception
+   * @expectedExceptionMessage Segment::group() requires userId or anonymousId
+   */
+  function testGroupNoUser() {
+    Segment::group(array(
+        "groupId" => "group-id",
+        "traits" => array(
+            "plan" => "startup"
+        )
+    ));
+  }
+
   function testMicrotime(){
     $this->assertTrue(Segment::page(array(
       "anonymousId" => "anonymous-id",
