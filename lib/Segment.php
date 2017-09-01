@@ -18,6 +18,7 @@ class Segment {
    */
   public static function init($secret, $options = array()) {
     self::assert($secret, "Segment::init() requires secret");
+    if (null != self::$client) return;
     self::$client = new Segment_Client($secret, $options);
   }
 
