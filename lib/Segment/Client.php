@@ -131,7 +131,7 @@ class Segment_Client {
    * Formats a timestamp by making sure it is set
    * and converting it to iso8601.
    *
-   * The timestamp can be time in seconds `time()` or `microseconds(true)`.
+   * The timestamp can be time in seconds `time()` or `microtime(true)`.
    * any other input is considered an error and the method will return a new date.
    *
    * Note: php's date() "u" format (for microseconds) has a bug in it
@@ -159,9 +159,9 @@ class Segment_Client {
     if (!isset($parts[1])) return date("c", (int)$parts[0]);
 
     // microtime(true)
-    $sec = (int)$parts[0];
-    $usec = (int)$parts[1];
-    $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
+    $sec = $parts[0];
+    $usec = $parts[1];
+    $fmt = sprintf("Y-m-d\TH:i:s.%sP", $usec);
     return date($fmt, (int)$sec);
   }
 
