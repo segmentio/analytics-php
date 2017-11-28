@@ -6,7 +6,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
 
   function setUp() {
     date_default_timezone_set("UTC");
-    Segment::init("oq0vdlg7yi", array("debug" => true));
+    Segment::init("oq0vdlg7yi", array("debug" => true,'check_max_request_size'=>true));
   }
 
   function testTrack() {
@@ -186,5 +186,78 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase {
       "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) . '.'
     )));
   }
+
+    function testCheckMaxRequestSizeBatch()
+    {
+        $error_handler_invoked = false;
+
+        Segment::init(
+            "oq0vdlg7yi",
+            array(
+                "debug"                  => false,
+                "batch_size"             => 100,
+                'check_max_request_size' => true,
+                "error_handler"          => function ($code, $msg) use (&$error_handler_invoked) { $error_handler_invoked = true; },
+            )
+        );
+
+        $event = 'test-max-request-size-batch';
+
+        $parameters = array();
+
+        // Add 300 random 16 character strings to list of parameters
+        for ( $i = 0; $i < 300; $i++ ) {
+            $parameters[] = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 16)), 0, 16);
+        }
+
+        /// Create 150 track calls
+        for ( $i = 0; $i < 150; $i++ ) {
+            $data = array(
+                'userId'     => 'user-id',
+                'event'      => $event,
+                'properties' => $parameters,
+                'timestamp'  => time(),
+            );
+
+            Segment::track($data);
+        }
+
+        $this->assertFalse($error_handler_invoked);
+    }
+
+
+    function testCheckMaxRequestSizeCall()
+    {
+        $error_handler_invoked = false;
+
+        Segment::init(
+            "oq0vdlg7yi",
+            array(
+                "debug"                  => false,
+                'check_max_request_size' => true,
+                "error_handler"          => function ($code, $msg) use (&$error_handler_invoked) { $error_handler_invoked = true; },
+            )
+        );
+
+        $event = 'test-max-request-size-call';
+
+        $parameters = array();
+
+        // Add 70 random 500 character strings to parameters list
+        for ( $i = 0; $i < 70; $i++ ) {
+            $parameters[] = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 500)), 0, 500);
+        }
+
+        $data = array(
+            'userId'     => 'user-id',
+            'event'      => $event,
+            'properties' => $parameters,
+            'timestamp'  => time(),
+        );
+
+        Segment::track($data);
+
+        $this->assertTrue($error_handler_invoked, 'The error handler was not invoked when a call over 32kb was added.');
+    }
 }
 ?>

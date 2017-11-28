@@ -25,13 +25,13 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
    * Make a sync request to our API. If debug is
    * enabled, we wait for the response
    * and retry once to diminish impact on performance.
-   * @param  array   $messages array of all the messages to send
+   * @param  array   $messages batch of messages to send
    * @return boolean whether the request succeeded
    */
   public function flushBatch($messages) {
 
-    $body = $this->payload($messages);
-    $payload = json_encode($body);
+    $payload = $this->encodedPayload($messages);
+
     $secret = $this->secret;
 
     $protocol = $this->ssl() ? "https://" : "http://";
