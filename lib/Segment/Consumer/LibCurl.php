@@ -54,6 +54,10 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
+    // set proxy if proxy address is configured in options
+    if ($this->proxy)
+      curl_setopt($ch, CURLOPT_PROXY, $this->proxy);
+
     // retry failed requests just once to diminish impact on performance
     $httpResponse = $this->executePost($ch);
 

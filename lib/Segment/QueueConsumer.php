@@ -6,6 +6,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   protected $queue;
   protected $max_queue_size = 1000;
   protected $batch_size = 100;
+  protected $proxy = "";
 
   /**
    * Store our secret and options as part of this consumer
@@ -20,6 +21,9 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
     if (isset($options["batch_size"]))
       $this->batch_size = $options["batch_size"];
+
+    if (isset($options["proxy"]))
+      $this->proxy = $options["proxy"];
 
     $this->queue = array();
   }
