@@ -55,10 +55,23 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $timeout = $this->options["timeout"];
 
     try {
-      # Open our socket to the API Server.
-      # Since we're try catch'ing prevent PHP logs.
-      $socket = @pfsockopen($protocol . "://" . $host, $port, $errno,
-                           $errstr, $timeout);
+      if (!isset($this->options["proxy"])) {
+        # Open our socket to the API Server.
+        # Since we're try catch'ing prevent PHP logs.
+        $socket = @pfsockopen($protocol . "://" . $host, $port, $errno,
+                            $errstr, $timeout);
+        echo $protocol . "://" . $host . ':' . $port . PHP_EOL;
+      }
+      else {
+        $proxy = explode(':', $this->options["proxy"]);
+        $proxy_server = $proxy[0];
+        $proxy_port = count($proxy) > 1 ? $proxy[1] : 80;
+        $socket = @pfsockopen($proxy_server, $proxy_port, $errno, $errstr, $timeout);
+
+        if ($socket) {
+          fputs($socket, "CONNECT $host:$port\r\n");
+        }
+      }
 
       # If we couldn't open the socket, handle the error.
       if (false === $socket) {
