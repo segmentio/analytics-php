@@ -60,7 +60,6 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
         # Since we're try catch'ing prevent PHP logs.
         $socket = @pfsockopen($protocol . "://" . $host, $port, $errno,
                             $errstr, $timeout);
-        echo $protocol . "://" . $host . ':' . $port . PHP_EOL;
       }
       else {
         $proxy = explode(':', $this->options["proxy"]);
