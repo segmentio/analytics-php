@@ -150,5 +150,21 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     $client->track(array("user_id" => "some-user", "event" => "Event"));
     $client->__destruct();
   }
+
+  function testProxy() {
+    $client = new Segment_Client("x", array(
+      "consumer"      => "socket",
+      "host"          => "api.segment.io",
+      "proxy"         => "163.172.27.213:3128",
+      "debug"         => true,
+      "error_handler" => function ($errno, $errmsg) {
+        throw new \RuntimeException($errmsg, $errno);
+      },
+    ));
+
+    $client->track(array("user_id" => "some-user", "event" => "Event"));
+    $client->__destruct();
+
+  }
 }
 ?>
