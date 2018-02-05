@@ -41,7 +41,7 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
 
     $backoff = 100;     // Set initial waiting time to 100ms
 
-    while ($backoff < $this->max_backoff_duration) {
+    while ($backoff < $this->maximum_backoff_duration) {
       $start_time = microtime(true);
 
       // open connection
