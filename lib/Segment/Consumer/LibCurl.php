@@ -42,36 +42,55 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
     $path = "/v1/import";
     $url = $protocol . $host . $path;
 
-    // open connection
-    $ch = curl_init();
+    $backoff = 100;     // Set initial waiting time to 100ms
 
-    // set the url, number of POST vars, POST data
-    curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    while ($backoff < $this->maximum_backoff_duration) {
+      $start_time = microtime(true);
 
-    // set variables for headers
-    $header = array();
-    $header[] = 'Content-Type: application/json';
+      // open connection
+      $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+      // set the url, number of POST vars, POST data
+      curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
-    // retry failed requests just once to diminish impact on performance
-    $httpResponse = $this->executePost($ch);
+      // set variables for headers
+      $header = array();
+      $header[] = 'Content-Type: application/json';
 
-    if ($httpResponse != 200) {
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 
-      // log error
-      $this->handleError($ch, $httpResponse);
+      // retry failed requests just once to diminish impact on performance
+      $httpResponse = $this->executePost($ch);
 
-      // try to post one more time
-      $secondHttpResponse = $this->executePost($ch);
-      $this->handleError($ch, $secondHttpResponse);
+      //close connection
+      curl_close($ch);
+
+      $elapsed_time = microtime(true) - $start_time;
+
+      if ($httpResponse != 200) {
+        // log error
+        $this->handleError($ch, $httpResponse);
+
+        if (($httpResponse >= 500 && $httpResponse <= 600) || $httpResponse == 429) {
+          // If status code is greater than 500 and less than 600, it indicates server error
+          // Error code 429 indicates rate limited.
+          // Retry uploading in these cases.
+          usleep($backoff * 1000);
+          $backoff *= 2;
+        }
+        else if ($httpResponse >= 400) {
+          break;
+        }
+      }
+      else {
+        break;  // no error
+      }
     }
 
-    //close connection
-    curl_close($ch);
+
 
     return $httpResponse;
   }

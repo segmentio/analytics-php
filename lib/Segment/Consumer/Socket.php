@@ -89,51 +89,60 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $bytes_total = strlen($req);
     $closed = false;
 
-    # Write the request
-    while (!$closed && $bytes_written < $bytes_total) {
-      try {
-        # Since we're try catch'ing prevent PHP logs.
-        $written = @fwrite($socket, substr($req, $bytes_written));
-      } catch (Exception $e) {
-        $this->handleError($e->getCode(), $e->getMessage());
-        $closed = true;
-      }
-      if (!isset($written) || !$written) {
-        $closed = true;
-      } else {
-        $bytes_written += $written;
-      }
-    }
+    // Retries with exponential backoff until success
+    $backoff = 100;   // Set initial waiting time to 100ms
 
-    # If the socket has been closed, attempt to retry a single time.
-    if ($closed) {
+    while (true) {
+      # Send request to server
+      while (!$closed && $bytes_written < $bytes_total) {
+        try {
+          # Since we're try catch'ing prevent PHP logs.
+          $written = @fwrite($socket, substr($req, $bytes_written));
+        } catch (Exception $e) {
+          $this->handleError($e->getCode(), $e->getMessage());
+          $closed = true;
+        }
+        if (!isset($written) || !$written) {
+          $closed = true;
+        } else {
+          $bytes_written += $written;
+        }
+      }
+
+      // Get response for request
+      $statusCode = 0;
+      $errorMessage = "";
+
+      if (!$closed) {
+        $res = $this->parseResponse(fread($socket, 2048));
+        $statusCode = (int)$res["status"];
+        $errorMessage = $res["message"];
+      }
       fclose($socket);
 
-      if ($retry) {
-        $socket = $this->createSocket();
-        if ($socket) return $this->makeRequest($socket, $req, false);
+      // If status code is 200, return true
+      if ($statusCode == 200)
+        return true;
+
+      // If status code is greater than 500 and less than 600, it indicates server error
+      // Error code 429 indicates rate limited.
+      // Retry uploading in these cases.
+      if (($statusCode >= 500 && $statusCode <= 600) || $statusCode == 429 || $statusCode == 0) {
+        if ($backoff >= $this->maximum_backoff_duration)
+          break;
+
+        usleep($backoff * 1000);
       }
-      return false;
-    }
-
-
-    $success = true;
-
-    if ($this->debug()) {
-      $res = $this->parseResponse(fread($socket, 2048));
-
-      if ($res["status"] != "200") {
-        $this->handleError($res["status"], $res["message"]);
-        $success = false;
+      else if ($statusCode >= 400) {
+        if ($this->debug()) {
+          $this->handleError($res["status"], $res["message"]);
+        }
+        break;
       }
-    } else {
-      // we have to read from the socket to avoid getting into
-      // states where the socket doesn't properly re-open.
-      // as long as we keep the recv buffer empty, php will
-      // properly reconnect
-      stream_set_timeout($socket, 0, 50000);
-      fread($socket, 2048);
-      stream_set_timeout($socket, 5);
+
+      // Retry uploading...
+      $backoff *= 2;
+      $socket = $this->createSocket();
     }
 
     return $success;
