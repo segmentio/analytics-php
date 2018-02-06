@@ -7,6 +7,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   protected $max_queue_size = 1000;
   protected $batch_size = 100;
   protected $maximum_backoff_duration = 10000;    // Set maximum waiting limit to 10s
+  protected $host = "";
 
   /**
    * Store our secret and options as part of this consumer
@@ -21,6 +22,9 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
     if (isset($options["batch_size"]))
       $this->batch_size = $options["batch_size"];
+
+    if (isset($options["host"]))
+      $this->host = $options["host"];
 
     $this->queue = array();
   }
