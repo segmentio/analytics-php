@@ -163,6 +163,14 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $req.= "Content-Type: application/json\r\n";
     $req.= "Authorization: Basic " . base64_encode($this->secret . ":") . "\r\n";
     $req.= "Accept: application/json\r\n";
+
+    // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
+    $content_json = json_decode($content, true);
+    $library = $content_json['batch'][0]['context']['library'];
+    $libName = $library['name'];
+    $libVersion = $library['version'];
+    $req.= "User-Agent: $libName/$libVersion\r\n";
+
     $req.= "Content-length: " . strlen($content) . "\r\n";
     $req.= "\r\n";
     $req.= $content;
