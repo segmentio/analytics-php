@@ -1,0 +1,136 @@
+<?php
+
+phpinfo();
+
+require_once(dirname(__FILE__) . "/../lib/Segment.php");
+
+class AxiosClient
+{
+  private $BaseAddress = null;
+  private $Timeout = 3000;
+  private $Authorization = "";
+  private $RetryCount = 1;
+
+  public function __construct($baseAddress, $timeout, $authorization) {
+    $this->BaseAddress = $baseAddress ? $baseAddress : "https://api.runscope.com";
+    if ($timeout)
+      $this->Timeout = $timeout;
+    if ($authorization)
+      $this->Authorization = $authorization;
+  }
+
+  public function setRetryCount($count) {
+    $this->RetryCount = $count > 0 ? $count : 1;
+  }
+
+  public function get($url) {
+    for ($i = 0; $i < $this->RetryCount; $i++) {
+      // open connection
+      $ch = curl_init();
+
+      // Set timeout
+      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->Timeout);
+      curl_setopt($ch, CURLOPT_TIMEOUT, $this->Timeout);
+
+      // Set authorization
+      if ($this->Authorization) {
+        $header = array();
+        $header[] = 'Authorization: Bearer ' . $this->Authorization;
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+      }
+
+      // Set url
+      curl_setopt($ch, CURLOPT_URL, $this->BaseAddress . "/" . $url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+      $output = curl_exec($ch);
+      $response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      curl_close($ch);
+
+      if ((int)$response == 200)
+        return $output;
+
+      usleep(3);
+    }
+
+    return NULL;
+  }
+}
+
+class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
+
+  private static $WRITE_KEY = "Cum1GHo14CegfLd83gVxsbc5Sb6jK8SN";
+  private static $RUNSCOPE_BUCKET = "pwb8mcmfks0f";
+  private $id = "";
+
+  private static function messageId(){
+    return sprintf("%04x%04x%04x%04x%04x%04x%04x%04x"
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0x0fff) | 0x4000
+      , mt_rand(0, 0x3fff) | 0x8000
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff)
+      , mt_rand(0, 0xffff));
+  }
+
+  function setUp() {
+    date_default_timezone_set("UTC");
+
+    $this->id = self::messageId();
+
+    // Segment Write Key for https://segment.com/segment-libraries/sources/analytics_node_e2e_test/overview.
+    // This source is configured to send events to a Runscope bucket used by this test.
+    Segment::init(self::$WRITE_KEY, array("debug" => true));
+    Segment::track(array(
+      "userId" => "prateek",
+      "event" => "Item Purchased",
+      "anonymousId" => $this->id,
+    ));
+    Segment::flush();
+
+    // Give some time for events to be delivered from the API to destinations.
+    sleep(5);     // 5 seconds.
+  }
+
+  function testE2E() {
+    // Verify RUNSCOPE_TOKEN is defined as system variable
+    $this->assertTrue(isset($_SERVER["RUNSCOPE_TOKEN"]));
+    $token = $_SERVER["RUNSCOPE_TOKEN"];
+
+    $client = new AxiosClient("https://api.runscope.com", 10 * 1000, $token);
+    $client->setRetryCount(3);
+
+    for ($i = 0; $i < 5; $i++)
+    {
+      // Runscope Bucket for https://www.runscope.com/stream/pwb8mcmfks0f.
+      $messageResponse = $client->Get("buckets/" . self::$RUNSCOPE_BUCKET . "/messages?count=20");
+      $this->assertTrue($messageResponse != NULL);
+
+      $data = json_decode($messageResponse, true);
+
+      $messages = array();
+      foreach ($data["data"] as $item) {
+        $response = $client->Get("buckets/" . self::$RUNSCOPE_BUCKET . "/messages/" . $item["uuid"]);
+        $this->assertTrue($response != NULL);
+
+        $content2 = json_decode($response, true);
+        array_push($messages, $content2['data']['request']['body']);
+      }
+
+      $count = 0;
+      foreach ($messages as $m) {
+        $msg = json_decode($m, true);
+        if ($msg['anonymousId'] == $this->id)
+          return;
+      }
+
+      sleep(5);
+    }
+
+    $this->assertTrue(false);
+  }
+}
+?>
