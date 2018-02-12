@@ -166,7 +166,7 @@ class Segment_Client {
   }
 
   /**
-   * Add common fields to the gvien `message`
+   * Add common fields to the given `message`
    *
    * @param array $msg
    * @param string $def

@@ -58,6 +58,12 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       $header = array();
       $header[] = 'Content-Type: application/json';
 
+      // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
+      $library = $messages[0]['context']['library'];
+      $libName = $library['name'];
+      $libVersion = $library['version'];
+      $header[] = "User-Agent: $libName/$libVersion";
+
       curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
       curl_setopt($ch, CURLOPT_URL, $url);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);

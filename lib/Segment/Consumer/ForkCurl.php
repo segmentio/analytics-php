@@ -49,6 +49,12 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
     $cmd.= " -d " . $payload . " '" . $url . "'";
 
+    // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
+    $library = $messages[0]['context']['library'];
+    $libName = $library['name'];
+    $libVersion = $library['version'];
+    $cmd.= " -H 'User-Agent: $libName/$libVersion'";
+
     if (!$this->debug()) {
       $cmd .= " > /dev/null 2>&1 &";
     }
