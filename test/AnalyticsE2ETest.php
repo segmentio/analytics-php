@@ -63,6 +63,7 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
   private static $WRITE_KEY = "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn";
   private static $RUNSCOPE_BUCKET = "bmbbsjxdttr7";
   private $id = "";
+  private $test_e2e;
 
   private static function messageId(){
     return sprintf("%04x%04x%04x%04x%04x%04x%04x%04x"
@@ -77,6 +78,10 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
   }
 
   function setUp() {
+    $this->test_e2e = isset($_SERVER["RUN_E2E_TESTS"]) && (!!json_decode($_SERVER["RUN_E2E_TESTS"]));
+    if (!$this->test_e2e)
+      return;
+
     date_default_timezone_set("UTC");
 
     $this->id = self::messageId();
@@ -98,6 +103,9 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
   }
 
   function testE2E() {
+    if (!$this->test_e2e)
+      return;
+
     // Verify RUNSCOPE_TOKEN is defined as system variable
     $this->assertTrue(isset($_SERVER["RUNSCOPE_TOKEN"]));
     $token = $_SERVER["RUNSCOPE_TOKEN"];
