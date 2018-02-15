@@ -60,8 +60,8 @@ class AxiosClient
 
 class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
 
-  private static $WRITE_KEY = "Cum1GHo14CegfLd83gVxsbc5Sb6jK8SN";
-  private static $RUNSCOPE_BUCKET = "pwb8mcmfks0f";
+  private static $WRITE_KEY = "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn";
+  private static $RUNSCOPE_BUCKET = "bmbbsjxdttr7";
   private $id = "";
 
   private static function messageId(){
@@ -105,7 +105,7 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
 
     for ($i = 0; $i < 5; $i++)
     {
-      // Runscope Bucket for https://www.runscope.com/stream/pwb8mcmfks0f.
+      // Runscope Bucket for https://www.runscope.com/stream/bmbbsjxdttr7.
       $messageResponse = $client->Get("buckets/" . self::$RUNSCOPE_BUCKET . "/messages?count=20");
       $this->assertTrue($messageResponse != NULL);
 
