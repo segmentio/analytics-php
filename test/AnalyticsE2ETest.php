@@ -87,7 +87,9 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
     Segment::track(array(
       "userId" => "prateek",
       "event" => "Item Purchased",
-      "anonymousId" => $this->id,
+      "property" => array(
+        "id" => $this->id,
+      )
     ));
     Segment::flush();
 
@@ -123,7 +125,7 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
       $count = 0;
       foreach ($messages as $m) {
         $msg = json_decode($m, true);
-        if ($msg['anonymousId'] == $this->id)
+        if (isset($msg['property']['id']) && $msg['property']['id'] == $this->id)
           return;
       }
 
