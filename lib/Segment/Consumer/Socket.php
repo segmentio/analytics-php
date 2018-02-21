@@ -180,6 +180,13 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $libVersion = $library['version'];
     $req.= "User-Agent: ${libName}/${libVersion}\r\n";
 
+    // Compress content if compress_request is true
+    if ($this->compress_request) {
+      $content = gzencode($content);
+
+      $req.= "Content-Encoding: gzip\r\n";
+    }
+
     $req.= "Content-length: " . strlen($content) . "\r\n";
     $req.= "\r\n";
     $req.= $content;
