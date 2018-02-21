@@ -79,6 +79,21 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
     )));
   }
 
+  function testRequestCompression() {
+    $options = array(
+      "compress_request" => true,
+      "consumer"      => "lib_curl",
+      "error_handler" => function () { throw new Exception("Was called"); }
+    );
+
+    $client = new Segment_Client("x", $options);
+
+    # Should error out with debug on.
+    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $client->__destruct();
+  }
+}
+
   public function testLargeMessageSizeError()
   {
     $options = array(
