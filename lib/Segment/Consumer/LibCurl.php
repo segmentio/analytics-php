@@ -34,6 +34,11 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
     $payload = json_encode($body);
     $secret = $this->secret;
 
+    // Verify message size is below than 32KB
+    if (strlen($payload) >= 32 * 1024) {
+      throw new Exception("Message size is larger than 32KB");
+    }
+
     $protocol = $this->ssl() ? "https://" : "http://";
     if ($this->host)
       $host = $this->host;

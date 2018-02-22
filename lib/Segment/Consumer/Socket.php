@@ -175,6 +175,11 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $req.= "\r\n";
     $req.= $content;
 
+    // Verify message size is below than 32KB
+    if (strlen($req) >= 32 * 1024) {
+      throw new Exception("Message size is larger than 32KB");
+    }
+
     return $req;
   }
 

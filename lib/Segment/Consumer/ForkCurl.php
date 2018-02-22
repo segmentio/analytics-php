@@ -49,6 +49,11 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
     $cmd.= " -d " . $payload . " '" . $url . "'";
 
+    // Verify message size is below than 32KB
+    if (strlen($payload) >= 32 * 1024) {
+      throw new Exception("Message size is larger than 32KB");
+    }
+
     // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
     $library = $messages[0]['context']['library'];
     $libName = $library['name'];
