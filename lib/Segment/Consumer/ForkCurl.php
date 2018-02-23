@@ -51,7 +51,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
     // Verify message size is below than 32KB
     if (strlen($payload) >= 32 * 1024) {
-      throw new Exception("Message size is larger than 32KB");
+      throw new RuntimeException("Message size is larger than 32KB");
     }
 
     // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
