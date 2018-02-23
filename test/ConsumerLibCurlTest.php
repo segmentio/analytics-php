@@ -68,6 +68,34 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase {
       "userId" => "user-id"
     )));
   }
+
+  /**
+   * @expectedException \RuntimeException
+   */
+  function testLargeMessageSizeError () {
+    $options = array(
+      "debug"    => true,
+      "consumer" => "lib_curl"
+    );
+
+    $client = new Segment_Client("testlargesize", $options);
+
+    $big_property = "";
+
+    for ($i = 0; $i < 32 * 1024; $i++) {
+      $big_property .= "a";
+    }
+
+    $this->assertTrue($client->track(array(
+      "userId" => "some-user",
+      "event" => "Super Large PHP Event",
+      "properties" => array("big_property" => $big_property)
+    )));
+
+    $client->__destruct();
+  }
+
+
 }
 
 ?>
