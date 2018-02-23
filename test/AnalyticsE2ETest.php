@@ -86,7 +86,7 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase {
 
     $this->id = self::messageId();
 
-    // Segment Write Key for https://segment.com/segment-libraries/sources/analytics_node_e2e_test/overview.
+    // Segment Write Key for https://segment.com/segment-libraries/sources/analytics_php_e2e_test/overview.
     // This source is configured to send events to a Runscope bucket used by this test.
     Segment::init(self::$WRITE_KEY, array("debug" => true));
     Segment::track(array(
