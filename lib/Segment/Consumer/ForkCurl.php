@@ -47,7 +47,24 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     $url = $protocol . $host . $path;
 
     $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
-    $cmd.= " -d " . $payload . " '" . $url . "'";
+
+    if ($this->compress_request) {
+      $payload = gzencode($payload);
+
+      // Create temporary file and save compressed byte stream
+      $tmpname = tempnam("/tmp", "analytics_php_post_cstream");
+      $handle = fopen($tmpname, "w");
+      fwrite($handle, $payload);
+      fclose($handle);
+
+      $cmd.= " -H 'Content-Encoding: gzip'";
+      $cmd.= " --data-binary '" . $tmpname . "'";
+    }
+    else {
+      $cmd.= " -d " . $payload;
+    }
+
+    $cmd.= " '" . $url . "'";
 
     // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
     $library = $messages[0]['context']['library'];
@@ -60,6 +77,11 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     }
 
     exec($cmd, $output, $exit);
+
+    // Remove temporary file which contains compressed request body
+    if ($this->compress_request) {
+      unlink($tmpname);
+    }
 
     if ($exit != 0) {
       $this->handleError($exit, $output);
