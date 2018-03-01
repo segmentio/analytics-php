@@ -8,14 +8,10 @@ if (in_array('--help', $argv)) {
   exit;
 }
 
-if (empty($_ENV['SEGMENT_WRITE_KEY'])) {
-  error('$SEGMENT_WRITE_KEY environment variable required');
-}
-
 date_default_timezone_set('UTC');
-Segment::init($_ENV['SEGMENT_WRITE_KEY']);
 
 $options = getopt('', [
+  'writeKey::',
   'method:',        // T I P G A
   'event::',        // x
   'userId::',      // x x x x x
@@ -29,6 +25,11 @@ $options = getopt('', [
   'timestamp::'     // x x x x x
 ]);
 
+if (empty($options['writeKey'])) {
+  error('writeKey flag required');
+}
+
+Segment::init($options['writeKey']);
 
 switch ($options['method']) {
   case 'track':
