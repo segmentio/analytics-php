@@ -40,6 +40,9 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $payload = json_encode($payload);
 
     $body = $this->createBody($this->options["host"], $payload);
+    if ($body === false)
+      return false;
+
     return $this->makeRequest($socket, $body);
   }
 
@@ -174,6 +177,15 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $req.= "Content-length: " . strlen($content) . "\r\n";
     $req.= "\r\n";
     $req.= $content;
+
+    // Verify message size is below than 32KB
+    if (strlen($req) >= 32 * 1024) {
+      if ($this->debug()) {
+        $msg = "Message size is larger than 32KB";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+      }
+      return false;
+    }
 
     return $req;
   }
