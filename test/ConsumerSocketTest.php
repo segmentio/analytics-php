@@ -135,9 +135,6 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
     $client->__destruct();
   }
 
-  /**
-   * @expectedException \RuntimeException
-   */
   function testLargeMessageSizeError () {
     $options = array(
       "debug"    => true,
@@ -152,11 +149,11 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase {
       $big_property .= "a";
     }
 
-    $this->assertTrue($client->track(array(
+    $this->assertFalse($client->track(array(
       "userId" => "some-user",
       "event" => "Super Large PHP Event",
       "properties" => array("big_property" => $big_property)
-    )));
+    )) && $client->flush());
 
     $client->__destruct();
   }
