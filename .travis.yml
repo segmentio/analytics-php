@@ -15,5 +15,7 @@ before_script:
   - composer install
 
 script:
-  - ./vendor/bin/phplint
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} >= "5.5" ]]; then
+  -   ./vendor/bin/phplint
+  - fi
   - phpunit --colors test
