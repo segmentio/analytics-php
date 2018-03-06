@@ -3,3 +3,4 @@ vendor
 composer.phar
 test/analytics.log
 /.vscode
+/coverage_report

@@ -11,4 +11,4 @@ matrix:
   allow_failures:
     - php: hhvm
 
-script: phpunit --colors test
+script: phpunit --colors
