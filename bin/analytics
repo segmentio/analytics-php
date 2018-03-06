@@ -12,7 +12,7 @@ date_default_timezone_set('UTC');
 
 $options = getopt('', [
   'writeKey::',
-  'method:',        // T I P G A
+  'type:',        // T I P G A
   'event::',        // x
   'userId::',      // x x x x x
   'groupId::',     //       x
@@ -31,7 +31,7 @@ if (empty($options['writeKey'])) {
 
 Segment::init($options['writeKey']);
 
-switch ($options['method']) {
+switch ($options['type']) {
   case 'track':
     Segment::track(array(
       'userId' => $options['userId'],
@@ -91,7 +91,7 @@ switch ($options['method']) {
 Segment::flush();
 
 function usage() {
-  return "\n  Usage: analytics --method <track|identify|page|group|alias> [options]\n\n";
+  return "\n  Usage: analytics --type <track|identify|page|group|alias> [options]\n\n";
 }
 
 function error($message) {
