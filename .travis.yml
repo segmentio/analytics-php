@@ -11,4 +11,6 @@ matrix:
   allow_failures:
     - php: hhvm
 
-script: phpunit --colors test
+script:
+  - if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint;  ./vendor/bin/phplint; fi
+  - phpunit --colors test
