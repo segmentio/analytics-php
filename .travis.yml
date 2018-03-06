@@ -12,5 +12,5 @@ matrix:
     - php: hhvm
 
 script:
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} >= "5.5" ]]; then  composer require overtrue/phplint;  ./vendor/bin/phplint; fi
+  - if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint;  ./vendor/bin/phplint; fi
   - phpunit --colors test
