@@ -11,6 +11,9 @@ matrix:
   allow_failures:
     - php: hhvm
 
+before_script:
+  - composer install
+
 script:
   - ./vendor/bin/phplint
   - phpunit --colors test
