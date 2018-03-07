@@ -12,8 +12,7 @@ matrix:
     - php: hhvm
 
 script:
-  - if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint;  ./vendor/bin/phplint; fi
-  - ./vendor/bin/phpcs
+  - if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi
   - phpunit
 
 after_success:
