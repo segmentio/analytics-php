@@ -40,11 +40,12 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase
     )));
   }
 
+  /**
+   * @expectedException \Exception
+   * @expectedExceptionMessage Segment::group() requires userId or anonymousId
+   */
   public function testGroupNoUser()
   {
-    $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('Segment::group() requires userId or anonymousId');
-
     Segment::group(array(
       "groupId" => "group-id",
       "traits" => array(

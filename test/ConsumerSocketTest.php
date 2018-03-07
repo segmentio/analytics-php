@@ -185,10 +185,11 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase
     $client->__destruct();
   }
 
+  /**
+   * @expectedException \RuntimeException
+   */
   public function testConnectionError()
   {
-    $this->expectException(\RuntimeException::class);
-
     $client = new Segment_Client("x", array(
       "consumer" => "socket",
       "host" => "api.segment.ioooooo",
