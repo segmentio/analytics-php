@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
-class ConsumerSocketTest extends PHPUnit\Framework\TestCase
+class ConsumerSocketTest extends PHPUnit_Framework_TestCase
 {
   private $client;
 

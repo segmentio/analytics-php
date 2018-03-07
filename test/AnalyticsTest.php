@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../lib/Segment.php";
 
-class AnalyticsTest extends PHPUnit\Framework\TestCase
+class AnalyticsTest extends PHPUnit_Framework_TestCase
 {
   public function setUp()
   {

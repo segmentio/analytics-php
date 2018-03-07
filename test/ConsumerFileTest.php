@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
-class ConsumerFileTest extends PHPUnit\Framework\TestCase
+class ConsumerFileTest extends PHPUnit_Framework_TestCase
 {
   private $client;
   private $filename = "/tmp/analytics.log";

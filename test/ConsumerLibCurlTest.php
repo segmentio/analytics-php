@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
-class ConsumerLibCurlTest extends PHPUnit\Framework\TestCase
+class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
 {
   private $client;
 

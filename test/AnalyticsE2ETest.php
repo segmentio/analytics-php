@@ -61,7 +61,7 @@ class AxiosClient
   }
 }
 
-class AnalyticsE2ETest extends PHPUnit\Framework\TestCase
+class AnalyticsE2ETest extends PHPUnit_Framework_TestCase
 {
   private static $WRITE_KEY = "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn";
   private static $RUNSCOPE_BUCKET = "bmbbsjxdttr7";
