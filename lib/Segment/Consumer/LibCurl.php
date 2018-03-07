@@ -1,13 +1,7 @@
 <?php
 
 class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
-
   protected $type = "LibCurl";
-
-  //define getter method for consumer type
-  public function getConsumer() {
-    return $this->type;
-  }
 
   /**
    * Creates a new queued libcurl consumer
@@ -21,6 +15,11 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
     parent::__construct($secret, $options);
   }
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
   /**
    * Make a sync request to our API. If debug is
    * enabled, we wait for the response
@@ -29,7 +28,6 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
    * @return boolean whether the request succeeded
    */
   public function flushBatch($messages) {
-
     $body = $this->payload($messages);
     $payload = json_encode($body);
     $secret = $this->secret;
@@ -40,14 +38,16 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
         $msg = "Message size is larger than 32KB";
         error_log("[Analytics][" . $this->type . "] " . $msg);
       }
+
       return false;
     }
 
     $protocol = $this->ssl() ? "https://" : "http://";
-    if ($this->host)
+    if ($this->host) {
       $host = $this->host;
-    else
+    } else {
       $host = "api.segment.io";
+    }
     $path = "/v1/import";
     $url = $protocol . $host . $path;
 
@@ -71,11 +71,11 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       $library = $messages[0]['context']['library'];
       $libName = $library['name'];
       $libVersion = $library['version'];
-      $header[] = "User-Agent: $libName/$libVersion";
+      $header[] = "User-Agent: ${libName}/${libVersion}";
 
       curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
       curl_setopt($ch, CURLOPT_URL, $url);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       // retry failed requests just once to diminish impact on performance
       $httpResponse = $this->executePost($ch);
@@ -85,36 +85,31 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
 
       $elapsed_time = microtime(true) - $start_time;
 
-      if ($httpResponse != 200) {
+      if (200 != $httpResponse) {
         // log error
         $this->handleError($ch, $httpResponse);
 
-        if (($httpResponse >= 500 && $httpResponse <= 600) || $httpResponse == 429) {
+        if (($httpResponse >= 500 && $httpResponse <= 600) || 429 == $httpResponse) {
           // If status code is greater than 500 and less than 600, it indicates server error
           // Error code 429 indicates rate limited.
           // Retry uploading in these cases.
           usleep($backoff * 1000);
           $backoff *= 2;
-        }
-        else if ($httpResponse >= 400) {
+        } elseif ($httpResponse >= 400) {
           break;
         }
-      }
-      else {
+      } else {
         break;  // no error
       }
     }
-
-
 
     return $httpResponse;
   }
 
   public function executePost($ch) {
-
     curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    return $httpCode;
 
+    return $httpCode;
   }
 }
