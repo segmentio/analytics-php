@@ -1,14 +1,7 @@
 <?php
 
 class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
-
   protected $type = "ForkCurl";
-
-  //define getter method for consumer type
-  public function getConsumer() {
-    return $this->type;
-  }
-
 
   /**
    * Creates a new queued fork consumer which queues fork and identify
@@ -23,6 +16,11 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     parent::__construct($secret, $options);
   }
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
   /**
    * Make an async request to our API. Fork a curl process, immediately send
    * to the API. If debug is enabled, we wait for the response.
@@ -30,23 +28,23 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
    * @return boolean whether the request succeeded
    */
   public function flushBatch($messages) {
-
     $body = $this->payload($messages);
     $payload = json_encode($body);
 
-    # Escape for shell usage.
+    // Escape for shell usage.
     $payload = escapeshellarg($payload);
     $secret = $this->secret;
 
     $protocol = $this->ssl() ? "https://" : "http://";
-    if ($this->host)
+    if ($this->host) {
       $host = $this->host;
-    else
+    } else {
       $host = "api.segment.io";
+    }
     $path = "/v1/import";
     $url = $protocol . $host . $path;
 
-    $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
+    $cmd = "curl -u ${secret}: -X POST -H 'Content-Type: application/json'";
     $cmd.= " -d " . $payload . " '" . $url . "'";
 
     // Verify message size is below than 32KB
@@ -55,6 +53,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
         $msg = "Message size is larger than 32KB";
         error_log("[Analytics][" . $this->type . "] " . $msg);
       }
+
       return false;
     }
 
@@ -62,7 +61,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
     $library = $messages[0]['context']['library'];
     $libName = $library['name'];
     $libVersion = $library['version'];
-    $cmd.= " -H 'User-Agent: $libName/$libVersion'";
+    $cmd.= " -H 'User-Agent: ${libName}/${libVersion}'";
 
     if (!$this->debug()) {
       $cmd .= " > /dev/null 2>&1 &";
@@ -70,10 +69,10 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
     exec($cmd, $output, $exit);
 
-    if ($exit != 0) {
+    if (0 != $exit) {
       $this->handleError($exit, $output);
     }
 
-    return $exit == 0;
+    return 0 == $exit;
   }
 }
