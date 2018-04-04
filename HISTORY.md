@@ -1,4 +1,88 @@
 
+100 / 2018-04-04
+================
+
+  * Merge pull request #113 from Mihailoff/patch-1
+  * Requesting the license file to be included
+  * Coding style fixer (#112)
+  * Coding style (#111)
+  * rename type to method to match new harness contract (#110)
+  * Code coverage (#108)
+  * Add Linter to CI (#109)
+  * Merge pull request #106 from segmentio/limit_messagesize
+  * When the message size is larger than 32KB, return FALSE instead of throw exception
+  * When message size is larger than 32KB, display error message instead of exception
+  * Merge pull request #107 from segmentio/writeKey
+  * Make writeKey required as a flag in the CLI instead of as an environment variable.
+  * Merge pull request #102 from segmentio/e2e_test
+  * Fix comment error for write key
+  * Add unit test for limiting message size
+  * Update exception class for large message size to RuntimeException
+  * Verify message size is below than 32KB
+  * Run E2E test when RUN_E2E_TESTS is defined
+  * Use property with id instead of anonymousId
+  * Update Runscope bucket and write key
+  * Merge pull request #103 from segmentio/RFC7231
+  * Add Rfc 7231 compliant user agent into request header
+  * Add E2E test
+  * Merge pull request #101 from segmentio/add_backoff
+  * Merge branch 'master' into add_backoff
+  * Change docker image dist so that prevent unit test error in PHP 5.3
+  * Fix code error
+  * Merge pull request #98 from segmentio/host_configurable
+  * Add backoff for socket communication
+  * Implement response error handling for POST request and add backoff (in LibCurl)
+  * Change environment to precise as default
+  * Make PHP 5.3 test to be run in precise environment
+  * Make host to be configurable
+  * Ignore .vscode directory for changes
+  * Merge pull request #84 from Gufran/anonymous-groupd
+  * Merge pull request #93 from segmentio/releasing
+  * add releasing steps
+  * Add anonymousId in group payload
+
+ / 2018-04-04
+=============
+
+  * Merge pull request #113 from Mihailoff/patch-1
+  * Requesting the license file to be included
+  * Coding style fixer (#112)
+  * Coding style (#111)
+  * rename type to method to match new harness contract (#110)
+  * Code coverage (#108)
+  * Add Linter to CI (#109)
+  * Merge pull request #106 from segmentio/limit_messagesize
+  * When the message size is larger than 32KB, return FALSE instead of throw exception
+  * When message size is larger than 32KB, display error message instead of exception
+  * Merge pull request #107 from segmentio/writeKey
+  * Make writeKey required as a flag in the CLI instead of as an environment variable.
+  * Merge pull request #102 from segmentio/e2e_test
+  * Fix comment error for write key
+  * Add unit test for limiting message size
+  * Update exception class for large message size to RuntimeException
+  * Verify message size is below than 32KB
+  * Run E2E test when RUN_E2E_TESTS is defined
+  * Use property with id instead of anonymousId
+  * Update Runscope bucket and write key
+  * Merge pull request #103 from segmentio/RFC7231
+  * Add Rfc 7231 compliant user agent into request header
+  * Add E2E test
+  * Merge pull request #101 from segmentio/add_backoff
+  * Merge branch 'master' into add_backoff
+  * Change docker image dist so that prevent unit test error in PHP 5.3
+  * Fix code error
+  * Merge pull request #98 from segmentio/host_configurable
+  * Add backoff for socket communication
+  * Implement response error handling for POST request and add backoff (in LibCurl)
+  * Change environment to precise as default
+  * Make PHP 5.3 test to be run in precise environment
+  * Make host to be configurable
+  * Ignore .vscode directory for changes
+  * Merge pull request #84 from Gufran/anonymous-groupd
+  * Merge pull request #93 from segmentio/releasing
+  * add releasing steps
+  * Add anonymousId in group payload
+
 1.5.2 / 2017-08-18
 ==================
 
