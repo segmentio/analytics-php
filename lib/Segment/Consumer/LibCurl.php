@@ -78,24 +78,25 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       // retry failed requests just once to diminish impact on performance
-      $httpResponse = $this->executePost($ch);
+      $response = $this->executePost($ch);
 
       //close connection
       curl_close($ch);
 
       $elapsed_time = microtime(true) - $start_time;
 
-      if (200 != $httpResponse) {
+      $responseCode = $response['httpCode'];
+      if (200 != $responseCode) {
         // log error
-        $this->handleError($ch, $httpResponse);
+        $this->handleError($response['errno'], $response['errmsg']);
 
-        if (($httpResponse >= 500 && $httpResponse <= 600) || 429 == $httpResponse) {
+        if (($responseCode >= 500 && $responseCode <= 600) || 429 == $responseCode) {
           // If status code is greater than 500 and less than 600, it indicates server error
           // Error code 429 indicates rate limited.
           // Retry uploading in these cases.
           usleep($backoff * 1000);
           $backoff *= 2;
-        } elseif ($httpResponse >= 400) {
+        } elseif ($responseCode >= 400) {
           break;
         }
       } else {
@@ -103,13 +104,19 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       }
     }
 
-    return $httpResponse;
+    return $responseCode;
   }
 
   public function executePost($ch) {
     curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $errno = curl_errno($ch);
+    $errmsg = curl_error($ch);
 
-    return $httpCode;
+    return array(
+      "httpCode" => $httpCode,
+      "errno" => $errno,
+      "errmsg" => $errmsg
+    );
   }
 }
