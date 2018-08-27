@@ -1,5 +1,7 @@
+bootstrap:
+	.buildscript/bootstrap.sh
 
-install: vendor
+dependencies: vendor
 
 vendor: composer.phar
 	@php ./composer.phar install
@@ -7,15 +9,15 @@ vendor: composer.phar
 composer.phar:
 	@curl -sS https://getcomposer.org/installer | php
 
-test: install
+test: lint
 	@vendor/bin/phpunit --colors test/
 	@php ./composer.phar validate
 
-lint:
+lint: dependencies
 	@if php -r 'exit(version_compare(PHP_VERSION, "5.5", ">=") ? 0 : 1);'; \
 	then \
-		composer require overtrue/phplint; \
-		composer require squizlabs/php_codesniffer; \
+		php ./composer.phar require overtrue/phplint --dev; \
+		php ./composer.phar require squizlabs/php_codesniffer --dev; \
 		./vendor/bin/phplint; \
 		./vendor/bin/phpcs; \
 	else \
@@ -35,4 +37,4 @@ clean:
 		vendor \
 		composer.lock
 
-.PHONY: lint test release
+.PHONY: boostrap release clean
