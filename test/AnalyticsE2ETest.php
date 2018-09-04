@@ -9,14 +9,14 @@ class AxiosClient
   private $Authorization = "";
   private $RetryCount = 1;
 
-  public function __construct($baseAddress, $timeout, $authorization)
+  public function __construct($baseAddress, $timeout, $username)
   {
-    $this->BaseAddress = $baseAddress ? $baseAddress : "https://api.runscope.com";
+    $this->BaseAddress = $baseAddress ? $baseAddress : "https://webhook-e2e.segment.com";
     if ($timeout) {
       $this->Timeout = $timeout;
     }
-    if ($authorization) {
-      $this->Authorization = $authorization;
+    if ($username) {
+      $this->Authorization = base64_encode($username . ":");
     }
   }
 
@@ -38,7 +38,7 @@ class AxiosClient
       // Set authorization
       if ($this->Authorization) {
         $header = array();
-        $header[] = 'Authorization: Bearer ' . $this->Authorization;
+        $header[] = 'Authorization: Basic ' . $this->Authorization;
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
       }
@@ -64,7 +64,6 @@ class AxiosClient
 class AnalyticsE2ETest extends PHPUnit_Framework_TestCase
 {
   private static $WRITE_KEY = "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn";
-  private static $RUNSCOPE_BUCKET = "bmbbsjxdttr7";
   private $id = "";
   private $test_e2e;
 
@@ -99,28 +98,19 @@ class AnalyticsE2ETest extends PHPUnit_Framework_TestCase
     if (!$this->test_e2e) {
       return;
     }
-    // Verify RUNSCOPE_TOKEN is defined as system variable
-    $this->assertTrue(isset($_SERVER["RUNSCOPE_TOKEN"]));
-    $token = $_SERVER["RUNSCOPE_TOKEN"];
+    // Verify WEBHOOK_AUTH_USERNAME is defined as system variable
+    $this->assertTrue(isset($_SERVER["WEBHOOK_AUTH_USERNAME"]));
+    $username = $_SERVER["WEBHOOK_AUTH_USERNAME"];
 
-    $client = new AxiosClient("https://api.runscope.com", 10 * 1000, $token);
+    $client = new AxiosClient("https://webhook-e2e.segment.com", 10 * 1000, $username);
     $client->setRetryCount(3);
 
     for ($i = 0; $i < 5; ++$i) {
-      // Runscope Bucket for https://www.runscope.com/stream/bmbbsjxdttr7.
-      $messageResponse = $client->Get("buckets/" . self::$RUNSCOPE_BUCKET . "/messages?count=20");
+      // Runscope Bucket for https://webhook-e2e.segment.com/buckets/php.
+      $messageResponse = $client->Get("buckets/php?limit=20");
       $this->assertTrue(null != $messageResponse);
 
-      $data = json_decode($messageResponse, true);
-
-      $messages = array();
-      foreach ($data["data"] as $item) {
-        $response = $client->Get("buckets/" . self::$RUNSCOPE_BUCKET . "/messages/" . $item["uuid"]);
-        $this->assertTrue(null != $response);
-
-        $content2 = json_decode($response, true);
-        array_push($messages, $content2['data']['request']['body']);
-      }
+      $messages = json_decode($messageResponse, true);
 
       $count = 0;
       foreach ($messages as $m) {
