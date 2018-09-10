@@ -14,6 +14,7 @@ matrix:
 script:
   - if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi
   - phpunit
+  - .buildscript/e2e.sh
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
