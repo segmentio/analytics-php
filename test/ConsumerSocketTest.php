@@ -206,7 +206,9 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase
     $options = array(
       "compress_request" => true,
       "consumer"      => "socket",
-      "error_handler" => function () { throw new Exception("Was called"); }
+      "error_handler" => function ($errno, $errmsg) {
+        throw new \RuntimeException($errmsg, $errno);
+      },
     );
 
     $client = new Segment_Client("x", $options);
