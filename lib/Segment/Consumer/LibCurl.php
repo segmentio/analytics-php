@@ -42,6 +42,10 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       return false;
     }
 
+    if ($this->compress_request) {
+      $payload = gzencode($payload);
+    }
+
     $protocol = $this->ssl() ? "https://" : "http://";
     if ($this->host) {
       $host = $this->host;
@@ -66,6 +70,10 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       // set variables for headers
       $header = array();
       $header[] = 'Content-Type: application/json';
+
+      if ($this->compress_request) {
+        $header[] = 'Content-Encoding: gzip';
+      }
 
       // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
       $library = $messages[0]['context']['library'];

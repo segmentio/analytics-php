@@ -201,4 +201,20 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase
     $client->track(array("user_id" => "some-user", "event" => "Event"));
     $client->__destruct();
   }
+
+  public function testRequestCompression() {
+    $options = array(
+      "compress_request" => true,
+      "consumer"      => "socket",
+      "error_handler" => function ($errno, $errmsg) {
+        throw new \RuntimeException($errmsg, $errno);
+      },
+    );
+
+    $client = new Segment_Client("x", $options);
+
+    # Should error out with debug on.
+    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $client->__destruct();
+  }
 }
