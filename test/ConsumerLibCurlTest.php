@@ -92,7 +92,6 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
     $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
     $client->__destruct();
   }
-}
 
   public function testLargeMessageSizeError()
   {
