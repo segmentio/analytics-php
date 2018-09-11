@@ -30,9 +30,10 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
       $this->host = $options["host"];
     }
 
-    if (isset($options["compress_request"]))
+    if (isset($options["compress_request"])) {
       $this->compress_request = json_decode($options["compress_request"]);
-
+    }
+    
     $this->queue = array();
   }
 

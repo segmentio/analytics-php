@@ -79,7 +79,7 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
     )));
   }
 
-  function testRequestCompression() {
+  public function testRequestCompression() {
     $options = array(
       "compress_request" => true,
       "consumer"      => "lib_curl",

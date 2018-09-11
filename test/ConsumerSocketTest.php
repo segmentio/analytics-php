@@ -202,7 +202,7 @@ class ConsumerSocketTest extends PHPUnit_Framework_TestCase
     $client->__destruct();
   }
 
-  function testRequestCompression() {
+  public function testRequestCompression() {
     $options = array(
       "compress_request" => true,
       "consumer"      => "socket",
