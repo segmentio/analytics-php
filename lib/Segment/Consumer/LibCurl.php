@@ -87,6 +87,7 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
 
       // retry failed requests just once to diminish impact on performance
       $httpResponse = $this->executePost($ch);
+      $errno = curl_errno($ch);
 
       //close connection
       curl_close($ch);
@@ -97,7 +98,7 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
         // log error
         $this->handleError($ch, $httpResponse);
 
-        if (($httpResponse >= 500 && $httpResponse <= 600) || 429 == $httpResponse) {
+        if (($httpResponse >= 500 && $httpResponse <= 600) || 429 == $httpResponse || $errno != 0) {
           // If status code is greater than 500 and less than 600, it indicates server error
           // Error code 429 indicates rate limited.
           // Retry uploading in these cases.
