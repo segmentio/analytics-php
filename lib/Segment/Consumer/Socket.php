@@ -2,7 +2,6 @@
 
 class Segment_Consumer_Socket extends Segment_QueueConsumer {
   protected $type = "Socket";
-  private $socket_failed;
 
   /**
    * Creates a new socket consumer for dispatching async requests immediately
@@ -32,10 +31,6 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
   public function flushBatch($batch) {
     $socket = $this->createSocket();
 
-    if (!$socket) {
-      return;
-    }
-
     $payload = $this->payload($batch);
     $payload = json_encode($payload);
 
@@ -48,10 +43,6 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
   }
 
   private function createSocket() {
-    if ($this->socket_failed) {
-      return false;
-    }
-
     $protocol = $this->ssl() ? "ssl" : "tcp";
     $host = $this->options["host"];
     $port = $this->ssl() ? 443 : 80;
@@ -71,7 +62,6 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
       // If we couldn't open the socket, handle the error.
       if (false === $socket) {
         $this->handleError($errno, $errstr);
-        $this->socket_failed = true;
 
         return false;
       }
@@ -79,7 +69,6 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
       return $socket;
     } catch (Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
-      $this->socket_failed = true;
 
       return false;
     }
@@ -102,32 +91,34 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $backoff = 100;   // Set initial waiting time to 100ms
 
     while (true) {
-      // Send request to server
-      while (!$closed && $bytes_written < $bytes_total) {
-        try {
-          // Since we're try catch'ing prevent PHP logs.
-          $written = @fwrite($socket, substr($req, $bytes_written));
-        } catch (Exception $e) {
-          $this->handleError($e->getCode(), $e->getMessage());
-          $closed = true;
-        }
-        if (!isset($written) || !$written) {
-          $closed = true;
-        } else {
-          $bytes_written += $written;
-        }
-      }
-
-      // Get response for request
       $statusCode = 0;
       $errorMessage = "";
 
-      if (!$closed) {
-        $res = $this->parseResponse(fread($socket, 2048));
-        $statusCode = (int)$res["status"];
-        $errorMessage = $res["message"];
+      if ($socket) {
+        // Send request to server
+        while (!$closed && $bytes_written < $bytes_total) {
+          try {
+            // Since we're try catch'ing prevent PHP logs.
+            $written = @fwrite($socket, substr($req, $bytes_written));
+          } catch (Exception $e) {
+            $this->handleError($e->getCode(), $e->getMessage());
+            $closed = true;
+          }
+          if (!isset($written) || !$written) {
+            $closed = true;
+          } else {
+            $bytes_written += $written;
+          }
+        }
+
+        // Get response for request
+        if (!$closed) {
+          $res = $this->parseResponse(fread($socket, 2048));
+          $statusCode = (int)$res["status"];
+          $errorMessage = $res["message"];
+        }
+        fclose($socket);
       }
-      fclose($socket);
 
       // If status code is 200, return true
       if (200 == $statusCode) {
@@ -156,7 +147,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
       $socket = $this->createSocket();
     }
 
-    return $success;
+    return false;
   }
 
   /**
