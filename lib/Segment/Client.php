@@ -11,13 +11,6 @@ require_once(__DIR__ . '/Version.php');
 class Segment_Client {
   protected $consumer;
 
-  private const DEFAULT_CONSUMERS = array(
-      "socket"     => "Segment_Consumer_Socket",
-      "file"       => "Segment_Consumer_File",
-      "fork_curl"  => "Segment_Consumer_ForkCurl",
-      "lib_curl"   => "Segment_Consumer_LibCurl"
-  );
-
   /**
    * Create a new analytics object with your app's secret
    * key
@@ -29,11 +22,17 @@ class Segment_Client {
    */
   public function __construct($secret, $options = array()) {
 
+    $consumers = array(
+        "socket"     => "Segment_Consumer_Socket",
+        "file"       => "Segment_Consumer_File",
+        "fork_curl"  => "Segment_Consumer_ForkCurl",
+        "lib_curl"   => "Segment_Consumer_LibCurl"
+    );
     // Use our socket libcurl by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
                                                    "lib_curl";
 
-    if (!array_key_exists($consumer_type, self::DEFAULT_CONSUMERS) && class_exists($consumer_type)) {
+    if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
         if (!is_subclass_of($consumer_type, Segment_Consumer::class)) {
             throw new Exception('Consumers must extend the Segment_Consumer abstract class');
         }
@@ -42,7 +41,7 @@ class Segment_Client {
         return;
     }
 
-    $Consumer = self::DEFAULT_CONSUMERS[$consumer_type];
+    $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
   }
