@@ -33,7 +33,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
     // Escape for shell usage.
     $payload = escapeshellarg($payload);
-    $secret = $this->secret;
+    $secret = escapeshellarg($this->secret);
 
     $protocol = $this->ssl() ? "https://" : "http://";
     if ($this->host) {
