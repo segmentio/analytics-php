@@ -40,11 +40,11 @@ jobs:
             - ./vendor
       - restore_cache:
           keys:
-            - node-v1-{{ checksum "package.json" }}
+            - node-v1-{{ checksum "composer.json" }}
             - node-v1-
       - run: yarn install
       - save_cache:
-          key: node-v1-{{ checksum "package.json" }}
+          key: node-v1-{{ checksum "composer.json" }}
           paths:
             - node_modules
 
