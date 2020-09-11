@@ -49,11 +49,19 @@ jobs:
           paths:
             - node_modules
 
-      # prepare the database
-      - run: touch storage/testing.sqlite
-      - run: php artisan migrate --env=testing --database=sqlite_testing --force
-
       # run tests with phpunit or codecept
+      #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
+      #- run: 'phpunit'
+      - run:
+          name: 'Running unit tests'
+          command: './vendor/bin/phpunit test'
+      - run:
+          name: 'Running E2E tests'
+          command: '.buildscript/e2e.sh'
+      - run:
+          name: 'Code coverage'
+          command: 'bash <(curl -s https://codecov.io/bash)'
+
       #- run: ./vendor/bin/phpunit
-      - run: ./vendor/bin/codecept build
-      - run: ./vendor/bin/codecept run
+      #- run: ./vendor/bin/codecept build
+      #- run: ./vendor/bin/codecept run
