@@ -59,6 +59,7 @@ jobs:
           name: 'Running E2E tests'
           command: '.buildscript/e2e.sh'
       - run:
+          when: on_success
           name: 'Code coverage'
           command: 'bash <(curl -s https://codecov.io/bash)'
 
