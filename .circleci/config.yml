@@ -5,6 +5,7 @@
 version: 2
 commands:
   setupenv:
+    steps:
       - checkout
 
       - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
@@ -36,6 +37,7 @@ commands:
             - node_modules
 
   test:     
+    steps:
       # run tests with phpunit or codecept
       #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
       #- run: 'phpunit'
