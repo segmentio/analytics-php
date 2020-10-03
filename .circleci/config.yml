@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  "build":
+  build:
       - checkout
 
       - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
@@ -34,7 +34,7 @@ jobs:
           key: node-v1-{{ checksum "composer.json" }}
           paths:
             - node_modules
-  "test":
+  test:
       # run tests with phpunit or codecept
       #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
       #- run: 'phpunit'
@@ -104,7 +104,7 @@ jobs:
     steps:
       - build
       - test
-
+      
   "php-7.3":
     docker:
       # Specify the version you desire here
