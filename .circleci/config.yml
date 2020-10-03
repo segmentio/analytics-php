@@ -4,21 +4,7 @@
 #
 version: 2
 jobs:
-  "php-5":
-    docker:
-      # Specify the version you desire here
-      - image: circleci/php:5-node-browsers
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # Using the RAM variation mitigates I/O contention
-      # for database intensive operations.
-      # - image: circleci/mysql:5.7-ram
-      #
-      # - image: redis:2.8.19
-
-    steps:
+  build:
       - checkout
 
       - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
@@ -48,7 +34,7 @@ jobs:
           key: node-v1-{{ checksum "composer.json" }}
           paths:
             - node_modules
-
+  test:
       # run tests with phpunit or codecept
       #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
       #- run: 'phpunit'
@@ -62,6 +48,26 @@ jobs:
           when: on_success
           name: 'Code coverage'
           command: 'bash <(curl -s https://codecov.io/bash)'
+
+  "php-5":
+    docker:
+      # Specify the version you desire here
+      - image: circleci/php:5-node-browsers
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # Using the RAM variation mitigates I/O contention
+      # for database intensive operations.
+      # - image: circleci/mysql:5.7-ram
+      #
+      # - image: redis:2.8.19
+
+    steps:
+      - build
+      - test
+
+
   
   "php-5.6":
     docker:
@@ -78,49 +84,8 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - checkout
-
-      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo docker-php-ext-install zip
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            # "composer.lock" can be used if it is committed to the repo
-            - v1-dependencies-{{ checksum "composer.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: composer install -n --prefer-dist
-
-      - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
-          paths:
-            - ./vendor
-      - restore_cache:
-          keys:
-            - node-v1-{{ checksum "composer.json" }}
-            - node-v1-
-      - run: yarn install
-      - save_cache:
-          key: node-v1-{{ checksum "composer.json" }}
-          paths:
-            - node_modules
-
-      # run tests with phpunit or codecept
-      #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
-      #- run: 'phpunit'
-      - run:
-          name: 'Running unit tests'
-          command: './vendor/bin/phpunit test'
-      - run:
-          name: 'Running E2E tests'
-          command: '.buildscript/e2e.sh'
-      - run:
-          when: on_success
-          name: 'Code coverage'
-          command: 'bash <(curl -s https://codecov.io/bash)'
+      - build
+      - test
 
   "php-7.1":
     docker:
@@ -137,50 +102,9 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - checkout
-
-      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo docker-php-ext-install zip
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            # "composer.lock" can be used if it is committed to the repo
-            - v1-dependencies-{{ checksum "composer.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: composer install -n --prefer-dist
-
-      - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
-          paths:
-            - ./vendor
-      - restore_cache:
-          keys:
-            - node-v1-{{ checksum "composer.json" }}
-            - node-v1-
-      - run: yarn install
-      - save_cache:
-          key: node-v1-{{ checksum "composer.json" }}
-          paths:
-            - node_modules
-
-      # run tests with phpunit or codecept
-      #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
-      #- run: 'phpunit'
-      - run:
-          name: 'Running unit tests'
-          command: './vendor/bin/phpunit test'
-      - run:
-          name: 'Running E2E tests'
-          command: '.buildscript/e2e.sh'
-      - run:
-          when: on_success
-          name: 'Code coverage'
-          command: 'bash <(curl -s https://codecov.io/bash)'
-
+      - build
+      - test
+      
   "php-7.3":
     docker:
       # Specify the version you desire here
@@ -196,49 +120,8 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - checkout
-
-      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo docker-php-ext-install zip
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            # "composer.lock" can be used if it is committed to the repo
-            - v1-dependencies-{{ checksum "composer.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: composer install -n --prefer-dist
-
-      - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
-          paths:
-            - ./vendor
-      - restore_cache:
-          keys:
-            - node-v1-{{ checksum "composer.json" }}
-            - node-v1-
-      - run: yarn install
-      - save_cache:
-          key: node-v1-{{ checksum "composer.json" }}
-          paths:
-            - node_modules
-
-      # run tests with phpunit or codecept
-      #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
-      #- run: 'phpunit'
-      - run:
-          name: 'Running unit tests'
-          command: './vendor/bin/phpunit test'
-      - run:
-          name: 'Running E2E tests'
-          command: '.buildscript/e2e.sh'
-      - run:
-          when: on_success
-          name: 'Code coverage'
-          command: 'bash <(curl -s https://codecov.io/bash)'
+      - build
+      - test
 
   "php-7.4":
     docker:
@@ -255,49 +138,8 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - checkout
-
-      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo apt install zlib1g-dev libsqlite3-dev
-      - run: sudo docker-php-ext-install zip
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            # "composer.lock" can be used if it is committed to the repo
-            - v1-dependencies-{{ checksum "composer.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: composer install -n --prefer-dist
-
-      - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
-          paths:
-            - ./vendor
-      - restore_cache:
-          keys:
-            - node-v1-{{ checksum "composer.json" }}
-            - node-v1-
-      - run: yarn install
-      - save_cache:
-          key: node-v1-{{ checksum "composer.json" }}
-          paths:
-            - node_modules
-
-      # run tests with phpunit or codecept
-      #- run: 'if [[ ! ${TRAVIS_PHP_VERSION:0:3} < "5.5" ]]; then  composer require overtrue/phplint; composer require squizlabs/php_codesniffer; ./vendor/bin/phplint; ./vendor/bin/phpcs; fi'
-      #- run: 'phpunit'
-      - run:
-          name: 'Running unit tests'
-          command: './vendor/bin/phpunit test'
-      - run:
-          name: 'Running E2E tests'
-          command: '.buildscript/e2e.sh'
-      - run:
-          when: on_success
-          name: 'Code coverage'
-          command: 'bash <(curl -s https://codecov.io/bash)'
+      - build
+      - test
 
 
 workflows:
