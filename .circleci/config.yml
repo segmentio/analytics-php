@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  "image":
+  "build":
       - checkout
 
       - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0 Configuration File sudo apt install zlib1g-dev libsqlite3-dev
@@ -64,7 +64,7 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - image
+      - build
       - test
 
 
@@ -84,7 +84,7 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - image
+      - build
       - test
 
   "php-7.1":
@@ -102,7 +102,7 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - image
+      - build
       - test
 
   "php-7.3":
@@ -120,7 +120,7 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - image
+      - build
       - test
 
   "php-7.4":
@@ -138,7 +138,7 @@ jobs:
       # - image: redis:2.8.19
 
     steps:
-      - image
+      - build
       - test
 
 
