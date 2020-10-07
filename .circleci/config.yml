@@ -4,15 +4,12 @@
 #
 version: 2
 jobs:
-
   multi-test: &multi-test
-    docker: 
-      - image: node
-
-    steps: 
+    docker:
+      - image: php
+    steps:
       - checkout
-
-      - run: sudo apt update 
+      - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
 
@@ -36,11 +33,9 @@ jobs:
           key: node-v1-{{ checksum "composer.json" }}
           paths:
             - node_modules
-
-      -run:
+      - run:
         - e2e
         - codecov
-
 
   e2e:
     steps:
@@ -77,9 +72,7 @@ jobs:
   test-php7.4:
     <<: *multi-test
     docker:
-      - image: circleci/php:7.4-node-browsers      
-
-
+      - image: circleci/php:7.4-node-browsers
 workflows:
   version: 2
   multi-test:
