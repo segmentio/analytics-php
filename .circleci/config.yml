@@ -34,17 +34,12 @@ jobs:
           paths:
             - node_modules
       - run:
-        - e2e
-        - codecov
-
-  e2e:
-    steps:
-        - run:
+          name: 'Running unit tests'
+          command: './vendor/bin/phpunit test'
+      - run:
           name: 'Running E2E tests'
           command: '.buildscript/e2e.sh'
-  codecov:
-    steps:
-        - run:
+      - run:
           when: on_success
           name: 'Code coverage'
           command: 'bash <(curl -s https://codecov.io/bash)'
