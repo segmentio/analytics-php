@@ -44,25 +44,10 @@ jobs:
           name: 'Code coverage'
           command: 'bash <(curl -s https://codecov.io/bash)'
 
-  test-php5:
+  test-php7.2:
     <<: *multi-test
     docker:
-      - image: circleci/php:5-node-browsers
-
-  test-php5.6:
-    <<: *multi-test
-    docker:
-      - image: circleci/php:5.6-node-browsers
-
-  test-php7.1:
-    <<: *multi-test
-    docker:
-      - image: circleci/php:7.1-node-browsers
-  
-  test-php7.3:
-    <<: *multi-test
-    docker:
-      - image: circleci/php:7.3-node-browsers
+      - image: circleci/php:7.2-node-browsers
 
   test-php7.4:
     <<: *multi-test
@@ -72,8 +57,5 @@ workflows:
   version: 2
   multi-test:
     jobs:
-      - test-php5
-      - test-php5.6
-      - test-php7.1
-      - test-php7.3
+      - test-php7.2
       - test-php7.4
