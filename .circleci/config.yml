@@ -6,11 +6,10 @@ version: 2
 jobs:
 
   coverage:
+    docker:
+      - image: circleci/php:7.2-node-browsers
     steps:
-      - run:
-        when: on_success
-        name: 'Code coverage'
-        command: 'bash <(curl -s https://codecov.io/bash)'
+      - run: 'bash <(curl -s https://codecov.io/bash)'
 
   multi-test: &multi-test
     docker:
@@ -48,12 +47,10 @@ jobs:
           name: 'Running E2E tests'
           command: '.buildscript/e2e.sh'
 
-
   test-php7.2:
     <<: *multi-test
     docker:
       - image: circleci/php:7.2-node-browsers
-
   test-php7.4:
     <<: *multi-test
     docker:
