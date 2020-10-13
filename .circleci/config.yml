@@ -4,6 +4,14 @@
 #
 version: 2
 jobs:
+
+  coverage:
+    steps:
+      - run:
+        when: on_success
+        name: 'Code coverage'
+        command: 'bash <(curl -s https://codecov.io/bash)'
+
   multi-test: &multi-test
     docker:
       - image: php
@@ -39,10 +47,7 @@ jobs:
       - run:
           name: 'Running E2E tests'
           command: '.buildscript/e2e.sh'
-      - run:
-          when: on_success
-          name: 'Code coverage'
-          command: 'bash <(curl -s https://codecov.io/bash)'
+
 
   test-php7.2:
     <<: *multi-test
@@ -57,5 +62,6 @@ workflows:
   version: 2
   multi-test:
     jobs:
+      - coverage
       - test-php7.2
       - test-php7.4
