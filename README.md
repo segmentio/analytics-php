@@ -1,7 +1,7 @@
 analytics-php
 ==============
+[![Segmentio](https://circleci.com/gh/segmentio/analytics-php.svg?style=shield)](https://app.circleci.com/pipelines/github/segmentio/analytics-php)
 
-[![Build Status](https://travis-ci.org/segmentio/analytics-php.png?branch=master)](https://travis-ci.org/segmentio/analytics-php)
 
 analytics-php is a php client for [Segment](https://segment.com)
 
