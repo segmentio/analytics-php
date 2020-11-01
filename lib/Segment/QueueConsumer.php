@@ -115,7 +115,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
     while ($count > 0 && $success) {
       $batch = array_splice($this->queue, 0, min($this->batch_size, $count));
 
-      if (strlen($batch) >= $max_batch_size_bytes) {
+      if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_batch_size_bytes) {
         $msg = "Batch size is larger than 500KB";
         error_log("[Analytics][" . $this->type . "] " . $msg);
 
@@ -142,7 +142,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
       return false;
     }
 
-    if (strlen($this->queue) >= $max_queue_size_bytes) {
+    if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_queue_size_bytes) {
         $msg = "Queue size is larger than 32MB";
         error_log("[Analytics][" . $this->type . "] " . $msg);
 
