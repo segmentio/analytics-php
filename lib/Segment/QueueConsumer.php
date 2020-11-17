@@ -141,7 +141,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
     while ($count > 0 && $success) {
 
-      $batch = array_splice($this->queue, 0, min($this->batch_size, $count));
+      $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
 
       if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_batch_size_bytes) {
         $msg = "Batch size is larger than 500KB";
