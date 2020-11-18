@@ -33,7 +33,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
     // Escape for shell usage.
     $payload = escapeshellarg($payload);
-    $secret = $this->secret;
+    $secret = escapeshellarg($this->secret);
 
     $protocol = $this->ssl() ? "https://" : "http://";
     if ($this->host) {
@@ -69,10 +69,8 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
 
     // Verify message size is below than 32KB
     if (strlen($payload) >= 32 * 1024) {
-      if ($this->debug()) {
-        $msg = "Message size is larger than 32KB";
-        error_log("[Analytics][" . $this->type . "] " . $msg);
-      }
+      $msg = "Message size is larger than 32KB";
+      error_log("[Analytics][" . $this->type . "] " . $msg);
 
       return false;
     }
