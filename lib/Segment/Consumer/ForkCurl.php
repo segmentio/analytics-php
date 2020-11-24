@@ -10,7 +10,7 @@ class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
    * @param array  $options
    *     boolean  "debug" - whether to use debug output, wait for response.
    *     number   "max_queue_size" - the max size of messages to enqueue
-   *     number   "batch_size" - how many messages to send in a single request
+   *     number   "flush_at" - how many messages to send in a single request
    */
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
