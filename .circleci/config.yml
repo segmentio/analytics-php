@@ -19,6 +19,7 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
+      - run: sudo docker-php-ext-enable xdebug
 
       - restore_cache:
           keys:
