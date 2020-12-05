@@ -14,12 +14,13 @@ jobs:
   multi-test: &multi-test
     docker:
       - image: php
+    environment:
+      XDEBUG_MODE: coverage
     steps:
       - checkout
       - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
-      - run: sudo export XDEBUG_MODE=coverage
 
       - restore_cache:
           keys:
