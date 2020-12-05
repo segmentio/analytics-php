@@ -20,7 +20,8 @@ jobs:
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
       - run: sudo docker-php-ext-enable xdebug
-      - run: sudo docker-php-ext-enable xdebug.mode = coverage
+      - run: sudo XDEBUG_MODE=coverage
+      - run: sudo export XDEBUG_MODE
 
       - restore_cache:
           keys:
