@@ -14,6 +14,8 @@ jobs:
   multi-test: &multi-test
     docker:
       - image: php
+    environment:
+      XDEBUG_MODE: coverage
     steps:
       - checkout
       - run: sudo apt update
