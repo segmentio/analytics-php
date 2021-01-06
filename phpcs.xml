@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="PHP_CodeSniffer">
+  <description>The coding standard for analytics-php project.</description>
+
+  <file>./lib/</file>
+  <file>./test/</file>
+
+  <arg name="tab-width" value="2"/>
+  <rule ref="PSR2">
+    <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
+    <exclude name="PSR1.Files.SideEffects"/>
+    <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+    <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
+    <!-- Enable opening braces can be placed at the same line of class definition -->
+    <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine"/>
+    <!-- Disable camel caps classname -->
+    <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
+    <!-- Enable opening braces can be placed at the same line of function definition -->
+    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
+  </rule>
+
+  <!-- Set indent size to 2 -->
+  <rule ref="Generic.WhiteSpace.ScopeIndent">
+    <properties>
+      <property name="indent" value="2"/>
+      <property name="tabIndent" value="false"/>
+    </properties>
+  </rule>
+  <!-- Set indent size for multi-line function -->
+  <rule ref="PSR2.Methods.FunctionCallSignature">
+    <properties>
+      <property name="indent" value="2"/>
+    </properties>
+  </rule>
+
+  <rule ref="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket">
+    <severity phpcs-only="true">0</severity>
+  </rule>
+
+</ruleset>

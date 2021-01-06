@@ -1,14 +1,8 @@
 <?php
 
-if (!function_exists('json_encode')) {
-    throw new Exception('Segment needs the JSON PHP extension.');
-}
-
-require_once(dirname(__FILE__) . '/Segment/Client.php');
-
+require_once __DIR__ . '/Segment/Client.php';
 
 class Segment {
-
   private static $client;
 
   /**
@@ -32,6 +26,7 @@ class Segment {
     $event = !empty($message["event"]);
     self::assert($event, "Segment::track() expects an event");
     self::validate($message, "track");
+
     return self::$client->track($message);
   }
 
@@ -45,6 +40,7 @@ class Segment {
     self::checkClient();
     $message["type"] = "identify";
     self::validate($message, "identify");
+
     return self::$client->identify($message);
   }
 
@@ -59,6 +55,7 @@ class Segment {
     $groupId = !empty($message["groupId"]);
     self::assert($groupId, "Segment::group() expects groupId");
     self::validate($message, "group");
+
     return self::$client->group($message);
   }
 
@@ -71,6 +68,7 @@ class Segment {
   public static function page(array $message) {
     self::checkClient();
     self::validate($message, "page");
+
     return self::$client->page($message);
   }
 
@@ -83,6 +81,7 @@ class Segment {
   public static function screen(array $message) {
     self::checkClient();
     self::validate($message, "screen");
+
     return self::$client->screen($message);
   }
 
@@ -97,6 +96,7 @@ class Segment {
     $userId = !empty($message["userId"]);
     $previousId = !empty($message["previousId"]);
     self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
+
     return self::$client->alias($message);
   }
 
@@ -109,7 +109,7 @@ class Segment {
   public static function validate($msg, $type){
     $userId = !empty($msg["userId"]);
     $anonId = !empty($msg["anonymousId"]);
-    self::assert($userId || $anonId, "Segment::$type() requires userId or anonymousId");
+    self::assert($userId || $anonId, "Segment::${type}() requires userId or anonymousId");
   }
 
   /**
@@ -118,6 +118,7 @@ class Segment {
 
   public static function flush(){
     self::checkClient();
+
     return self::$client->flush();
   }
 
@@ -127,7 +128,10 @@ class Segment {
    * @throws Exception
    */
   private static function checkClient(){
-    if (null != self::$client) return;
+    if (null != self::$client) {
+      return;
+    }
+
     throw new Exception("Segment::init() must be called before any other tracking method.");
   }
 
@@ -138,8 +142,13 @@ class Segment {
    * @param string $msg
    * @throws Exception
    */
-  private static function assert($value, $msg){
-    if (!$value) throw new Exception($msg);
+  private static function assert($value, $msg) {
+    if (!$value) {
+      throw new Exception($msg);
+    }
   }
+}
 
+if (!function_exists('json_encode')) {
+  throw new Exception('Segment needs the JSON PHP extension.');
 }

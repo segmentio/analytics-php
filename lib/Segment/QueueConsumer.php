@@ -1,11 +1,19 @@
 <?php
-abstract class Segment_QueueConsumer extends Segment_Consumer {
 
+abstract class Segment_QueueConsumer extends Segment_Consumer {
   protected $type = "QueueConsumer";
 
   protected $queue;
   protected $max_queue_size = 1000;
-  protected $batch_size = 100;
+  protected $max_queue_size_bytes = 33554432; //32M
+
+  protected $flush_at = 100;
+  protected $max_batch_size_bytes = 512000; //500kb
+  protected $maximum_backoff_duration = 10000;    // Set maximum waiting limit to 10s
+  protected $host = "";
+  protected $compress_request = false;
+
+  protected $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
 
   /**
    * Store our secret and options as part of this consumer
@@ -15,17 +23,52 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
 
-    if (isset($options["max_queue_size"]))
+    if (isset($options["max_queue_size"])) {
       $this->max_queue_size = $options["max_queue_size"];
+    }
 
-    if (isset($options["batch_size"]))
-      $this->batch_size = $options["batch_size"];
+    if (isset($options["batch_size"])) {
+      if($options["batch_size"] < 1) {
+        $msg = "Batch Size must not be less than 1";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+      } else {
+        $msg = "WARNING: batch_size option to be depricated soon, please use new option flush_at";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+        $this->flush_at = $options["batch_size"];
+      }
+    }
 
+    if (isset($options["flush_at"])) {
+      if($options["flush_at"] < 1) {
+        $msg = "Flush at Size must not be less than 1";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+      } else {
+        $this->flush_at = $options["flush_at"];
+      }
+    }    
+
+    if (isset($options["host"])) {
+      $this->host = $options["host"];
+    }
+
+    if (isset($options["compress_request"])) {
+      $this->compress_request = json_decode($options["compress_request"]);
+    }
+
+    if (isset($options["flush_interval"])) {
+      if($options["flush_interval"] < 1000) {
+        $msg = "Flush interval must not be less than 1 second";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+      } else {
+        $this->flush_interval_in_mills = $options["flush_interval"];
+      }
+    }
+    
     $this->queue = array();
   }
 
   public function __destruct() {
-    # Flush our queue on destruction
+    // Flush our queue on destruction
     $this->flush();
   }
 
@@ -90,65 +133,73 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   }
 
   /**
-   * Adds an item to our queue.
-   * @param  mixed   $item
-   * @return boolean whether call has succeeded
-   */
-  protected function enqueue($item) {
-
-    $count = count($this->queue);
-
-    if ($count > $this->max_queue_size) {
-      return false;
-    }
-
-    $count = array_push($this->queue, $item);
-
-    if ($count >= $this->batch_size) {
-      return $this->flush(); // return ->flush() result: true on success
-    }
-
-    return true;
-  }
-
-
-  /**
    * Flushes our queue of messages by batching them to the server
    */
   public function flush() {
-
     $count = count($this->queue);
     $success = true;
 
-    while($count > 0 && $success) {
+    while ($count > 0 && $success) {
 
-      $batch = array_splice($this->queue, 0, min($this->batch_size, $count));
+      $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
+
+      if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_batch_size_bytes) {
+        $msg = "Batch size is larger than 500KB";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+
+        return false;
+      }   
+
       $success = $this->flushBatch($batch);
 
       $count = count($this->queue);
+
+      usleep($this->flush_interval_in_mills * 1000);
     }
 
     return $success;
   }
 
   /**
+   * Adds an item to our queue.
+   * @param  mixed   $item
+   * @return boolean whether call has succeeded
+   */
+  protected function enqueue($item) {
+    $count = count($this->queue);
+
+    if ($count > $this->max_queue_size) {
+      return false;
+    }
+
+    if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_queue_size_bytes) {
+        $msg = "Queue size is larger than 32MB";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+
+      return false;
+    }
+
+    $count = array_push($this->queue, $item);
+ 
+
+    if ($count >= $this->flush_at) {
+      return $this->flush(); // return ->flush() result: true on success
+    }
+
+    return true;
+  }
+
+  /**
    * Given a batch of messages the method returns
    * a valid payload.
-   * 
-   * @param {Array} batch
+   *
+   * @param {Array} $batch
    * @return {Array}
-   **/
+   */
   protected function payload($batch){
     return array(
       "batch" => $batch,
       "sentAt" => date("c"),
     );
   }
-
-  /**
-   * Flushes a batch of messages.
-   * @param  [type] $batch [description]
-   * @return [type]        [description]
-   */
-  abstract function flushBatch($batch);
 }

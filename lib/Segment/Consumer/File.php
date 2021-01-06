@@ -1,14 +1,9 @@
 <?php
 
 class Segment_Consumer_File extends Segment_Consumer {
-
-  private $file_handle;
   protected $type = "File";
 
-  //define getter method for consumer type
-  public function getConsumer() {
-    return $this->type;
-  }
+  private $file_handle;
 
   /**
    * The file consumer writes track and identify calls to a file.
@@ -17,9 +12,9 @@ class Segment_Consumer_File extends Segment_Consumer {
    *     string "filename" - where to log the analytics calls
    */
   public function __construct($secret, $options = array()) {
-
-    if (!isset($options["filename"]))
+    if (!isset($options["filename"])) {
       $options["filename"] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "analytics.log";
+    }
 
     parent::__construct($secret, $options);
 
@@ -33,9 +28,14 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   public function __destruct() {
     if ($this->file_handle &&
-        get_resource_type($this->file_handle) != "Unknown") {
+        "Unknown" != get_resource_type($this->file_handle)) {
       fclose($this->file_handle);
     }
+  }
+
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
   }
 
   /**
@@ -104,11 +104,11 @@ class Segment_Consumer_File extends Segment_Consumer {
    * @return [boolean] whether the request succeeded
    */
   private function write($body) {
-
-    if (!$this->file_handle)
+    if (!$this->file_handle) {
       return false;
+    }
 
-    $content = json_encode($body);
+      $content = json_encode($body);
     $content.= "\n";
 
     return fwrite($this->file_handle, $content) == strlen($content);

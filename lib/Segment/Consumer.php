@@ -1,6 +1,5 @@
 <?php
 abstract class Segment_Consumer {
-
   protected $type = "Consumer";
 
   protected $options;
@@ -15,7 +14,6 @@ abstract class Segment_Consumer {
     $this->secret = $secret;
     $this->options = $options;
   }
-
 
   /**
    * Tracks a user action
@@ -83,7 +81,6 @@ abstract class Segment_Consumer {
     return isset($this->options["ssl"]) ? $this->options["ssl"] : true;
   }
 
-
   /**
    * On an error, try and call the error handler, if debugging output to
    * error_log as well.
@@ -91,7 +88,6 @@ abstract class Segment_Consumer {
    * @param  string $msg
    */
   protected function handleError($code, $msg) {
-
     if (isset($this->options['error_handler'])) {
       $handler = $this->options['error_handler'];
       $handler($code, $msg);
