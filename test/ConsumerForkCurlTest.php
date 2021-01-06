@@ -10,7 +10,7 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase
   {
     date_default_timezone_set("UTC");
     $this->client = new Segment_Client(
-      "oq0vdlg7yi",
+      "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn",
       array(
         "consumer" => "fork_curl",
         "debug" => true,
@@ -77,5 +77,23 @@ class ConsumerForkCurlTest extends PHPUnit_Framework_TestCase
       "previousId" => "previous-id",
       "userId" => "user-id",
     )));
+  }
+
+  public function testRequestCompression() {
+    $options = array(
+      "compress_request" => true,
+      "consumer" => "fork_curl",
+      "debug" => true,
+    );
+
+    // Create client and send Track message
+    $client = new Segment_Client("OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn", $options);
+    $result = $client->track(array(
+      "userId" => "some-user",
+      "event" => "PHP Fork Curl'd\" Event with compression",
+    ));
+    $client->__destruct();
+
+    $this->assertTrue($result);
   }
 }

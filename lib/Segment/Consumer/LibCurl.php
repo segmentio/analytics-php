@@ -9,7 +9,7 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
    * @param array  $options
    *     boolean  "debug" - whether to use debug output, wait for response.
    *     number   "max_queue_size" - the max size of messages to enqueue
-   *     number   "batch_size" - how many messages to send in a single request
+   *     number   "flush_at" - how many messages to send in a single request
    */
   public function __construct($secret, $options = array()) {
     parent::__construct($secret, $options);
@@ -34,12 +34,14 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
 
     // Verify message size is below than 32KB
     if (strlen($payload) >= 32 * 1024) {
-      if ($this->debug()) {
-        $msg = "Message size is larger than 32KB";
-        error_log("[Analytics][" . $this->type . "] " . $msg);
-      }
+      $msg = "Message size is larger than 32KB";
+      error_log("[Analytics][" . $this->type . "] " . $msg);
 
       return false;
+    }
+
+    if ($this->compress_request) {
+      $payload = gzencode($payload);
     }
 
     $protocol = $this->ssl() ? "https://" : "http://";
@@ -66,6 +68,10 @@ class Segment_Consumer_LibCurl extends Segment_QueueConsumer {
       // set variables for headers
       $header = array();
       $header[] = 'Content-Type: application/json';
+
+      if ($this->compress_request) {
+        $header[] = 'Content-Encoding: gzip';
+      }
 
       // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
       $library = $messages[0]['context']['library'];

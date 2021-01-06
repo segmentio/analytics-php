@@ -180,16 +180,21 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $libVersion = $library['version'];
     $req.= "User-Agent: ${libName}/${libVersion}\r\n";
 
+    // Compress content if compress_request is true
+    if ($this->compress_request) {
+      $content = gzencode($content);
+
+      $req.= "Content-Encoding: gzip\r\n";
+    }
+
     $req.= "Content-length: " . strlen($content) . "\r\n";
     $req.= "\r\n";
     $req.= $content;
 
     // Verify message size is below than 32KB
     if (strlen($req) >= 32 * 1024) {
-      if ($this->debug()) {
-        $msg = "Message size is larger than 32KB";
-        error_log("[Analytics][" . $this->type . "] " . $msg);
-      }
+      $msg = "Message size is larger than 32KB";
+      error_log("[Analytics][" . $this->type . "] " . $msg);
 
       return false;
     }

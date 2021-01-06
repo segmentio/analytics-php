@@ -21,16 +21,25 @@ class Segment_Client {
    *
    */
   public function __construct($secret, $options = array()) {
-    $consumers = array(
-      "socket"     => "Segment_Consumer_Socket",
-      "file"       => "Segment_Consumer_File",
-      "fork_curl"  => "Segment_Consumer_ForkCurl",
-      "lib_curl"   => "Segment_Consumer_LibCurl"
-    );
 
+    $consumers = array(
+        "socket"     => "Segment_Consumer_Socket",
+        "file"       => "Segment_Consumer_File",
+        "fork_curl"  => "Segment_Consumer_ForkCurl",
+        "lib_curl"   => "Segment_Consumer_LibCurl"
+    );
     // Use our socket libcurl by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
                                                    "lib_curl";
+
+    if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
+        if (!is_subclass_of($consumer_type, Segment_Consumer::class)) {
+            throw new Exception('Consumers must extend the Segment_Consumer abstract class');
+        }
+        // Try to resolve it by class name
+        $this->consumer  = new $consumer_type($secret, $options);
+        return;
+    }
 
     $Consumer = $consumers[$consumer_type];
 
@@ -130,6 +139,14 @@ class Segment_Client {
 
     return true;
   }
+
+    /**
+     * @return Segment_Consumer
+     */
+    public function getConsumer() {
+      return $this->consumer;
+    }
+
 
   /**
    * Formats a timestamp by making sure it is set
