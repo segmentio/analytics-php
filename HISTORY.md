@@ -1,4 +1,47 @@
 
+1.6.1-beta / 2018-05-01
+=======================
+
+  * Fix tslint error in version.php
+
+1.6.0-beta / 2018-04-30
+=======================
+
+  * Add License file
+  * Coding style fixers (#112)
+  * rename type to method to match new harness contract (#110)
+  * Increase Code coverage (#108)
+  * Add Linter to CI (#109)
+  * When the message size is larger than 32KB, return FALSE instead of throw exception
+  * Make writeKey required as a flag in the CLI instead of as an environment variable.
+  * Verify message size is below than 32KB
+  * Run E2E test when RUN_E2E_TESTS is defined
+  * Add Rfc 7231 compliant user agent into request header
+  * Add backoff for socket communication
+  * Implement response error handling for POST request and add backoff (in LibCurl)
+  * Change environment to precise as default
+  * CI: Make PHP 5.3 test to be run in precise environment
+  * Make host to be configurable
+  * Add anonymousId in group payload
+
+1.5.2 / 2017-08-18
+==================
+
+  * Always set default context.
+
+1.5.1 / 2017-04-06
+==================
+
+  * Use require_once() instead of require(). Fixes issue where seperate plugins in systems such as Moodle break because of class redeclaration when using seperate internal versions of Segment.io.
+
+1.5.0 / 2017-03-03
+==================
+
+  * Adding context.library.consumer to all PHP events
+  * libcurl consumer will retry once if http response is not 200
+  * update link to php docs
+  * improve portability and reliability of Makefile accros different platforms (#74)
+
 1.4.2 / 2016-07-11
 ==================
 

@@ -1,9 +1,9 @@
 <?php
 
 class Segment_Consumer_File extends Segment_Consumer {
+  protected $type = "File";
 
   private $file_handle;
-  protected $type = "File";
 
   /**
    * The file consumer writes track and identify calls to a file.
@@ -12,15 +12,19 @@ class Segment_Consumer_File extends Segment_Consumer {
    *     string "filename" - where to log the analytics calls
    */
   public function __construct($secret, $options = array()) {
-
-    if (!isset($options["filename"]))
+    if (!isset($options["filename"])) {
       $options["filename"] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "analytics.log";
+    }
 
     parent::__construct($secret, $options);
 
     try {
       $this->file_handle = fopen($options["filename"], "a");
-      chmod($options["filename"], 0777);
+      if (isset($options["filepermissions"])) {
+          chmod($options["filename"], $options["filepermissions"]);
+      } else {
+          chmod($options["filename"], 0777);
+      }
     } catch (Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
     }
@@ -28,14 +32,19 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   public function __destruct() {
     if ($this->file_handle &&
-        get_resource_type($this->file_handle) != "Unknown") {
+        "Unknown" != get_resource_type($this->file_handle)) {
       fclose($this->file_handle);
     }
   }
 
+  //define getter method for consumer type
+  public function getConsumer() {
+    return $this->type;
+  }
+
   /**
    * Tracks a user action
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the track call succeeded
    */
@@ -45,7 +54,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tags traits about the user.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the identify call succeeded
    */
@@ -55,7 +64,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tags traits about the group.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the group call succeeded
    */
@@ -65,7 +74,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tracks a page view.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the page call succeeded
    */
@@ -75,7 +84,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Tracks a screen view.
-   * 
+   *
    * @param  array $message
    * @return [boolean] whether the screen call succeeded
    */
@@ -85,7 +94,7 @@ class Segment_Consumer_File extends Segment_Consumer {
 
   /**
    * Aliases from one user id to another
-   * 
+   *
    * @param  array $message
    * @return boolean whether the alias call succeeded
    */
@@ -99,11 +108,11 @@ class Segment_Consumer_File extends Segment_Consumer {
    * @return [boolean] whether the request succeeded
    */
   private function write($body) {
-
-    if (!$this->file_handle)
+    if (!$this->file_handle) {
       return false;
+    }
 
-    $content = json_encode($body);
+      $content = json_encode($body);
     $content.= "\n";
 
     return fwrite($this->file_handle, $content) == strlen($content);

@@ -1,15 +1,14 @@
 <?php
 
-require(__DIR__ . '/Consumer.php');
-require(__DIR__ . '/QueueConsumer.php');
-require(__DIR__ . '/Consumer/File.php');
-require(__DIR__ . '/Consumer/ForkCurl.php');
-require(__DIR__ . '/Consumer/LibCurl.php');
-require(__DIR__ . '/Consumer/Socket.php');
-require(__DIR__ . '/Version.php');
+require_once(__DIR__ . '/Consumer.php');
+require_once(__DIR__ . '/QueueConsumer.php');
+require_once(__DIR__ . '/Consumer/File.php');
+require_once(__DIR__ . '/Consumer/ForkCurl.php');
+require_once(__DIR__ . '/Consumer/LibCurl.php');
+require_once(__DIR__ . '/Consumer/Socket.php');
+require_once(__DIR__ . '/Version.php');
 
 class Segment_Client {
-
   protected $consumer;
 
   /**
@@ -18,20 +17,30 @@ class Segment_Client {
    *
    * @param string $secret
    * @param array  $options array of consumer options [optional]
-   * @param string Consumer constructor to use, socket by default.
+   * @param string Consumer constructor to use, libcurl by default.
+   *
    */
   public function __construct($secret, $options = array()) {
 
     $consumers = array(
-      "socket"     => "Segment_Consumer_Socket",
-      "file"       => "Segment_Consumer_File",
-      "fork_curl"  => "Segment_Consumer_ForkCurl",
-      "lib_curl"   => "Segment_Consumer_LibCurl"
+        "socket"     => "Segment_Consumer_Socket",
+        "file"       => "Segment_Consumer_File",
+        "fork_curl"  => "Segment_Consumer_ForkCurl",
+        "lib_curl"   => "Segment_Consumer_LibCurl"
     );
-
-    # Use our socket consumer by default
+    // Use our socket libcurl by default
     $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
                                                    "lib_curl";
+
+    if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
+        if (!is_subclass_of($consumer_type, Segment_Consumer::class)) {
+            throw new Exception('Consumers must extend the Segment_Consumer abstract class');
+        }
+        // Try to resolve it by class name
+        $this->consumer  = new $consumer_type($secret, $options);
+        return;
+    }
+
     $Consumer = $consumers[$consumer_type];
 
     $this->consumer = new $Consumer($secret, $options);
@@ -50,6 +59,7 @@ class Segment_Client {
   public function track(array $message) {
     $message = $this->message($message, "properties");
     $message["type"] = "track";
+
     return $this->consumer->track($message);
   }
 
@@ -62,6 +72,7 @@ class Segment_Client {
   public function identify(array $message) {
     $message = $this->message($message, "traits");
     $message["type"] = "identify";
+
     return $this->consumer->identify($message);
   }
 
@@ -74,6 +85,7 @@ class Segment_Client {
   public function group(array $message) {
     $message = $this->message($message, "traits");
     $message["type"] = "group";
+
     return $this->consumer->group($message);
   }
 
@@ -86,6 +98,7 @@ class Segment_Client {
   public function page(array $message) {
     $message = $this->message($message, "properties");
     $message["type"] = "page";
+
     return $this->consumer->page($message);
   }
 
@@ -98,6 +111,7 @@ class Segment_Client {
   public function screen(array $message) {
     $message = $this->message($message, "properties");
     $message["type"] = "screen";
+
     return $this->consumer->screen($message);
   }
 
@@ -110,6 +124,7 @@ class Segment_Client {
   public function alias(array $message) {
     $message = $this->message($message);
     $message["type"] = "alias";
+
     return $this->consumer->alias($message);
   }
 
@@ -121,8 +136,17 @@ class Segment_Client {
     if (method_exists($this->consumer, 'flush')) {
       return $this->consumer->flush();
     }
+
     return true;
   }
+
+    /**
+     * @return Segment_Consumer
+     */
+    public function getConsumer() {
+      return $this->consumer;
+    }
+
 
   /**
    * Formats a timestamp by making sure it is set
@@ -135,35 +159,42 @@ class Segment_Client {
    * it always shows `.000` for microseconds since `date()` only accepts
    * ints, so we have to construct the date ourselves if microtime is passed.
    *
-   * @param  time $timestamp - time in seconds (time())
+   * @param  ts $timestamp - time in seconds (time())
    */
   private function formatTime($ts) {
     // time()
-    if ($ts == null || !$ts) $ts = time();
-    if (filter_var($ts, FILTER_VALIDATE_INT) !== false) return date("c", (int) $ts);
+    if (null == $ts || !$ts) {
+      $ts = time();
+    }
+    if (false !== filter_var($ts, FILTER_VALIDATE_INT)) {
+      return date("c", (int) $ts);
+    }
 
     // anything else try to strtotime the date.
-    if (filter_var($ts, FILTER_VALIDATE_FLOAT) === false) {
+    if (false === filter_var($ts, FILTER_VALIDATE_FLOAT)) {
       if (is_string($ts)) {
         return date("c", strtotime($ts));
-      } else {
-        return date("c");
       }
+  
+      return date("c");
     }
 
     // fix for floatval casting in send.php
     $parts = explode(".", (string)$ts);
-    if (!isset($parts[1])) return date("c", (int)$parts[0]);
+    if (!isset($parts[1])) {
+      return date("c", (int)$parts[0]);
+    }
 
     // microtime(true)
     $sec = (int)$parts[0];
     $usec = (int)$parts[1];
-    $fmt = sprintf("Y-m-d\TH:i:s%sP", $usec);
+    $fmt = sprintf("Y-m-d\\TH:i:s%sP", $usec);
+
     return date($fmt, (int)$sec);
   }
 
   /**
-   * Add common fields to the gvien `message`
+   * Add common fields to the given `message`
    *
    * @param array $msg
    * @param string $def
@@ -171,13 +202,24 @@ class Segment_Client {
    */
 
   private function message($msg, $def = ""){
-    if ($def && !isset($msg[$def])) $msg[$def] = array();
-    if ($def && empty($msg[$def])) $msg[$def] = (object)$msg[$def];
-    if (!isset($msg["context"])) $msg["context"] = array();
-    if (!isset($msg["timestamp"])) $msg["timestamp"] = null;
-    $msg["context"] = array_merge($msg["context"], $this->getContext());
+    if ($def && !isset($msg[$def])) {
+      $msg[$def] = array();
+    }
+    if ($def && empty($msg[$def])) {
+      $msg[$def] = (object)$msg[$def];
+    }
+
+    if (!isset($msg["context"])) {
+      $msg["context"] = array();
+    }
+    $msg["context"] = array_merge($this->getDefaultContext(), $msg["context"]);
+
+    if (!isset($msg["timestamp"])) {
+      $msg["timestamp"] = null;
+    }
     $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
     $msg["messageId"] = self::messageId();
+
     return $msg;
   }
 
@@ -190,27 +232,30 @@ class Segment_Client {
    */
 
   private static function messageId(){
-    return sprintf("%04x%04x-%04x-%04x-%04x-%04x%04x%04x"
-      , mt_rand(0, 0xffff)
-      , mt_rand(0, 0xffff)
-      , mt_rand(0, 0xffff)
-      , mt_rand(0, 0x0fff) | 0x4000
-      , mt_rand(0, 0x3fff) | 0x8000
-      , mt_rand(0, 0xffff)
-      , mt_rand(0, 0xffff)
-      , mt_rand(0, 0xffff));
+    return sprintf("%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0x0fff) | 0x4000,
+      mt_rand(0, 0x3fff) | 0x8000,
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff),
+      mt_rand(0, 0xffff)
+    );
   }
 
   /**
    * Add the segment.io context to the request
    * @return array additional context
    */
-  private function getContext () {
+  private function getDefaultContext() {
     global $SEGMENT_VERSION;
+
     return array(
       "library" => array(
         "name" => "analytics-php",
-        "version" => $SEGMENT_VERSION
+        "version" => $SEGMENT_VERSION,
+        "consumer" => $this->consumer->getConsumer()
       )
     );
   }

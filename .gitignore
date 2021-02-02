@@ -2,3 +2,6 @@ composer.lock
 vendor
 composer.phar
 test/analytics.log
+/.vscode
+.phplint-cache
+/.idea
