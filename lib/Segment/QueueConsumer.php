@@ -4,7 +4,7 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   protected $type = "QueueConsumer";
 
   protected $queue;
-  protected $max_queue_size = 1000;
+  protected $max_queue_size = 10000;
   protected $max_queue_size_bytes = 33554432; //32M
 
   protected $flush_at = 100;
