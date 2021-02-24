@@ -60,7 +60,7 @@ jobs:
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.0-node-browsers      
+      - image: circleci/php:8.0      
 workflows:
   version: 2
   multi-test:
