@@ -60,7 +60,11 @@ jobs:
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.0-node      
+      - image: circleci/php:8.0-node   
+    steps:   
+      - run:
+          name: 'Running unit tests'
+          command: './vendor/bin/phpunit ^9 test'
 workflows:
   version: 2
   multi-test:
