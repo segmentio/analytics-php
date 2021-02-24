@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . "/../lib/Segment.php";
+require_once 'PHPUnit/Autoload.php';
 
 class AnalyticsTest extends PHPUnit_Framework_TestCase
 {
