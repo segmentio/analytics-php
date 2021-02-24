@@ -57,6 +57,10 @@ jobs:
     <<: *multi-test
     docker:
       - image: circleci/php:7.4-node-browsers
+  test-php8.0:
+    <<: *multi-test
+    docker:
+      - image: circleci/php:8.0-node-browsers      
 workflows:
   version: 2
   multi-test:
@@ -64,3 +68,4 @@ workflows:
       - coverage
       - test-php7.2
       - test-php7.4
+      - test-php8.0
