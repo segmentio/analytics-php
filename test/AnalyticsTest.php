@@ -1,11 +1,10 @@
 <?php
 
 require_once __DIR__ . "/../lib/Segment.php";
-require_once 'PHPUnit/Autoload.php';
 
-class AnalyticsTest extends PHPUnit_Framework_TestCase
+class AnalyticsTest extends \PHPUnit\Framework\TestCase
 {
-  public function setUp()
+  public function setUp(): void
   {
     date_default_timezone_set("UTC");
     Segment::init("oq0vdlg7yi", array("debug" => true));
@@ -43,7 +42,7 @@ class AnalyticsTest extends PHPUnit_Framework_TestCase
 
   /**
    * @expectedException \Exception
-   * @expectedExceptionMessage Segment::group() requires userId or anonymousId
+   * @expectedExceptionMessage Segment::group() expects groupId
    */
   public function testGroupNoUser()
   {

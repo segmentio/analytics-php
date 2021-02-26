@@ -2,11 +2,11 @@
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
-class ConsumerSocketTest extends PHPUnit_Framework_TestCase
+class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
 {
   private $client;
 
-  public function setUp()
+  public function setUp(): void
   {
     date_default_timezone_set("UTC");
     $this->client = new Segment_Client(
