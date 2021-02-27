@@ -42,7 +42,7 @@ class AnalyticsTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @expectedException \Exception
-   * @expectedExceptionMessage Segment::group() expects groupId
+   * @expectedExceptionMessage Segment::group() requires userId or anonymousId
    */
   public function testGroupNoUser()
   {

@@ -105,7 +105,7 @@ class ConsumerFileTest extends \PHPUnit\Framework\TestCase
     }
     exec("php --define date.timezone=UTC send.php --secret oq0vdlg7yi --file /tmp/analytics.log", $output);
     $this->assertSame("sent 200 from 200 requests successfully", trim($output[0]));
-    $this->assertFileNotExists($this->filename());
+    $this->assertFileDoesNotExist($this->filename());
   }
 
   public function testProductionProblems()
