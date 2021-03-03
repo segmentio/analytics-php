@@ -52,8 +52,8 @@ class Segment {
    */
   public static function group(array $message) {
     self::checkClient();
-    $groupId = !empty($message["groupId"]);
-    self::assert($groupId, "Segment::group() expects groupId");
+    $groupId = !empty($message['groupId']);
+    self::assert($groupId, "Segment::group() expects a groupId");    
     self::validate($message, "group");
 
     return self::$client->group($message);
@@ -93,8 +93,8 @@ class Segment {
    */
   public static function alias(array $message) {
     self::checkClient();
-    $userId = !empty($message["userId"]);
-    $previousId = !empty($message["previousId"]);
+    $userId = (array_key_exists('userId', $message) && strlen((string) $message['userId']) > 0);
+    $previousId = (array_key_exists('previousId', $message) && strlen((string) $message['previousId']) > 0);
     self::assert($userId && $previousId, "Segment::alias() requires both userId and previousId");
 
     return self::$client->alias($message);
@@ -103,12 +103,12 @@ class Segment {
   /**
    * Validate common properties.
    *
-   * @param array $msg
+   * @param array $message
    * @param string $type
    */
-  public static function validate($msg, $type){
-    $userId = !empty($msg["userId"]);
-    $anonId = !empty($msg["anonymousId"]);
+  public static function validate($message, $type){
+    $userId = (array_key_exists('userId', $message) && strlen((string) $message['userId']) > 0);
+    $anonId = !empty($message['anonymousId']);
     self::assert($userId || $anonId, "Segment::${type}() requires userId or anonymousId");
   }
 
