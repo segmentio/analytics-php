@@ -1,3 +1,19 @@
+1.7.0 / 2021-03-10
+=======================
+  
+  * Retry Network errors (#136)
+  * Update Tests [Improvement] (#132)
+  * Updtate Readme Status Badging (#139)
+  * Bump e2e tests to latest version [Improvement] (#142)
+  * Add Limits to message, batch and memeory usage [Feature] (#137)
+  * Add Configurable flush parameters [Feature] (#135)
+  * Add ability to use custom consumer [Feature] (#61)
+  * Add ability to set file permmissions [Feature] (#122)
+  * Fix curl error handler [Improvement] (#97)
+  * Fix timestamp implementation for microseconds (#94)
+  * Modify max queue size setting to match requirements (#153, #146)
+  * Add ability to set userid as zero (#157)
+
 
 1.6.1-beta / 2018-05-01
 =======================
