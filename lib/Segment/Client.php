@@ -218,7 +218,10 @@ class Segment_Client {
       $msg["timestamp"] = null;
     }
     $msg["timestamp"] = $this->formatTime($msg["timestamp"]);
-    $msg["messageId"] = self::messageId();
+
+    if (!isset($msg["messageId"])) {
+      $msg["messageId"] = self::messageId();
+    }
 
     return $msg;
   }
