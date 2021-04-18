@@ -91,7 +91,7 @@ foreach ($lines as $line) {
 
 $libCurlResponse = Segment::flush();
 if ($libCurlResponse) {
-    $successful += count($lines) - $total !== 0 ?: $total;
+    $successful += $total - $successful;
 }
 unlink($file);
 
