@@ -76,7 +76,7 @@ foreach ($lines as $line) {
     $type = $payload["type"];
     $currentBatch[] = $payload;
     // flush before batch gets too big
-    if (strlen(json_encode(array('batch' => $currentBatch, 'sentAt' => date("c")))) >= 32 * 1024) {
+    if (mb_strlen((json_encode(array('batch' => $currentBatch, 'sentAt' => date("c")))), '8bit') >= 512000) {
         $libCurlResponse = Segment::flush();
         if ($libCurlResponse) {
             $successful += count($currentBatch) - 1;
