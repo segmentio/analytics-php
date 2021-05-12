@@ -1,0 +1,59 @@
+# PHP CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-php/ for more details
+#
+version: 2
+jobs:
+
+  multi-test: &multi-test
+    docker:
+      - image: php
+    environment:
+      XDEBUG_MODE: coverage
+    steps:
+      - checkout
+      - run: sudo apt update
+      - run: sudo apt install zlib1g-dev
+      - run: sudo docker-php-ext-install zip
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "composer.json" }}
+            - v1-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "composer.json" }}
+            - node-v1-
+      - run: yarn install
+      - save_cache:
+          key: node-v1-{{ checksum "composer.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: 'Running unit tests'
+          command: './vendor/bin/phpunit test'
+      - run:
+          name: 'Running E2E tests'
+          command: '.buildscript/e2e.sh'
+
+  test-php7.2:
+    <<: *multi-test
+    docker:
+      - image: circleci/php:7.2-node-browsers
+  test-php7.4:
+    <<: *multi-test
+    docker:
+      - image: circleci/php:7.4-node-browsers
+workflows:
+  version: 2
+  multi-test:
+    jobs:
+      - test-php7.2
+      - test-php7.4
