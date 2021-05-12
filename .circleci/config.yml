@@ -8,6 +8,8 @@ jobs:
   multi-test: &multi-test
     docker:
       - image: php
+    environment:
+      XDEBUG_MODE: php-code-coverage
     steps:
       - checkout
       - run: sudo apt update
