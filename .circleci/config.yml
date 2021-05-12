@@ -9,7 +9,7 @@ jobs:
     docker:
       - image: php
     environment:
-      XDEBUG_MODE: php-code-coverage
+      XDEBUG_MODE: coverage
     steps:
       - checkout
       - run: sudo apt update
