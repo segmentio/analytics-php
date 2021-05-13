@@ -167,7 +167,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
    */
   private function createBody($host, $content) {
     $req = "";
-    $req.= "POST /v1/import HTTP/1.1\r\n";
+    $req.= "POST /v1/batch HTTP/1.1\r\n";
     $req.= "Host: " . $host . "\r\n";
     $req.= "Content-Type: application/json\r\n";
     $req.= "Authorization: Basic " . base64_encode($this->secret . ":") . "\r\n";
