@@ -1,3 +1,12 @@
+1.8.0 / 2021-05-26
+=======================
+  
+  * Fix socket return response (#174)
+  * API Endpoint update (#168)
+  * Update Batch Size Check (#168)
+  * Remove messageID override capabilities (#163)
+  * Update flush sleep waiting period (#161)
+
 1.7.0 / 2021-03-10
 =======================
   
