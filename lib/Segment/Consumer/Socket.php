@@ -97,6 +97,7 @@ class Segment_Consumer_Socket extends Segment_QueueConsumer {
     $bytes_written = 0;
     $bytes_total = strlen($req);
     $closed = false;
+    $success = true;
 
     // Retries with exponential backoff until success
     $backoff = 100;   // Set initial waiting time to 100ms
