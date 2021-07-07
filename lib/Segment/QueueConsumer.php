@@ -4,11 +4,12 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
   protected $type = "QueueConsumer";
 
   protected $queue;
-  protected $max_queue_size = 1000;
+  protected $max_queue_size = 10000;
   protected $max_queue_size_bytes = 33554432; //32M
 
   protected $flush_at = 100;
   protected $max_batch_size_bytes = 512000; //500kb
+  protected $max_item_size_bytes = 32000; // 32kb
   protected $maximum_backoff_duration = 10000;    // Set maximum waiting limit to 10s
   protected $host = "";
   protected $compress_request = false;
@@ -143,18 +144,19 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
 
       $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
 
-      if (mb_strlen(serialize((array)$this->queue), '8bit') >= $this->max_batch_size_bytes) {
-        $msg = "Batch size is larger than 500KB";
-        error_log("[Analytics][" . $this->type . "] " . $msg);
+      if (mb_strlen(serialize($batch), '8bit') >= $this->max_batch_size_bytes) {
+          $msg = "Batch size is larger than 500KB";
+          error_log("[Analytics][" . $this->type . "] " . $msg);
 
-        return false;
-      }   
+          return false;
+      }
 
       $success = $this->flushBatch($batch);
 
       $count = count($this->queue);
 
-      usleep($this->flush_interval_in_mills * 1000);
+      if($count > 0)
+        usleep($this->flush_interval_in_mills * 1000);
     }
 
     return $success;
@@ -177,6 +179,13 @@ abstract class Segment_QueueConsumer extends Segment_Consumer {
         error_log("[Analytics][" . $this->type . "] " . $msg);
 
       return false;
+    }
+
+    if (mb_strlen(json_encode($item), '8bit') >= $this->max_item_size_bytes) {
+        $msg = "Item size is larger than 32KB";
+        error_log("[Analytics][" . $this->type . "] " . $msg);
+
+        return false;
     }
 
     $count = array_push($this->queue, $item);

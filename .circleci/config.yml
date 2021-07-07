@@ -5,12 +5,6 @@
 version: 2
 jobs:
 
-  coverage:
-    docker:
-      - image: circleci/php:7.2-node-browsers
-    steps:
-      - run: 'bash <(curl -s https://codecov.io/bash)'
-
   multi-test: &multi-test
     docker:
       - image: php
@@ -65,7 +59,6 @@ workflows:
   version: 2
   multi-test:
     jobs:
-      - coverage
       - test-php7.2
       - test-php7.4
       - test-php8.0
