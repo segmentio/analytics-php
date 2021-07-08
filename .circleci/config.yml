@@ -43,10 +43,6 @@ jobs:
           name: 'Running E2E tests'
           command: '.buildscript/e2e.sh'
 
-  test-php7.2:
-    <<: *multi-test
-    docker:
-      - image: circleci/php:7.2-node-browsers
   test-php7.4:
     <<: *multi-test
     docker:
@@ -59,6 +55,5 @@ workflows:
   version: 2
   multi-test:
     jobs:
-      - test-php7.2
       - test-php7.4
       - test-php8.0
