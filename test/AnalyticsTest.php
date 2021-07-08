@@ -44,8 +44,9 @@ class AnalyticsTest extends \PHPUnit\Framework\TestCase
    * @expectedException \Exception
    * @expectedExceptionMessage Segment::group() requires userId or anonymousId
    */
-  public function testGroupNoUser()
+  public function testGroupNoUser(): void
   {
+    $this->expectException(Exception::class);
     Segment::group(array(
       "groupId" => "group-id",
       "traits" => array(

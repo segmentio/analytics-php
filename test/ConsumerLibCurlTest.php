@@ -91,7 +91,7 @@ class ConsumerLibCurlTest extends \PHPUnit\Framework\TestCase
     $client = new Segment_Client("x", $options);
 
     # Should error out with debug on.
-    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
     $client->__destruct();
   }
 

@@ -110,7 +110,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
     );
 
     // Shouldn't error out without debug on.
-    $client->track(array("user_id" => "some-user", "event" => "Production Problems"));
+    $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Production Problems")));
     $client->__destruct();
   }
 
@@ -129,7 +129,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
     $client = new Segment_Client("x", $options);
 
     // Should error out with debug on.
-    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
     $client->__destruct();
   }
 
@@ -190,6 +190,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
    */
   public function testConnectionError()
   {
+    $this->expectException(RuntimeException::class);
     $client = new Segment_Client("x", array(
       "consumer" => "socket",
       "host" => "api.segment.ioooooo",
@@ -214,7 +215,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
     $client = new Segment_Client("x", $options);
 
     # Should error out with debug on.
-    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
     $client->__destruct();
   }
 }
