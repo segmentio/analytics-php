@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../lib/Segment/Client.php';
 
-class ClientTest extends PHPUnit_Framework_TestCase
+class ClientTest extends \PHPUnit\Framework\TestCase
 {
     /** @test */
     public function it_uses_the_lib_curl_consumer_as_default()

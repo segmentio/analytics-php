@@ -2,11 +2,11 @@
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
-class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
+class ConsumerLibCurlTest extends \PHPUnit\Framework\TestCase
 {
   private $client;
 
-  public function setUp()
+  public function setUp(): void
   {
     date_default_timezone_set("UTC");
     $this->client = new Segment_Client(
@@ -91,7 +91,7 @@ class ConsumerLibCurlTest extends PHPUnit_Framework_TestCase
     $client = new Segment_Client("x", $options);
 
     # Should error out with debug on.
-    $client->track(array("user_id" => "some-user", "event" => "Socket PHP Event"));
+    $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
     $client->__destruct();
   }
 
