@@ -1,5 +1,5 @@
 <?php
-
+namespace Segment;
 /**
  * require client
  */
@@ -70,7 +70,7 @@ foreach ($lines as $line) {
     if (!trim($line)) continue;
     $total++;
     $payload = json_decode($line, true);
-    $dt = new DateTime($payload["timestamp"]);
+    $dt = new \DateTime($payload["timestamp"]);
     $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
     $payload["timestamp"] = date("c", (int) $ts);
     $type = $payload["type"];
@@ -86,7 +86,7 @@ foreach ($lines as $line) {
         $currentBatch = array();
     }
     $payload["timestamp"] = $ts;
-    call_user_func_array(array("Segment", $type), array($payload));
+    call_user_func_array(array("Segment\Segment", $type), array($payload));
 }
 
 $libCurlResponse = Segment::flush();
