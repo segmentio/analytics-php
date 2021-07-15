@@ -26,7 +26,7 @@ class File extends Consumer {
       } else {
           chmod($options["filename"], 0777);
       }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
     }
   }
