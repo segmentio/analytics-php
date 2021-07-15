@@ -1,4 +1,5 @@
 <?php
+namespace Segment\Consumer;
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
@@ -14,7 +15,7 @@ class ConsumerFileTest extends \PHPUnit\Framework\TestCase
       unlink($this->filename());
     }
 
-    $this->client = new Segment_Client(
+    $this->client = new Segment\Consumer\Client(
       "oq0vdlg7yi",
       array(
         "consumer" => "file",
@@ -111,7 +112,7 @@ class ConsumerFileTest extends \PHPUnit\Framework\TestCase
   public function testProductionProblems()
   {
     // Open to a place where we should not have write access.
-    $client = new Segment_Client(
+    $client = new Segment\Consumer\Client(
       "oq0vdlg7yi",
       array(
         "consumer" => "file",
@@ -124,7 +125,7 @@ class ConsumerFileTest extends \PHPUnit\Framework\TestCase
   }
 
   public function testFileSecurityCustom() {
-    $client = new Segment_Client(
+    $client = new Segment\Consumer\Client(
       "testsecret",
       array(
         "consumer" => "file",
@@ -137,7 +138,7 @@ class ConsumerFileTest extends \PHPUnit\Framework\TestCase
   }
 
   public function testFileSecurityDefaults() {
-    $client = new Segment_Client(
+    $client = new Segment\Consumer\Client(
       "testsecret",
       array(
         "consumer" => "file",

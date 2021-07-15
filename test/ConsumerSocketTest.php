@@ -1,4 +1,5 @@
 <?php
+namespace Segment\Consumer;
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
@@ -9,7 +10,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
   public function setUp(): void
   {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client(
+    $this->client = new Segment\Consumer\Client(
       "oq0vdlg7yi",
       array("consumer" => "socket")
     );
@@ -77,7 +78,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
 
   public function testShortTimeout()
   {
-    $client = new Segment_Client(
+    $client = new Segment\Consumer\Client(
       "oq0vdlg7yi",
       array(
         "timeout" => 0.01,
@@ -100,7 +101,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
 
   public function testProductionProblems()
   {
-    $client = new Segment_Client("x",
+    $client = new Segment\Consumer\Client("x",
       array(
         "consumer" => "socket",
         "error_handler" => function () {
@@ -126,7 +127,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       },
     );
 
-    $client = new Segment_Client("x", $options);
+    $client = new Segment\Consumer\Client("x", $options);
 
     // Should error out with debug on.
     $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
@@ -140,7 +141,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       "consumer" => "socket",
     );
 
-    $client = new Segment_Client("testsecret", $options);
+    $client = new Segment\Consumer\Client("testsecret", $options);
 
     $big_property = "";
 
@@ -164,7 +165,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       "consumer" => "socket",
     );
 
-    $client = new Segment_Client("testlargesize", $options);
+    $client = new Segment\Consumer\Client("testlargesize", $options);
 
     $big_property = "";
 
@@ -191,7 +192,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
   public function testConnectionError()
   {
     $this->expectException(RuntimeException::class);
-    $client = new Segment_Client("x", array(
+    $client = new Segment\Consumer\Client("x", array(
       "consumer" => "socket",
       "host" => "api.segment.ioooooo",
       "error_handler" => function ($errno, $errmsg) {
@@ -212,7 +213,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       },
     );
 
-    $client = new Segment_Client("x", $options);
+    $client = new Segment\Consumer\Client("x", $options);
 
     # Should error out with debug on.
     $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));

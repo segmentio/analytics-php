@@ -1,4 +1,5 @@
 <?php
+namespace Segment\Consumer;
 
 require_once __DIR__ . "/../lib/Segment.php";
 

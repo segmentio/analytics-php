@@ -1,6 +1,7 @@
 <?php
+namespace Segment\Consumer;
 
-class Segment_Consumer_ForkCurl extends Segment_QueueConsumer {
+class ForkCurl extends Segment\Consumer\QueueConsumer {
   protected $type = "ForkCurl";
 
   /**

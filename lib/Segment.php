@@ -1,4 +1,5 @@
 <?php
+namespace Segment;
 
 require_once __DIR__ . '/Segment/Client.php';
 
