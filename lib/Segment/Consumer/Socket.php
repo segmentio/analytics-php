@@ -1,7 +1,7 @@
 <?php
 namespace Segment\Consumer;
 
-class Socket extends Segment\Consumer\QueueConsumer {
+class Socket extends QueueConsumer {
   protected $type = "Socket";
   private $socket_failed;
 

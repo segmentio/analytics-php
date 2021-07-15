@@ -1,7 +1,7 @@
 <?php
 namespace Segment\Consumer;
 
-class LibCurl extends Segment\Consumer\QueueConsumer {
+class LibCurl extends QueueConsumer {
   protected $type = "LibCurl";
 
   /**

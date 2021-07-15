@@ -2,7 +2,7 @@
 
 namespace Segment\Consumer;
 
-abstract class QueueConsumer extends Segment\Consumer\Consumer {
+abstract class QueueConsumer extends Consumer {
   protected $type = "QueueConsumer";
 
   protected $queue;

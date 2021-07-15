@@ -1,7 +1,7 @@
 <?php
 namespace Segment\Consumer;
 
-class File extends Segment\Consumer\Consumer {
+class File extends Consumer {
   protected $type = "File";
 
   private $file_handle;
