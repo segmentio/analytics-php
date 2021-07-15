@@ -2,10 +2,11 @@
 2.0.0 / 2021-07-14
 ==================
 
-* Modify Endpoint to match API docs (#171)
-* usleep in flush() causes unexpected delays on page loads (#173)
-* Support PHP 8 (#152)
-* Namespacing (#182)
+  * Modify Endpoint to match API docs (#171)
+  * usleep in flush() causes unexpected delays on page loads (#173)
+  * Support PHP 8 (#152)
+  * Remove Support for PHP 7.2
+  * Namespacing (#182)
 
 
 1.8.0 / 2021-05-31
