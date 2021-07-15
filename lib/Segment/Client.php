@@ -36,7 +36,7 @@ class Client {
 
     if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
         if (!is_subclass_of($consumer_type, Consumer::class)) {
-            throw new Exception('Consumers must extend the Segment/Consumer/Consumer abstract class');
+            throw new \Exception('Consumers must extend the Segment/Consumer/Consumer abstract class');
         }
         // Try to resolve it by class name
         $this->consumer  = new $consumer_type($secret, $options);

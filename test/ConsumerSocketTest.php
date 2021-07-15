@@ -105,7 +105,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       array(
         "consumer" => "socket",
         "error_handler" => function () {
-          throw new Exception("Was called");
+          throw new \Exception("Was called");
         },
       )
     );
@@ -122,7 +122,7 @@ class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
       "consumer" => "socket",
       "error_handler" => function ($errno, $errmsg) {
         if (400 != $errno) {
-          throw new Exception("Response is not 400");
+          throw new \Exception("Response is not 400");
         }
       },
     );
