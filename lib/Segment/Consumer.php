@@ -1,5 +1,8 @@
 <?php
-abstract class Segment_Consumer {
+
+namespace Segment\Consumer;
+
+abstract class Consumer {
   protected $type = "Consumer";
 
   protected $options;

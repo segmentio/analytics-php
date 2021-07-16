@@ -1,6 +1,7 @@
 <?php
+namespace Segment\Consumer;
 
-class Segment_Consumer_File extends Segment_Consumer {
+class File extends Consumer {
   protected $type = "File";
 
   private $file_handle;
@@ -25,7 +26,7 @@ class Segment_Consumer_File extends Segment_Consumer {
       } else {
           chmod($options["filename"], 0777);
       }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->handleError($e->getCode(), $e->getMessage());
     }
   }

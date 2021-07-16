@@ -1,4 +1,6 @@
 <?php
+namespace Segment;
+use Segment\Consumer\Client as Client;
 
 require_once __DIR__ . '/Segment/Client.php';
 
@@ -12,7 +14,7 @@ class Segment {
    */
   public static function init($secret, $options = array()) {
     self::assert($secret, "Segment::init() requires secret");
-    self::$client = new Segment_Client($secret, $options);
+    self::$client = new Client($secret, $options);
   }
 
   /**
@@ -132,7 +134,7 @@ class Segment {
       return;
     }
 
-    throw new Exception("Segment::init() must be called before any other tracking method.");
+    throw new \Exception("Segment::init() must be called before any other tracking method.");
   }
 
   /**
@@ -144,11 +146,11 @@ class Segment {
    */
   private static function assert($value, $msg) {
     if (!$value) {
-      throw new Exception($msg);
+      throw new \Exception($msg);
     }
   }
 }
 
 if (!function_exists('json_encode')) {
-  throw new Exception('Segment needs the JSON PHP extension.');
+  throw new \Exception('Segment needs the JSON PHP extension.');
 }

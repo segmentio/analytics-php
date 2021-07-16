@@ -1,4 +1,5 @@
 <?php
+namespace Segment\Consumer;
 
 require_once __DIR__ . "/../lib/Segment/Client.php";
 
@@ -9,7 +10,7 @@ class ConsumerLibCurlTest extends \PHPUnit\Framework\TestCase
   public function setUp(): void
   {
     date_default_timezone_set("UTC");
-    $this->client = new Segment_Client(
+    $this->client = new Client(
       "oq0vdlg7yi",
       array(
         "consumer" => "lib_curl",
@@ -88,7 +89,7 @@ class ConsumerLibCurlTest extends \PHPUnit\Framework\TestCase
       },
     );
 
-    $client = new Segment_Client("x", $options);
+    $client = new Client("x", $options);
 
     # Should error out with debug on.
     $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
@@ -102,7 +103,7 @@ class ConsumerLibCurlTest extends \PHPUnit\Framework\TestCase
       "consumer" => "lib_curl",
     );
 
-    $client = new Segment_Client("testlargesize", $options);
+    $client = new Client("testlargesize", $options);
 
     $big_property = "";
 

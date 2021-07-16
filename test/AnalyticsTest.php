@@ -1,4 +1,5 @@
 <?php
+namespace Segment;
 
 require_once __DIR__ . "/../lib/Segment.php";
 
@@ -46,7 +47,7 @@ class AnalyticsTest extends \PHPUnit\Framework\TestCase
    */
   public function testGroupNoUser(): void
   {
-    $this->expectException(Exception::class);
+    $this->expectException( \Exception::class);
     Segment::group(array(
       "groupId" => "group-id",
       "traits" => array(
