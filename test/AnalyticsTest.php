@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Segment\Test;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Segment\Segment;
 
@@ -9,245 +12,332 @@ class AnalyticsTest extends TestCase
 {
     public function setUp(): void
     {
-        date_default_timezone_set("UTC");
-        Segment::init("oq0vdlg7yi", array("debug" => true));
+        date_default_timezone_set('UTC');
+        Segment::init('oq0vdlg7yi', ['debug' => true]);
     }
 
-    public function testTrack()
+    public function testTrack(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "john",
-        "event" => "Module PHP Event",
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId' => 'john',
+                    'event'  => 'Module PHP Event',
+                ]
+            )
+        );
     }
 
-    public function testGroup()
+    public function testGroup(): void
     {
-        $this->assertTrue(Segment::group(array(
-        "groupId" => "group-id",
-        "userId" => "user-id",
-        "traits" => array(
-        "plan" => "startup",
-        ),
-        )));
+        self::assertTrue(
+            Segment::group(
+                [
+                    'groupId' => 'group-id',
+                    'userId'  => 'user-id',
+                    'traits'  => [
+                        'plan' => 'startup',
+                    ],
+                ]
+            )
+        );
     }
 
-    public function testGroupAnonymous()
+    public function testGroupAnonymous(): void
     {
-        $this->assertTrue(Segment::group(array(
-        "groupId" => "group-id",
-        "anonymousId" => "anonymous-id",
-        "traits" => array(
-        "plan" => "startup",
-        ),
-        )));
+        self::assertTrue(
+            Segment::group(
+                [
+                    'groupId'     => 'group-id',
+                    'anonymousId' => 'anonymous-id',
+                    'traits'      => [
+                        'plan' => 'startup',
+                    ],
+                ]
+            )
+        );
     }
 
-  /**
-   * @expectedException \Exception
-   * @expectedExceptionMessage Segment::group() requires userId or anonymousId
-   */
     public function testGroupNoUser(): void
     {
-        $this->expectException(\Exception::class);
-        Segment::group(array(
-        "groupId" => "group-id",
-        "traits" => array(
-        "plan" => "startup",
-        ),
-        ));
+        $this->expectExceptionMessage('Segment::group() requires userId or anonymousId');
+        $this->expectException(Exception::class);
+        Segment::group(
+            [
+                'groupId' => 'group-id',
+                'traits'  => [
+                    'plan' => 'startup',
+                ],
+            ]
+        );
     }
 
-    public function testMicrotime()
+    public function testMicrotime(): void
     {
-        $this->assertTrue(Segment::page(array(
-        "anonymousId" => "anonymous-id",
-        "name" => "analytics-php-microtime",
-        "category" => "docs",
-        "timestamp" => microtime(true),
-        "properties" => array(
-        "path" => "/docs/libraries/php/",
-        "url" => "https://segment.io/docs/libraries/php/",
-        ),
-        )));
+        self::assertTrue(
+            Segment::page(
+                [
+                    'anonymousId' => 'anonymous-id',
+                    'name'        => 'analytics-php-microtime',
+                    'category'    => 'docs',
+                    'timestamp'   => microtime(true),
+                    'properties'  => [
+                        'path' => '/docs/libraries/php/',
+                        'url'  => 'https://segment.io/docs/libraries/php/',
+                    ],
+                ]
+            )
+        );
     }
 
-    public function testPage()
+    public function testPage(): void
     {
-        $this->assertTrue(Segment::page(array(
-        "anonymousId" => "anonymous-id",
-        "name" => "analytics-php",
-        "category" => "docs",
-        "properties" => array(
-        "path" => "/docs/libraries/php/",
-        "url" => "https://segment.io/docs/libraries/php/",
-        ),
-        )));
+        self::assertTrue(
+            Segment::page(
+                [
+                    'anonymousId' => 'anonymous-id',
+                    'name'        => 'analytics-php',
+                    'category'    => 'docs',
+                    'properties'  => [
+                        'path' => '/docs/libraries/php/',
+                        'url'  => 'https://segment.io/docs/libraries/php/',
+                    ],
+                ]
+            )
+        );
     }
 
-    public function testBasicPage()
+    public function testBasicPage(): void
     {
-        $this->assertTrue(Segment::page(array(
-        "anonymousId" => "anonymous-id",
-        )));
+        self::assertTrue(Segment::page(['anonymousId' => 'anonymous-id']));
     }
 
-    public function testScreen()
+    public function testScreen(): void
     {
-        $this->assertTrue(Segment::screen(array(
-        "anonymousId" => "anonymous-id",
-        "name" => "2048",
-        "category" => "game built with php :)",
-        "properties" => array(
-        "points" => 300
-        ),
-        )));
+        self::assertTrue(
+            Segment::screen(
+                [
+                    'anonymousId' => 'anonymous-id',
+                    'name'        => '2048',
+                    'category'    => 'game built with php :)',
+                    'properties'  => [
+                        'points' => 300,
+                    ],
+                ]
+            )
+        );
     }
 
-    public function testBasicScreen()
+    public function testBasicScreen(): void
     {
-        $this->assertTrue(Segment::screen(array(
-        "anonymousId" => "anonymous-id"
-        )));
+        self::assertTrue(Segment::screen(['anonymousId' => 'anonymous-id']));
     }
 
-    public function testIdentify()
+    public function testIdentify(): void
     {
-        $this->assertTrue(Segment::identify(array(
-        "userId" => "doe",
-        "traits" => array(
-        "loves_php" => false,
-        "birthday" => time(),
-        ),
-        )));
+        self::assertTrue(
+            Segment::identify(
+                [
+                    'userId' => 'doe',
+                    'traits' => [
+                        'loves_php' => false,
+                        'birthday'  => time(),
+                    ],
+                ]
+            )
+        );
     }
 
-    public function testEmptyTraits()
+    public function testEmptyTraits(): void
     {
-        $this->assertTrue(Segment::identify(array(
-        "userId" => "empty-traits",
-        )));
+        self::assertTrue(Segment::identify(['userId' => 'empty-traits']));
 
-        $this->assertTrue(Segment::group(array(
-        "userId" => "empty-traits",
-        "groupId" => "empty-traits",
-        )));
+        self::assertTrue(
+            Segment::group(
+                [
+                    'userId'  => 'empty-traits',
+                    'groupId' => 'empty-traits',
+                ]
+            )
+        );
     }
 
-    public function testEmptyArrayTraits()
+    public function testEmptyArrayTraits(): void
     {
-        $this->assertTrue(Segment::identify(array(
-        "userId" => "empty-traits",
-        "traits" => array(),
-        )));
+        self::assertTrue(
+            Segment::identify(
+                [
+                    'userId' => 'empty-traits',
+                    'traits' => [],
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::group(array(
-        "userId" => "empty-traits",
-        "groupId" => "empty-traits",
-        "traits" => array(),
-        )));
+        self::assertTrue(
+            Segment::group(
+                [
+                    'userId'  => 'empty-traits',
+                    'groupId' => 'empty-traits',
+                    'traits'  => [],
+                ]
+            )
+        );
     }
 
-    public function testEmptyProperties()
+    public function testEmptyProperties(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "empty-properties",
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId' => 'user-id',
+                    'event'  => 'empty-properties',
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::page(array(
-        "category" => "empty-properties",
-        "name" => "empty-properties",
-        "userId" => "user-id",
-        )));
+        self::assertTrue(
+            Segment::page(
+                [
+                    'category' => 'empty-properties',
+                    'name'     => 'empty-properties',
+                    'userId'   => 'user-id',
+                ]
+            )
+        );
     }
 
-    public function testEmptyArrayProperties()
+    public function testEmptyArrayProperties(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "empty-properties",
-        "properties" => array(),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'     => 'user-id',
+                    'event'      => 'empty-properties',
+                    'properties' => [],
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::page(array(
-        "category" => "empty-properties",
-        "name" => "empty-properties",
-        "userId" => "user-id",
-        "properties" => array(),
-        )));
+        self::assertTrue(
+            Segment::page(
+                [
+                    'category'   => 'empty-properties',
+                    'name'       => 'empty-properties',
+                    'userId'     => 'user-id',
+                    'properties' => [],
+                ]
+            )
+        );
     }
 
-    public function testAlias()
+    public function testAlias(): void
     {
-        $this->assertTrue(Segment::alias(array(
-        "previousId" => "previous-id",
-        "userId" => "user-id",
-        )));
+        self::assertTrue(
+            Segment::alias(
+                [
+                    'previousId' => 'previous-id',
+                    'userId'     => 'user-id',
+                ]
+            )
+        );
     }
 
-    public function testContextEmpty()
+    public function testContextEmpty(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "Context Test",
-        "context" => array(),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'  => 'user-id',
+                    'event'   => 'Context Test',
+                    'context' => [],
+                ]
+            )
+        );
     }
 
-    public function testContextCustom()
+    public function testContextCustom(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "Context Test",
-        "context" => array(
-        "active" => false,
-        ),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'  => 'user-id',
+                    'event'   => 'Context Test',
+                    'context' => ['active' => false],
+                ]
+            )
+        );
     }
 
-    public function testTimestamps()
+    public function testTimestamps(): void
     {
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "integer-timestamp",
-        "timestamp" => (int) mktime(0, 0, 0, date('n'), 1, date('Y')),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'integer-timestamp',
+                    'timestamp' => (int)mktime(0, 0, 0, (int)date('n'), 1, (int)date('Y')),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "string-integer-timestamp",
-        "timestamp" => (string) mktime(0, 0, 0, date('n'), 1, date('Y')),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'string-integer-timestamp',
+                    'timestamp' => (string)mktime(0, 0, 0, (int)date('n'), 1, (int)date('Y')),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "iso8630-timestamp",
-        "timestamp" => date(DATE_ATOM, mktime(0, 0, 0, date('n'), 1, date('Y'))),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'iso8630-timestamp',
+                    'timestamp' => date(DATE_ATOM, mktime(0, 0, 0, (int)date('n'), 1, (int)date('Y'))),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "iso8601-timestamp",
-        "timestamp" => date(DATE_ATOM, mktime(0, 0, 0, date('n'), 1, date('Y'))),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'iso8601-timestamp',
+                    'timestamp' => date(DATE_ATOM, mktime(0, 0, 0, (int)date('n'), 1, (int)date('Y'))),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "strtotime-timestamp",
-        "timestamp" => strtotime('1 week ago'),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'strtotime-timestamp',
+                    'timestamp' => strtotime('1 week ago'),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "microtime-timestamp",
-        "timestamp" => microtime(true),
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'microtime-timestamp',
+                    'timestamp' => microtime(true),
+                ]
+            )
+        );
 
-        $this->assertTrue(Segment::track(array(
-        "userId" => "user-id",
-        "event" => "invalid-float-timestamp",
-        "timestamp" => ((string) mktime(0, 0, 0, date('n'), 1, date('Y'))) . '.',
-        )));
+        self::assertTrue(
+            Segment::track(
+                [
+                    'userId'    => 'user-id',
+                    'event'     => 'invalid-float-timestamp',
+                    'timestamp' => ((string)mktime(0, 0, 0, (int)date('n'), 1, (int)date('Y'))) . '.',
+                ]
+            )
+        );
     }
 }

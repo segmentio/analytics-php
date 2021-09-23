@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Segment\Test;
 
 use PHPUnit\Framework\TestCase;
@@ -7,97 +9,95 @@ use Segment\Client;
 
 class ConsumerForkCurlTest extends TestCase
 {
-    private $client;
+    private Client $client;
 
     public function setUp(): void
     {
-        date_default_timezone_set("UTC");
+        date_default_timezone_set('UTC');
         $this->client = new Client(
-            "OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn",
-            array(
-            "consumer" => "fork_curl",
-            "debug" => true,
-            )
+            'OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn',
+            [
+                'consumer' => 'fork_curl',
+                'debug'    => true,
+            ]
         );
     }
 
-    public function testTrack()
+    public function testTrack(): void
     {
-        $this->assertTrue($this->client->track(array(
-        "userId" => "some-user",
-        "event" => "PHP Fork Curl'd\" Event",
-        )));
+        self::assertTrue($this->client->track([
+            'userId' => 'some-user',
+            'event'  => "PHP Fork Curl'd\" Event",
+        ]));
     }
 
-    public function testIdentify()
+    public function testIdentify(): void
     {
-        $this->assertTrue($this->client->identify(array(
-        "userId" => "user-id",
-        "traits" => array(
-        "loves_php" => false,
-        "type" => "consumer fork-curl test",
-        "birthday" => time(),
-        ),
-        )));
+        self::assertTrue($this->client->identify([
+            'userId' => 'user-id',
+            'traits' => [
+                'loves_php' => false,
+                'type'      => 'consumer fork-curl test',
+                'birthday'  => time(),
+            ],
+        ]));
     }
 
-    public function testGroup()
+    public function testGroup(): void
     {
-        $this->assertTrue($this->client->group(array(
-        "userId" => "user-id",
-        "groupId" => "group-id",
-        "traits" => array(
-        "type" => "consumer fork-curl test",
-        ),
-        )));
+        self::assertTrue($this->client->group([
+            'userId'  => 'user-id',
+            'groupId' => 'group-id',
+            'traits'  => [
+                'type' => 'consumer fork-curl test',
+            ],
+        ]));
     }
 
-    public function testPage()
+    public function testPage(): void
     {
-        $this->assertTrue($this->client->page(array(
-        "userId" => "userId",
-        "name" => "analytics-php",
-        "category" => "fork-curl",
-        "properties" => array(
-        "url" => "https://a.url/",
-        ),
-        )));
+        self::assertTrue($this->client->page([
+            'userId'     => 'userId',
+            'name'       => 'analytics-php',
+            'category'   => 'fork-curl',
+            'properties' => ['url' => 'https://a.url/'],
+        ]));
     }
 
-    public function testScreen()
+    public function testScreen(): void
     {
-        $this->assertTrue($this->client->page(array(
-        "anonymousId" => "anonymous-id",
-        "name" => "grand theft auto",
-        "category" => "fork-curl",
-        "properties" => array(),
-        )));
+        self::assertTrue($this->client->page([
+            'anonymousId' => 'anonymous-id',
+            'name'        => 'grand theft auto',
+            'category'    => 'fork-curl',
+            'properties'  => [],
+        ]));
     }
 
-    public function testAlias()
+    public function testAlias(): void
     {
-        $this->assertTrue($this->client->alias(array(
-        "previousId" => "previous-id",
-        "userId" => "user-id",
-        )));
+        self::assertTrue($this->client->alias([
+            'previousId' => 'previous-id',
+            'userId'     => 'user-id',
+        ]));
     }
 
-    public function testRequestCompression()
+    public function testRequestCompression(): void
     {
-        $options = array(
-        "compress_request" => true,
-        "consumer" => "fork_curl",
-        "debug" => true,
-        );
+        $options = [
+            'compress_request' => true,
+            'consumer'         => 'fork_curl',
+            'debug'            => true,
+        ];
 
-      // Create client and send Track message
-        $client = new Client("OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn", $options);
-        $result = $client->track(array(
-        "userId" => "some-user",
-        "event" => "PHP Fork Curl'd\" Event with compression",
-        ));
+        // Create client and send Track message
+        $client = new Client('OnMMoZ6YVozrgSBeZ9FpkC0ixH0ycYZn', $options);
+        $result = $client->track([
+            'userId' => 'some-user',
+            'event'  => "PHP Fork Curl'd\" Event with compression",
+        ]);
         $client->__destruct();
 
-        $this->assertTrue($result);
+        self::assertTrue($result);
     }
 }

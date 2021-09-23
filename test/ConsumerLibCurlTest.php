@@ -1,126 +1,123 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Segment\Test;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Segment\Client;
 
 class ConsumerLibCurlTest extends TestCase
 {
-    private $client;
+    private Client $client;
 
     public function setUp(): void
     {
-        date_default_timezone_set("UTC");
+        date_default_timezone_set('UTC');
         $this->client = new Client(
-            "oq0vdlg7yi",
-            array(
-            "consumer" => "lib_curl",
-            "debug" => true,
-            )
+            'oq0vdlg7yi',
+            [
+                'consumer' => 'lib_curl',
+                'debug'    => true,
+            ]
         );
     }
 
-    public function testTrack()
+    public function testTrack(): void
     {
-        $this->assertTrue($this->client->track(array(
-        "userId" => "lib-curl-track",
-        "event" => "PHP Lib Curl'd\" Event",
-        )));
+        self::assertTrue($this->client->track([
+            'userId' => 'lib-curl-track',
+            'event'  => "PHP Lib Curl'd\" Event",
+        ]));
     }
 
-    public function testIdentify()
+    public function testIdentify(): void
     {
-        $this->assertTrue($this->client->identify(array(
-        "userId" => "lib-curl-identify",
-        "traits" => array(
-        "loves_php" => false,
-        "type" => "consumer lib-curl test",
-        "birthday" => time(),
-        ),
-        )));
+        self::assertTrue($this->client->identify([
+            'userId' => 'lib-curl-identify',
+            'traits' => [
+                'loves_php' => false,
+                'type'      => 'consumer lib-curl test',
+                'birthday'  => time(),
+            ],
+        ]));
     }
 
-    public function testGroup()
+    public function testGroup(): void
     {
-        $this->assertTrue($this->client->group(array(
-        "userId" => "lib-curl-group",
-        "groupId" => "group-id",
-        "traits" => array(
-        "type" => "consumer lib-curl test",
-        ),
-        )));
+        self::assertTrue($this->client->group([
+            'userId'  => 'lib-curl-group',
+            'groupId' => 'group-id',
+            'traits'  => [
+                'type' => 'consumer lib-curl test',
+            ],
+        ]));
     }
 
-    public function testPage()
+    public function testPage(): void
     {
-        $this->assertTrue($this->client->page(array(
-        "userId" => "lib-curl-page",
-        "name" => "analytics-php",
-        "category" => "fork-curl",
-        "properties" => array(
-        "url" => "https://a.url/",
-        ),
-        )));
+        self::assertTrue($this->client->page([
+            'userId'     => 'lib-curl-page',
+            'name'       => 'analytics-php',
+            'category'   => 'fork-curl',
+            'properties' => ['url' => 'https://a.url/'],
+        ]));
     }
 
-    public function testScreen()
+    public function testScreen(): void
     {
-        $this->assertTrue($this->client->page(array(
-        "anonymousId" => "lib-curl-screen",
-        "name" => "grand theft auto",
-        "category" => "fork-curl",
-        "properties" => array(),
-        )));
+        self::assertTrue($this->client->page([
+            'anonymousId' => 'lib-curl-screen',
+            'name'        => 'grand theft auto',
+            'category'    => 'fork-curl',
+            'properties'  => [],
+        ]));
     }
 
-    public function testAlias()
+    public function testAlias(): void
     {
-        $this->assertTrue($this->client->alias(array(
-        "previousId" => "lib-curl-alias",
-        "userId" => "user-id",
-        )));
+        self::assertTrue($this->client->alias([
+            'previousId' => 'lib-curl-alias',
+            'userId'     => 'user-id',
+        ]));
     }
 
-    public function testRequestCompression()
+    public function testRequestCompression(): void
     {
-        $options = array(
-        "compress_request" => true,
-        "consumer"      => "lib_curl",
-        "error_handler" => function ($errno, $errmsg) {
-            throw new \RuntimeException($errmsg, $errno);
-        },
-        );
+        $options = [
+            'compress_request' => true,
+            'consumer'         => 'lib_curl',
+            'error_handler'    => function ($errno, $errmsg) {
+                throw new RuntimeException($errmsg, $errno);
+            },
+        ];
 
-        $client = new Client("x", $options);
+        $client = new Client('x', $options);
 
-      # Should error out with debug on.
-        $this->assertTrue($client->track(array("user_id" => "some-user", "event" => "Socket PHP Event")));
+        # Should error out with debug on.
+        self::assertTrue($client->track(['user_id' => 'some-user', 'event' => 'Socket PHP Event']));
         $client->__destruct();
     }
 
-    public function testLargeMessageSizeError()
+    public function testLargeMessageSizeError(): void
     {
-        $options = array(
-        "debug" => true,
-        "consumer" => "lib_curl",
-        );
+        $options = [
+            'debug'    => true,
+            'consumer' => 'lib_curl',
+        ];
 
-        $client = new Client("testlargesize", $options);
+        $client = new Client('testlargesize', $options);
 
-        $big_property = "";
+        $big_property = str_repeat('a', 32 * 1024);
 
-        for ($i = 0; $i < 32 * 1024; ++$i) {
-            $big_property .= "a";
-        }
-
-        $this->assertFalse(
+        self::assertFalse(
             $client->track(
-                array(
-                "userId" => "some-user",
-                "event" => "Super Large PHP Event",
-                "properties" => array("big_property" => $big_property),
-                )
+                [
+                    'userId'     => 'some-user',
+                    'event'      => 'Super Large PHP Event',
+                    'properties' => ['big_property' => $big_property],
+                ]
             ) && $client->flush()
         );
 

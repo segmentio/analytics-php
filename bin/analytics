@@ -1,106 +1,94 @@
 #!/usr/bin/env php
 <?php
 
-require_once(__DIR__ . '/../lib/Segment.php');
+use Segment\Segment;
 
-if (in_array('--help', $argv)) {
-  print(usage());
-  exit;
+require __DIR__ . '/../vendor/autoload.php';
+
+if (in_array('--help', $argv, true)) {
+    print(usage());
+    exit;
 }
 
 date_default_timezone_set('UTC');
 
-$options = getopt('', array(
-  'writeKey::',
-  'type:',
-
-  'userId::',
-
-  'event::',
-  'properties::',
-
-  'name::',
-
-  'traits::',
-
-  'groupId::',
-
-  'previousId::'
-));
+$options = getopt(
+    '',
+    [
+        'writeKey::',
+        'type:',
+        'userId::',
+        'event::',
+        'properties::',
+        'name::',
+        'traits::',
+        'groupId::',
+        'previousId::'
+    ]
+);
 
 if (empty($options['writeKey'])) {
-  error('writeKey flag required');
+    error('writeKey flag required');
 }
 
 Segment::init($options['writeKey']);
 
 switch ($options['type']) {
-  case 'track':
-    Segment::track(array(
-      'userId' => $options['userId'],
-      'event' => $options['event'],
-      'properties' => parse_json($options['properties'])
-    ));
-    break;
-
-  case 'identify':
-    Segment::identify(array(
-      'userId' => $options['userId'],
-      'traits' => parse_json($options['traits'])
-    ));
-    break;
-
-  case 'page':
-    Segment::page(array(
-      'userId' => $options['userId'],
-      'name' => $options['name'],
-      'properties' => parse_json($options['properties'])
-    ));
-    break;
-
-  case 'group':
-    Segment::identify(array(
-      'userId' => $options['userId'],
-      'groupId' => $options['groupId'],
-      'traits' => parse_json($options['traits'])
-    ));
-    break;
-
-  case 'alias':
-    Segment::alias(array(
-      'userId' => $options['userId'],
-      'previousId' => $options['previousId']
-    ));
-    break;
-
-  default:
-    error(usage());
-    break;
+    case 'track':
+        Segment::track(array(
+            'userId'     => $options['userId'],
+            'event'      => $options['event'],
+            'properties' => parse_json($options['properties'])
+        ));
+        break;
+    case 'identify':
+        Segment::identify(array(
+            'userId' => $options['userId'],
+            'traits' => parse_json($options['traits'])
+        ));
+        break;
+    case 'page':
+        Segment::page(array(
+            'userId'     => $options['userId'],
+            'name'       => $options['name'],
+            'properties' => parse_json($options['properties'])
+        ));
+        break;
+    case 'group':
+        Segment::identify(array(
+            'userId'  => $options['userId'],
+            'groupId' => $options['groupId'],
+            'traits'  => parse_json($options['traits'])
+        ));
+        break;
+    case 'alias':
+        Segment::alias(array(
+            'userId'     => $options['userId'],
+            'previousId' => $options['previousId']
+        ));
+        break;
+    default:
+        error(usage());
 }
 
 Segment::flush();
 
-function usage() {
-  return "\n  Usage: analytics --type <track|identify|page|group|alias> [options]\n\n";
+function usage(): string
+{
+    return "\n  Usage: analytics --type <track|identify|page|group|alias> [options]\n\n";
 }
 
-function error($message) {
-  print("$message\n\n");
-  exit(1);
+function error($message): void
+{
+    print("$message\n\n");
+    exit(1);
 }
 
-function parse_json($input) {
-  if (empty($input)) {
-    return null;
-  }
+function parse_json($input): ?array
+{
+    if (empty($input)) {
+        return null;
+    }
 
-  return json_decode($input);
-}
-
-function parse_timestamp($input) {
-  if (empty($input)) {
-    return null;
-  }
-
-  return strtotime($input);
+    return json_decode($input, true);
 }
