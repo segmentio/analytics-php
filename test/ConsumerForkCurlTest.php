@@ -1,10 +1,11 @@
 <?php
 
-namespace Segment\Consumer;
+namespace Segment\Test;
 
-require_once __DIR__ . "/../lib/Segment/Client.php";
+use PHPUnit\Framework\TestCase;
+use Segment\Client;
 
-class ConsumerForkCurlTest extends \PHPUnit\Framework\TestCase
+class ConsumerForkCurlTest extends TestCase
 {
     private $client;
 

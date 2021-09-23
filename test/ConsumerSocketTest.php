@@ -1,10 +1,11 @@
 <?php
 
-namespace Segment\Consumer;
+namespace Segment\Test;
 
-require_once __DIR__ . "/../lib/Segment/Client.php";
+use PHPUnit\Framework\TestCase;
+use Segment\Client;
 
-class ConsumerSocketTest extends \PHPUnit\Framework\TestCase
+class ConsumerSocketTest extends TestCase
 {
     private $client;
 

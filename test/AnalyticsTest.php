@@ -1,10 +1,11 @@
 <?php
 
-namespace Segment;
+namespace Segment\Test;
 
-require_once __DIR__ . "/../lib/Segment.php";
+use PHPUnit\Framework\TestCase;
+use Segment\Segment;
 
-class AnalyticsTest extends \PHPUnit\Framework\TestCase
+class AnalyticsTest extends TestCase
 {
     public function setUp(): void
     {

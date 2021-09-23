@@ -1,10 +1,12 @@
 <?php
-namespace Segment;
+
+use Segment\Segment;
+
 /**
  * require client
  */
 
-require_once(__DIR__ . "/lib/Segment.php");
+require './vendor/autoload.php';
 
 /**
  * Args
@@ -70,7 +72,7 @@ foreach ($lines as $line) {
     if (!trim($line)) continue;
     $total++;
     $payload = json_decode($line, true);
-    $dt = new \DateTime($payload["timestamp"]);
+    $dt = new DateTime($payload["timestamp"]);
     $ts = floatval($dt->getTimestamp() . "." . $dt->format("u"));
     $payload["timestamp"] = date("c", (int) $ts);
     $type = $payload["type"];

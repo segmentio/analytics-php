@@ -1,10 +1,14 @@
 <?php
 
-namespace Segment\Consumer;
+namespace Segment\Test;
 
-require_once __DIR__ . '/../lib/Segment/Client.php';
+use PHPUnit\Framework\TestCase;
+use Segment\Client;
+use Segment\Segment;
+use Segment\Consumer\LibCurl;
+use Segment\Consumer\ForkCurl;
 
-class ClientTest extends \PHPUnit\Framework\TestCase
+class ClientTest extends TestCase
 {
     /** @test */
     public function it_uses_the_lib_curl_consumer_as_default()

@@ -2,10 +2,6 @@
 
 namespace Segment;
 
-use Segment\Consumer\Client as Client;
-
-require_once __DIR__ . '/Segment/Client.php';
-
 class Segment
 {
     private static $client;

@@ -25,9 +25,9 @@
 		"squizlabs/php_codesniffer": "^3.3"
 	},
 	"autoload": {
-		"files": [
-			"lib/Segment.php"
-		]
+		"psr-4": {
+			"Segment\\": "lib/"
+		}
 	},
 	"bin": [
 		"bin/analytics"

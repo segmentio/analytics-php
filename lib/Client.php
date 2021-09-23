@@ -1,14 +1,12 @@
 <?php
 
-namespace Segment\Consumer;
+namespace Segment;
 
-require_once(__DIR__ . '/Consumer.php');
-require_once(__DIR__ . '/QueueConsumer.php');
-require_once(__DIR__ . '/Consumer/File.php');
-require_once(__DIR__ . '/Consumer/ForkCurl.php');
-require_once(__DIR__ . '/Consumer/LibCurl.php');
-require_once(__DIR__ . '/Consumer/Socket.php');
-require_once(__DIR__ . '/Version.php');
+use Segment\Consumer\Consumer;
+use Segment\Consumer\Socket;
+use Segment\Consumer\File;
+use Segment\Consumer\ForkCurl;
+use Segment\Consumer\LibCurl;
 
 class Client
 {
@@ -27,10 +25,10 @@ class Client
     {
 
         $consumers = array(
-        "socket"     => "Segment\Consumer\Socket",
-        "file"       => "Segment\Consumer\File",
-        "fork_curl"  => "Segment\Consumer\ForkCurl",
-        "lib_curl"   => "Segment\Consumer\LibCurl"
+        "socket"     => Socket::class,
+        "file"       => File::class,
+        "fork_curl"  => ForkCurl::class,
+        "lib_curl"   => LibCurl::class
         );
       // Use our socket libcurl by default
         $consumer_type = isset($options["consumer"]) ? $options["consumer"] :
