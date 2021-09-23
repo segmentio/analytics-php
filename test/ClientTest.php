@@ -1,4 +1,5 @@
 <?php
+
 namespace Segment\Consumer;
 
 require_once __DIR__ . '/../lib/Segment/Client.php';
@@ -11,7 +12,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $client = new Client('foobar', []);
         $this->assertInstanceOf(LibCurl::class, $client->getConsumer());
     }
-    
+
     /** @test */
     public function can_provide_the_consumer_configuration_as_string()
     {
@@ -20,7 +21,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         ]);
         $this->assertInstanceOf(ForkCurl::class, $client->getConsumer());
     }
-    
+
     /** @test */
     public function can_provide_a_class_namespace_as_consumer_configuration()
     {
