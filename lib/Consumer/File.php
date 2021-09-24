@@ -27,7 +27,7 @@ class File extends Consumer
 
         parent::__construct($secret, $options);
 
-        $this->file_handle = fopen($options['filename'], 'ab');
+        $this->file_handle = @fopen($options['filename'], 'ab');
         if ($this->file_handle === false) {
             $this->handleError(13, 'Failed to open analytics.log file');
             return;
