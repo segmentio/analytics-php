@@ -151,14 +151,9 @@ class Socket extends QueueConsumer
         while (true) {
             // Send request to server
             while (!$closed && $bytes_written < $bytes_total) {
-                try {
-                    // Since we're try catch'ing prevent PHP logs.
-                    $written = @fwrite($socket, substr($req, $bytes_written));
-                } catch (Exception $e) {
-                    $this->handleError($e->getCode(), $e->getMessage());
-                    $closed = true;
-                }
-                if (!isset($written) || !$written) {
+                $written = @fwrite($socket, substr($req, $bytes_written));
+                if ($written === false) {
+                    $this->handleError(13, 'Failed to write to socket.');
                     $closed = true;
                 } else {
                     $bytes_written += $written;
