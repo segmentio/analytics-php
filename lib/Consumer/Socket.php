@@ -136,10 +136,9 @@ class Socket extends QueueConsumer
      *
      * @param resource|false $socket the handle for the socket
      * @param string $req request body
-     * @param bool $retry
      * @return bool
      */
-    private function makeRequest($socket, string $req, bool $retry = true): bool
+    private function makeRequest($socket, string $req): bool
     {
         $bytes_written = 0;
         $bytes_total = strlen($req);
