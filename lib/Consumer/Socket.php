@@ -169,7 +169,7 @@ class Socket extends QueueConsumer
             $statusCode = 0;
 
             if (!$closed) {
-                $res = $this->parseResponse(fread($socket, 2048));
+                $res = self::parseResponse(fread($socket, 2048));
                 $statusCode = (int)$res['status'];
             }
             fclose($socket);
@@ -211,7 +211,7 @@ class Socket extends QueueConsumer
      *     string $status HTTP code, e.g. "200"
      *     string $message JSON response from the api
      */
-    private function parseResponse(string $res): array
+    private static function parseResponse(string $res): array
     {
         $contents = explode("\n", $res);
 
