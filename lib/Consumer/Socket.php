@@ -63,32 +63,23 @@ class Socket extends QueueConsumer
         $port = $this->ssl() ? 443 : 80;
         $timeout = $this->options['timeout'];
 
-        try {
-            // Open our socket to the API Server.
-            // Since we're try catch'ing prevent PHP logs.
-            $socket = @pfsockopen(
-                $protocol . '://' . $host,
-                $port,
-                $errno,
-                $errstr,
-                $timeout
-            );
+        // Open our socket to the API Server.
+        // Since we're try catch'ing prevent PHP logs.
+        $socket = @pfsockopen(
+            $protocol . '://' . $host,
+            $port,
+            $errno,
+            $errstr,
+            $timeout
+        );
 
-            // If we couldn't open the socket, handle the error.
-            if ($socket === false) {
-                $this->handleError($errno, $errstr);
-                $this->socket_failed = true;
-
-                return false;
-            }
-
-            return $socket;
-        } catch (\Exception $e) {
-            $this->handleError($e->getCode(), $e->getMessage());
+        // If we couldn't open the socket, handle the error.
+        if ($socket === false) {
+            $this->handleError($errno, $errstr);
             $this->socket_failed = true;
-
-            return false;
         }
+
+        return $socket;
     }
 
     /**
