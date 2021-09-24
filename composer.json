@@ -33,6 +33,7 @@
 	},
 	"autoload": {
 		"psr-4": {
+			"Segment\\Test\\": "test/",
 			"Segment\\": "lib/"
 		}
 	},
