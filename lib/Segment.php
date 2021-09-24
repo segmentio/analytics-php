@@ -27,12 +27,12 @@ class Segment
      *
      * @param mixed $value
      * @param string $msg
-     * @throws Exception
+     * @throws SegmentException
      */
     private static function assert($value, string $msg): void
     {
         if (empty($value)) {
-            throw new Exception($msg);
+            throw new SegmentException($msg);
         }
     }
 
@@ -55,7 +55,7 @@ class Segment
     /**
      * Check the client.
      *
-     * @throws Exception
+     * @throws SegmentException
      */
     private static function checkClient(): void
     {
@@ -63,7 +63,7 @@ class Segment
             return;
         }
 
-        throw new Exception('Segment::init() must be called before any other tracking method.');
+        throw new SegmentException('Segment::init() must be called before any other tracking method.');
     }
 
     /**

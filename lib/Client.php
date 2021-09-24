@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Segment;
 
-use Exception;
 use Segment\Consumer\Consumer;
 use Segment\Consumer\File;
 use Segment\Consumer\ForkCurl;
@@ -38,7 +37,7 @@ class Client
 
         if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
             if (!is_subclass_of($consumer_type, Consumer::class)) {
-                throw new Exception('Consumers must extend the Segment/Consumer/Consumer abstract class');
+                throw new SegmentException('Consumers must extend the Segment/Consumer/Consumer abstract class');
             }
             // Try to resolve it by class name
             $this->consumer = new $consumer_type($secret, $options);
