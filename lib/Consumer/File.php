@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Segment\Consumer;
 
-use Exception;
-
 class File extends Consumer
 {
     protected string $type = 'File';
@@ -29,15 +27,15 @@ class File extends Consumer
 
         parent::__construct($secret, $options);
 
-        try {
-            $this->file_handle = fopen($options['filename'], 'ab');
-            if (isset($options['filepermissions'])) {
-                chmod($options['filename'], $options['filepermissions']);
-            } else {
-                chmod($options['filename'], 0777);
-            }
-        } catch (Exception $e) {
-            $this->handleError($e->getCode(), $e->getMessage());
+        $this->file_handle = fopen($options['filename'], 'ab');
+        if ($this->file_handle === false) {
+            $this->handleError(13, 'Failed to open analytics.log file');
+            return;
+        }
+        if (isset($options['filepermissions'])) {
+            chmod($options['filename'], $options['filepermissions']);
+        } else {
+            chmod($options['filename'], 0664);
         }
     }
 
