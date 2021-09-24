@@ -149,11 +149,11 @@ class ConsumerFileTest extends TestCase
             [
                 'consumer'        => 'file',
                 'filename'        => $this->filename,
-                'filepermissions' => 0700,
+                'filepermissions' => 0600,
             ]
         );
         $client->track(['userId' => 'some_user', 'event' => 'File PHP Event']);
-        self::assertEquals(0700, (fileperms($this->filename) & 0777));
+        self::assertEquals(0600, (fileperms($this->filename) & 0777));
     }
 
     public function testFileSecurityDefaults(): void
@@ -166,6 +166,6 @@ class ConsumerFileTest extends TestCase
             ]
         );
         $client->track(['userId' => 'some_user', 'event' => 'File PHP Event']);
-        self::assertEquals(0777, (fileperms($this->filename) & 0777));
+        self::assertEquals(0644, (fileperms($this->filename) & 0777));
     }
 }

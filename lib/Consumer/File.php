@@ -35,7 +35,7 @@ class File extends Consumer
         if (isset($options['filepermissions'])) {
             chmod($options['filename'], $options['filepermissions']);
         } else {
-            chmod($options['filename'], 0664);
+            chmod($options['filename'], 0644);
         }
     }
 
