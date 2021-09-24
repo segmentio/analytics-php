@@ -213,16 +213,15 @@ class Socket extends QueueConsumer
      */
     private static function parseResponse(string $res): array
     {
-        $contents = explode("\n", $res);
+        [$first,] = explode("\n", $res, 2);
 
         // Response comes back as HTTP/1.1 200 OK
         // Final line contains HTTP response.
-        $status = explode(' ', $contents[0], 3);
-        $result = $contents[count($contents) - 1];
+        [, $status, $message] = explode(' ', $first, 3);
 
         return [
-            'status'  => $status[1] ?? null,
-            'message' => $result,
+            'status'  => $status ?? null,
+            'message' => $message,
         ];
     }
 }
