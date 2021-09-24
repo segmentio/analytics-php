@@ -10,7 +10,8 @@ class Socket extends QueueConsumer
     private bool $socket_failed = false;
 
     /**
-     * Creates a new socket consumer for dispatching async requests immediately
+     * Creates a new socket consumer for dispatching async requests immediately.
+     *
      * @param string $secret
      * @param array $options
      *     number "timeout" - the timeout for connecting
@@ -50,6 +51,8 @@ class Socket extends QueueConsumer
     }
 
     /**
+     * Open a connection to the target host.
+     *
      * @return false|resource
      */
     private function createSocket()
@@ -83,7 +86,8 @@ class Socket extends QueueConsumer
     }
 
     /**
-     * Create the body to send as the post request.
+     * Create the request body.
+     *
      * @param string $host
      * @param string $content
      * @return string body
@@ -117,6 +121,7 @@ class Socket extends QueueConsumer
         // Verify message size is below than 32KB
         if (strlen($req) >= 32 * 1024) {
             $msg = 'Message size is larger than 32KB';
+            /** @noinspection ForgottenDebugOutputInspection */
             error_log('[Analytics][' . $this->type . '] ' . $msg);
 
             return false;
@@ -128,7 +133,8 @@ class Socket extends QueueConsumer
     /**
      * Attempt to write the request to the socket, wait for response if debug
      * mode is enabled.
-     * @param resource $socket the handle for the socket
+     *
+     * @param resource|false $socket the handle for the socket
      * @param string $req request body
      * @param bool $retry
      * @return bool
