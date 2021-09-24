@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Segment\Test;
 
-use Exception;
 use PHPUnit\Framework\TestCase;
 use Segment\Segment;
+use Segment\SegmentException;
 
 class AnalyticsTest extends TestCase
 {
@@ -61,7 +61,7 @@ class AnalyticsTest extends TestCase
     public function testGroupNoUser(): void
     {
         $this->expectExceptionMessage('Segment::group() requires userId or anonymousId');
-        $this->expectException(Exception::class);
+        $this->expectException(SegmentException::class);
         Segment::group(
             [
                 'groupId' => 'group-id',
