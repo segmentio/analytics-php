@@ -67,7 +67,6 @@ class Socket extends QueueConsumer
         $timeout = $this->options['timeout'];
 
         // Open our socket to the API Server.
-        // Since we're try catch'ing prevent PHP logs.
         $socket = @pfsockopen(
             $protocol . '://' . $host,
             $port,
