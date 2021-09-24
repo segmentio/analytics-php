@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Segment;
 
-use Exception;
-
 class Segment
 {
     private static Client $client;
