@@ -15,9 +15,7 @@ class ConsumerFileTest extends TestCase
     public function setUp(): void
     {
         date_default_timezone_set('UTC');
-        if (file_exists($this->filename())) {
-            unlink($this->filename());
-        }
+        $this->clearLog();
 
         $this->client = new Client(
             'oq0vdlg7yi',
@@ -28,16 +26,21 @@ class ConsumerFileTest extends TestCase
         );
     }
 
-    public function filename(): string
-    {
-        return '/tmp/analytics.log';
-    }
-
-    public function tearDown(): void
+    private function clearLog(): void
     {
         if (file_exists($this->filename)) {
             unlink($this->filename);
         }
+    }
+
+    public function filename(): string
+    {
+        return $this->filename;
+    }
+
+    public function tearDown(): void
+    {
+        $this->clearLog();
     }
 
     public function testTrack(): void
@@ -124,7 +127,7 @@ class ConsumerFileTest extends TestCase
         }
         exec('php --define date.timezone=UTC send.php --secret oq0vdlg7yi --file /tmp/analytics.log', $output);
         self::assertSame('sent 200 from 200 requests successfully', trim($output[0]));
-        self::assertFileDoesNotExist($this->filename());
+        self::assertFileDoesNotExist($this->filename);
     }
 
     public function testProductionProblems(): void
