@@ -43,6 +43,8 @@ class LibCurl extends QueueConsumer
             // set the url, number of POST vars, POST data
             curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $this->options['curl_timeout']);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->options['curl_connecttimeout']);
 
             // set variables for headers
             $header = [];
