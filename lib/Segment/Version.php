@@ -1,3 +1,0 @@
-<?php
-global $SEGMENT_VERSION;
-$SEGMENT_VERSION = "2.0.0";

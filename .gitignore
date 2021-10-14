@@ -5,3 +5,5 @@ test/analytics.log
 /.vscode
 .phplint-cache
 /.idea
+clover.xml
+.phpunit.result.cache
