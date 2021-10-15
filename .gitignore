@@ -6,4 +6,6 @@ test/analytics.log
 .phplint-cache
 /.idea
 clover.xml
+junit.xml
 .phpunit.result.cache
+/build/*
