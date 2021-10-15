@@ -1,3 +1,16 @@
+3.0.0 / 2021-10-14
+==================
+
+  * PSR-12 coding standard with Slevomat and phcs extensions
+  * Namespace and file rearrangement to follow PSR-4 naming scheme and more logical separation
+  * Provide strict types for all properties, parameters, and return values
+  * Add an exception class so we can have segment-specific exceptions
+  * Add dependencies on JSON extension
+  * Add dependency on the Roave security checker
+  * Since the library already required a minimum of PHP 7.4, make use of PHP 7.4+ features, and avoid compat issues with 8.0
+  * More sensible error handling, don't try to catch exceptions that are never thrown
+  * Extensive linting and static analysis using phpcs, psalm, phpstan, and PHPStorm to spot issues
+
 
 2.0.0 / 2021-07-16
 ==================
