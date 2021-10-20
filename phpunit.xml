@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
          backupGlobals="true"
          backupStaticAttributes="false"
          bootstrap="vendor/autoload.php"
@@ -24,7 +24,7 @@
             <directory suffix=".php">./lib</directory>
         </include>
         <report>
-            <clover outputFile="clover.xml"/>
+            <clover outputFile="build/logs/clover.xml"/>
         </report>
     </coverage>
     <testsuites>
@@ -32,5 +32,9 @@
             <directory>test</directory>
         </testsuite>
     </testsuites>
-    <logging/>
+    <logging>
+        <testdoxText outputFile="php://stdout"/>
+        <testdoxXml outputFile="build/logs/clover.xml"/>
+        <junit outputFile="build/logs/junit.xml"/>
+    </logging>
 </phpunit>
