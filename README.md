@@ -1,7 +1,7 @@
 analytics-php
 ==============
-[![Test status](https://github.com/segmentio/analytics-php/workflows/Tests/badge.svg)](https://github.com/Synchro/analytics-php/actions)
-[![codecov.io](https://codecov.io/gh/segmentio/analytics-php/branch/master/graph/badge.svg?token=iORZpwmYmM)](https://codecov.io/gh/Synchro/analytics-php)
+[![Test status](https://github.com/segmentio/analytics-php/workflows/Tests/badge.svg)](https://github.com/segmentio/analytics-php/actions)
+[![codecov.io](https://codecov.io/gh/segmentio/analytics-php/branch/master/graph/badge.svg?token=iORZpwmYmM)](https://codecov.io/gh/segmentio/analytics-php)
 
 analytics-php is a php client for [Segment](https://segment.com)
 
