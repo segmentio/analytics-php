@@ -1,6 +1,7 @@
 analytics-php
 ==============
-[![Segmentio](https://circleci.com/gh/segmentio/analytics-php.svg?style=shield&circle-token=a20a4b1daa865d164e62ca59a65d6753d286c1c1)](https://app.circleci.com/pipelines/github/segmentio/analytics-php)
+[![Test status](https://github.com/segmentio/analytics-php/workflows/Tests/badge.svg)](https://github.com/segmentio/analytics-php/actions)
+[![codecov.io](https://codecov.io/gh/segmentio/analytics-php/branch/master/graph/badge.svg?token=iORZpwmYmM)](https://codecov.io/gh/segmentio/analytics-php)
 
 analytics-php is a php client for [Segment](https://segment.com)
 
