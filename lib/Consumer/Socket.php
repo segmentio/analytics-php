@@ -28,6 +28,10 @@ class Socket extends QueueConsumer
             $options['host'] = 'api.segment.io';
         }
 
+        if (!isset($options['tls'])) {
+            $options['tls'] = '';
+        }        
+
         parent::__construct($secret, $options);
     }
 
