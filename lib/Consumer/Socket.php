@@ -30,7 +30,7 @@ class Socket extends QueueConsumer
 
         if (!isset($options['tls'])) {
             $options['tls'] = '';
-        }        
+        }
 
         parent::__construct($secret, $options);
     }

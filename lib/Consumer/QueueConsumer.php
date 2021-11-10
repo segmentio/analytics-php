@@ -76,11 +76,11 @@ abstract class QueueConsumer extends Consumer
 
         if (isset($options['curl_timeout'])) {
             $this->curl_timeout = $options['curl_timeout'];
-        }      
+        }
 
         if (isset($options['curl_connecttimeout'])) {
             $this->curl_connecttimeout = $options['curl_connecttimeout'];
-        }          
+        }
 
         $this->queue = [];
     }
