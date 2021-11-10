@@ -21,6 +21,8 @@ abstract class QueueConsumer extends Consumer
     protected string $host = '';
     protected bool $compress_request = false;
     protected int $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
+    protected int $curl_timeout = 0; // by default this is infinite
+    protected int $curl_connecttimeout = 300;
 
     /**
      * Store our secret and options as part of this consumer
@@ -70,6 +72,14 @@ abstract class QueueConsumer extends Consumer
             } else {
                 $this->flush_interval_in_mills = $options['flush_interval'];
             }
+        }
+
+        if (isset($options['curl_timeout'])) {
+            $this->curl_timeout = $options['curl_timeout'];
+        }
+
+        if (isset($options['curl_connecttimeout'])) {
+            $this->curl_connecttimeout = $options['curl_connecttimeout'];
         }
 
         $this->queue = [];
