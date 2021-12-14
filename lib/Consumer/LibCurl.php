@@ -25,14 +25,13 @@ class LibCurl extends QueueConsumer
             $payload = gzencode($payload);
         }
 
-        $protocol = $this->ssl() ? 'https://' : 'http://';
         if ($this->host) {
             $host = $this->host;
         } else {
             $host = 'api.segment.io';
         }
         $path = '/v1/batch';
-        $url = $protocol . $host . $path;
+        $url = $this->protocol . $host . $path;
 
         $backoff = 100; // Set initial waiting time to 100ms
 

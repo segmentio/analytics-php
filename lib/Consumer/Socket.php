@@ -65,9 +65,9 @@ class Socket extends QueueConsumer
             return false;
         }
 
-        $protocol = $this->options['tls'] ? 'tls' : ($this->ssl() ? 'ssl' : 'tcp');
+        $protocol = $this->options['tls'] ? 'tls' : 'ssl');
         $host = $this->options['host'];
-        $port = $this->ssl() ? 443 : 80;
+        $port = 443;
         $timeout = $this->options['timeout'];
 
         // Open our socket to the API Server.
