@@ -65,7 +65,7 @@ class Socket extends QueueConsumer
             return false;
         }
 
-        $protocol = $this->options['tls'] ? 'tls' : 'ssl');
+        $protocol = $this->options['tls'] ? 'tls' : 'ssl';
         $host = $this->options['host'];
         $port = 443;
         $timeout = $this->options['timeout'];
