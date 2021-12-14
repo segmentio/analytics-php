@@ -7,8 +7,8 @@ namespace Segment\Consumer;
 abstract class QueueConsumer extends Consumer
 {
     protected string $type = 'QueueConsumer';
-    protected string $protocol = 'https://';    
-
+    protected string $protocol = 'https://';
+    
     /**
      * @var array<int,mixed>
      */

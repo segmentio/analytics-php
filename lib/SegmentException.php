@@ -6,5 +6,4 @@ namespace Segment;
 
 class SegmentException extends \Exception
 {
-
 }
