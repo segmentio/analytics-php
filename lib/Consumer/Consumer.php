@@ -84,17 +84,6 @@ abstract class Consumer
     }
 
     /**
-     * Check whether we should connect to the API using SSL. This is enabled by
-     * default with connections which make batching requests. For connections
-     * which can save on round-trip times, you may disable it.
-     * @return bool
-     */
-    protected function ssl(): bool
-    {
-        return $this->options['ssl'] ?? true;
-    }
-
-    /**
      * On an error, try and call the error handler, if debugging output to
      * error_log as well.
      * @param int $code

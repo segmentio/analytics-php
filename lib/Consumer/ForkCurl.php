@@ -23,14 +23,13 @@ class ForkCurl extends QueueConsumer
         $payload = escapeshellarg($payload);
         $secret = escapeshellarg($this->secret);
 
-        $protocol = $this->ssl() ? 'https://' : 'http://';
         if ($this->host) {
             $host = $this->host;
         } else {
             $host = 'api.segment.io';
         }
         $path = '/v1/batch';
-        $url = $protocol . $host . $path;
+        $url = $this->protocol . $host . $path;
 
         $cmd = "curl -u $secret: -X POST -H 'Content-Type: application/json'";
 
