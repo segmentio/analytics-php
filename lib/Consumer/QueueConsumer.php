@@ -38,6 +38,14 @@ abstract class QueueConsumer extends Consumer
             $this->max_queue_size = $options['max_queue_size'];
         }
 
+        if (isset($options['max_item_size_bytes'])) {
+            $this->max_item_size_bytes = $options['max_item_size_bytes'];
+        }
+
+        if (isset($options['max_queue_size_bytes'])) {
+            $this->max_queue_size_bytes = $options['max_queue_size_bytes'];
+        }
+
         if (isset($options['batch_size'])) {
             if ($options['batch_size'] < 1) {
                 $msg = 'Batch Size must not be less than 1';
