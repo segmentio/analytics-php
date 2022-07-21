@@ -54,9 +54,9 @@ class ForkCurl extends QueueConsumer
 
         $cmd .= " '" . $url . "'";
 
-        // Verify message size is below than 32KB
-        if (strlen($payload) >= 32 * 1024) {
-            $msg = 'Message size is larger than 32KB';
+        // Verify payload size is below 512KB
+        if (strlen($payload) >= 500 * 1024) {
+            $msg = 'Payload size is larger than 512KB';
             error_log('[Analytics][' . $this->type . '] ' . $msg);
 
             return false;
