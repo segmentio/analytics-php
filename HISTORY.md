@@ -1,7 +1,7 @@
 3.5.0 / 2022-07-21
 ==================
 
-  * Correct Payload size check of 512kb (#199)
+  * Correct Payload size check of 512kb (#202)
   * Add new consumer configurable options: curl_timeout, curl_connecttimeout, max_item_size_bytes, max_queue_size_bytes (#192, #197, #198)
   * Depricate HTTP Option (#194 & #195)
 
