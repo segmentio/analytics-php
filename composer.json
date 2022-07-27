@@ -50,5 +50,13 @@
     "lint": [
       "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . -e php,phps --exclude vendor --exclude .git --exclude build"
     ]
-  }
+  },
+  "config": {
+        "allow-plugins": {
+            "third-party/required-plugin": true,
+            "segmentio/*": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "unnecessary/plugin": false
+        }
+    }
 }
