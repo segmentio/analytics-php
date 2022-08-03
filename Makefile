@@ -18,6 +18,8 @@ lint: dependencies
 	then \
 		php ./composer.phar require overtrue/phplint --dev; \
 		php ./composer.phar require squizlabs/php_codesniffer --dev; \
+		php ./composer.phar require dealerdirect/phpcodesniffer-composer-installer --dev; \
+		
 		./vendor/bin/phplint; \
 		./vendor/bin/phpcs; \
 	else \

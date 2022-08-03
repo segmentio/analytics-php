@@ -121,9 +121,9 @@ class Socket extends QueueConsumer
         $req .= "\r\n";
         $req .= $content;
 
-        // Verify message size is below than 32KB
-        if (strlen($req) >= 32 * 1024) {
-            $msg = 'Message size is larger than 32KB';
+        // Verify payload size is below 512KB
+        if (strlen($req) >= 500 * 1024) {
+            $msg = 'Payload size is larger than 512KB';
             /** @noinspection ForgottenDebugOutputInspection */
             error_log('[Analytics][' . $this->type . '] ' . $msg);
 
