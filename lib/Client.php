@@ -10,6 +10,8 @@ use Segment\Consumer\ForkCurl;
 use Segment\Consumer\LibCurl;
 use Segment\Consumer\Socket;
 
+require __DIR__ . '/Version.php';
+
 class Client
 {
     protected Consumer $consumer;
