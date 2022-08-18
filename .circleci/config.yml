@@ -12,6 +12,7 @@ jobs:
       XDEBUG_MODE: coverage
     steps:
       - checkout
+      - run: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
       - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
