@@ -1,62 +1,62 @@
 {
-  "name": "segmentio/analytics-php",
-  "version": "3.5.0",
-  "description": "Segment Analytics PHP Library",
-  "keywords": [
-    "analytics",
-    "segmentio",
-    "segment",
-    "analytics.js"
-  ],
-  "homepage": "https://segment.com/libraries/php",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Segment.io <friends@segment.com>",
-      "homepage": "https://segment.com/"
-    }
-  ],
-  "require": {
-    "php": "^7.4 || ^8.0",
-    "ext-json": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "~9.5",
-    "overtrue/phplint": "^3.0",
-    "squizlabs/php_codesniffer": "^3.6",
-    "roave/security-advisories": "dev-latest",
-    "slevomat/coding-standard": "^7.0",
-    "php-parallel-lint/php-parallel-lint": "^1.3",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7"
-  },
-  "suggest": {
-    "ext-curl": "For using the curl HTTP client",
-    "ext-zlib": "For using compression"
-  },
-  "autoload": {
-    "psr-4": {
-      "Segment\\Test\\": "test/",
-      "Segment\\": "lib/"
-    }
-  },
-  "bin": [
-    "bin/analytics"
-  ],
-  "scripts": {
-    "test": "./vendor/bin/phpunit --no-coverage",
-    "check": "./vendor/bin/phpcs",
-    "cf": "./vendor/bin/phpcbf",
-    "coverage": "./vendor/bin/phpunit",
-    "lint": [
-      "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . -e php,phps --exclude vendor --exclude .git --exclude build"
-    ]
-  },
-  "config": {
-        "allow-plugins": {
-            "third-party/required-plugin": true,
-            "segmentio/*": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "unnecessary/plugin": false
-        }
-    }
+	"name": "segmentio/analytics-php",
+	"version": "3.5.0",
+	"description": "Segment Analytics PHP Library",
+	"keywords": [
+		"analytics",
+		"segmentio",
+		"segment",
+		"analytics.js"
+	],
+	"homepage": "https://segment.com/libraries/php",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Segment.io <friends@segment.com>",
+			"homepage": "https://segment.com/"
+		}
+	],
+	"require": {
+		"php": "^7.4 || ^8.0",
+		"ext-json": "*"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "~9.5",
+		"overtrue/phplint": "^3.0",
+		"squizlabs/php_codesniffer": "^3.6",
+		"roave/security-advisories": "dev-latest",
+		"slevomat/coding-standard": "^7.0",
+		"php-parallel-lint/php-parallel-lint": "^1.3",
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.7"
+	},
+	"suggest": {
+		"ext-curl": "For using the curl HTTP client",
+		"ext-zlib": "For using compression"
+	},
+	"autoload": {
+		"psr-4": {
+			"Segment\\Test\\": "test/",
+			"Segment\\": "lib/"
+		}
+	},
+	"bin": [
+		"bin/analytics"
+	],
+	"scripts": {
+		"test": "./vendor/bin/phpunit --no-coverage",
+		"check": "./vendor/bin/phpcs",
+		"cf": "./vendor/bin/phpcbf",
+		"coverage": "./vendor/bin/phpunit",
+		"lint": [
+			"@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint . -e php,phps --exclude vendor --exclude .git --exclude build"
+		]
+	},
+	"config": {
+		"allow-plugins": {
+			"third-party/required-plugin": true,
+			"segmentio/*": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"unnecessary/plugin": false
+		}
+	}
 }
