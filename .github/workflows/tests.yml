@@ -18,7 +18,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '8.1'
           coverage: none
           tools: cs2pr
 
@@ -38,11 +38,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1']
+        php: ['7.4', '8.0', '8.1', '8.2']
         experimental: [false]
-        include:
-          - php: '8.2'
-            experimental: true
 
     name: "Lint: PHP ${{ matrix.php }}"
     continue-on-error: ${{ matrix.experimental }}
@@ -76,7 +73,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1']
+        php: ['7.4', '8.0', '8.1', '8.2']
         coverage: [false]
         experimental: [false]
         include:
@@ -90,10 +87,9 @@ jobs:
           - php: '8.1'
             coverage: true
             experimental: false
-          # Experimental builds. These are allowed to fail.
           - php: '8.2'
             coverage: true
-            experimental: true  
+            experimental: false  
 
     name: "Test: PHP ${{ matrix.php }}"
 
