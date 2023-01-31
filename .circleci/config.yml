@@ -16,6 +16,8 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
+      - run: php --version
+      - run: node --version
 
       - restore_cache:
           keys:
@@ -47,19 +49,19 @@ jobs:
   test-php7.4:
     <<: *multi-test
     docker:
-      - image: circleci/php:7.4-node-browsers
+      - image: cimg/php:7.4-node-browsers
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.0-node   
+      - image: cimg/php:8.0-node   
   test-php8.1:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.1-node   
+      - image: cimg/php:8.1-node   
   test-php8.2:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.2-node   
+      - image: cimg/php:8.2-node   
 workflows:
   version: 2
   multi-test:
