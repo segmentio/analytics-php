@@ -38,10 +38,10 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: ['7.4', '8.0']
+        php: ['7.4', '8.0', '8.1']
         experimental: [false]
         include:
-          - php: '8.1'
+          - php: '8.2'
             experimental: true
 
     name: "Lint: PHP ${{ matrix.php }}"
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        php: ['7.4', '8.0']
+        php: ['7.4', '8.0', '8.1']
         coverage: [false]
         experimental: [false]
         include:
@@ -87,11 +87,13 @@ jobs:
           - php: '8.0'
             coverage: true
             experimental: false
-
-          # Experimental builds. These are allowed to fail.
           - php: '8.1'
-            coverage: false
-            experimental: true
+            coverage: true
+            experimental: false
+          # Experimental builds. These are allowed to fail.
+          - php: '8.2'
+            coverage: true
+            experimental: true  
 
     name: "Test: PHP ${{ matrix.php }}"
 
