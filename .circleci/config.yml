@@ -20,6 +20,7 @@ jobs:
       - run: php --version
       - run: node --version
       - run: sudo touch /tmp/analytics.log
+      - run: sudo chmod 777 /tmp/analytics.log
 
       - restore_cache:
           keys:
