@@ -54,15 +54,15 @@ jobs:
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.0-node   
+      - image: circleci/php:8.0-browsers   
   test-php8.1:
     <<: *multi-test
     docker:
-      - image: cimg/php:8.1-node   
+      - image: cimg/php:8.1-browsers
   test-php8.2:
     <<: *multi-test
     docker:
-      - image: cimg/php:8.2-node   
+      - image: cimg/php:8.2-browsers
 workflows:
   version: 2
   multi-test:
