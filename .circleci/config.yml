@@ -1,3 +1,4 @@
+
 # PHP CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-php/ for more details
@@ -49,11 +50,11 @@ jobs:
   test-php7.4:
     <<: *multi-test
     docker:
-      - image: cimg/php:7.4-node-browsers
+      - image: circleci/php:7.4-node-browsers
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: cimg/php:8.0-node   
+      - image: circleci/php:8.0-node   
   test-php8.1:
     <<: *multi-test
     docker:
