@@ -1,3 +1,4 @@
+
 # PHP CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-php/ for more details
@@ -16,6 +17,8 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install zlib1g-dev
       - run: sudo docker-php-ext-install zip
+      - run: php --version
+      - run: node --version
 
       - restore_cache:
           keys:
@@ -51,10 +54,20 @@ jobs:
   test-php8.0:
     <<: *multi-test
     docker:
-      - image: circleci/php:8.0-node   
+      - image: circleci/php:8.0-browsers   
+  test-php8.1:
+    <<: *multi-test
+    docker:
+      - image: cimg/php:8.1-browsers
+  test-php8.2:
+    <<: *multi-test
+    docker:
+      - image: cimg/php:8.2-browsers
 workflows:
   version: 2
   multi-test:
     jobs:
       - test-php7.4
       - test-php8.0
+      - test-php8.1
+      - test-php8.2
