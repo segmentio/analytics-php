@@ -1,3 +1,11 @@
+
+2.1.0 / 2023-03-28
+==================
+
+  *  Issue #210 test update (#211)
+  * Issue #208 Correct autoload require statement (#209)
+  * Fix missing version information (#207)
+
 3.5.1 / 2023-01-31
 ==================
 
