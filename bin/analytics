@@ -3,7 +3,7 @@
 
 use Segment\Segment;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../bootstrap.php';
 
 if (in_array('--help', $argv, true)) {
     print(usage());
