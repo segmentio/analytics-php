@@ -1,4 +1,11 @@
+3.7.0 / 2023-07-24
+==================
 
+  * Convert to github actions
+  * Remove circleci config/files
+  * Update autoloader
+
+  
 3.6.0 / 2023-03-28
 ==================
 
