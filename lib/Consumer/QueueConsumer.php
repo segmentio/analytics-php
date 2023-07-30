@@ -43,7 +43,7 @@ abstract class QueueConsumer extends Consumer
                 $msg = 'Batch Size must not be less than 1';
                 error_log('[Analytics][' . $this->type . '] ' . $msg);
             } else {
-                $msg = 'WARNING: batch_size option to be depricated soon, please use new option flush_at';
+                $msg = 'WARNING: batch_size option to be deprecated soon, please use new option flush_at';
                 error_log('[Analytics][' . $this->type . '] ' . $msg);
                 $this->flush_at = $options['batch_size'];
             }

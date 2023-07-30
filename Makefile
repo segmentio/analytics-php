@@ -39,4 +39,4 @@ clean:
 		vendor \
 		composer.lock
 
-.PHONY: boostrap release clean
+.PHONY: bootstrap release clean
