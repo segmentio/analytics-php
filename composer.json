@@ -53,10 +53,8 @@
 	},
 	"config": {
 		"allow-plugins": {
-			"third-party/required-plugin": true,
 			"segmentio/*": true,
-			"dealerdirect/phpcodesniffer-composer-installer": true,
-			"unnecessary/plugin": false
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	}
 }
