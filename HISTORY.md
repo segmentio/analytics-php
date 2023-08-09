@@ -19,7 +19,7 @@
 
   * Correct Payload size check of 512kb (#202)
   * Add new consumer configurable options: curl_timeout, curl_connecttimeout, max_item_size_bytes, max_queue_size_bytes (#192, #197, #198)
-  * Depricate HTTP Option (#194 & #195)
+  * Deprecate HTTP Option (#194 & #195)
 
 
 3.0.0 / 2021-10-14
@@ -62,10 +62,10 @@
   * Update Tests [Improvement] (#132)
   * Updtate Readme Status Badging (#139)
   * Bump e2e tests to latest version [Improvement] (#142)
-  * Add Limits to message, batch and memeory usage [Feature] (#137)
+  * Add Limits to message, batch and memory usage [Feature] (#137)
   * Add Configurable flush parameters [Feature] (#135)
   * Add ability to use custom consumer [Feature] (#61)
-  * Add ability to set file permmissions [Feature] (#122)
+  * Add ability to set file permissions [Feature] (#122)
   * Fix curl error handler [Improvement] (#97)
   * Fix timestamp implementation for microseconds (#94)
   * Modify max queue size setting to match requirements (#153, #146)
@@ -105,7 +105,7 @@
 1.5.1 / 2017-04-06
 ==================
 
-  * Use require_once() instead of require(). Fixes issue where seperate plugins in systems such as Moodle break because of class redeclaration when using seperate internal versions of Segment.io.
+  * Use require_once() instead of require(). Fixes issue where separate plugins in systems such as Moodle break because of class redeclaration when using separate internal versions of Segment.io.
 
 1.5.0 / 2017-03-03
 ==================
@@ -113,7 +113,7 @@
   * Adding context.library.consumer to all PHP events
   * libcurl consumer will retry once if http response is not 200
   * update link to php docs
-  * improve portability and reliability of Makefile accros different platforms (#74)
+  * improve portability and reliability of Makefile across different platforms (#74)
 
 1.4.2 / 2016-07-11
 ==================

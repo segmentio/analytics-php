@@ -1,6 +1,5 @@
 {
 	"name": "segmentio/analytics-php",
-	"version": "3.6.0",
 	"description": "Segment Analytics PHP Library",
 	"keywords": [
 		"analytics",
