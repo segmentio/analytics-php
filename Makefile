@@ -29,7 +29,6 @@ lint: dependencies
 release:
 	@printf "releasing ${VERSION}..."
 	@printf '<?php\nglobal $$SEGMENT_VERSION;\n$$SEGMENT_VERSION = "%b";\n' ${VERSION} > ./lib/Version.php
-	@node -e "var fs = require('fs'), pkg = require('./composer'); pkg.version = '${VERSION}'; fs.writeFileSync('./composer.json', JSON.stringify(pkg, null, '\t'));"
 	@git changelog -t ${VERSION}
 	@git release ${VERSION}
 
@@ -39,4 +38,4 @@ clean:
 		vendor \
 		composer.lock
 
-.PHONY: boostrap release clean
+.PHONY: bootstrap release clean
