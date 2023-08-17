@@ -34,8 +34,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Segment\\Test\\": "test/",
 			"Segment\\": "lib/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Segment\\Test\\": "test/"
 		}
 	},
 	"bin": [
