@@ -1,3 +1,5 @@
 <?php
+
 global $SEGMENT_VERSION;
-$SEGMENT_VERSION = "3.7.0";
+
+$SEGMENT_VERSION = '3.7.0';
