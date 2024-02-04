@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Segment;
+namespace Castled;
 
-use Segment\Consumer\Consumer;
-use Segment\Consumer\File;
-use Segment\Consumer\ForkCurl;
-use Segment\Consumer\LibCurl;
-use Segment\Consumer\Socket;
+use Castled\Consumer\Consumer;
+use Castled\Consumer\File;
+use Castled\Consumer\ForkCurl;
+use Castled\Consumer\LibCurl;
+use Castled\Consumer\Socket;
 
 class Client
 {
@@ -37,7 +37,7 @@ class Client
 
         if (!array_key_exists($consumer_type, $consumers) && class_exists($consumer_type)) {
             if (!is_subclass_of($consumer_type, Consumer::class)) {
-                throw new SegmentException('Consumers must extend the Segment/Consumer/Consumer abstract class');
+                throw new CastledException('Consumers must extend the Castled/Consumer/Consumer abstract class');
             }
             // Try to resolve it by class name
             $this->consumer = new $consumer_type($secret, $options);
@@ -103,19 +103,19 @@ class Client
     }
 
     /**
-     * Add the segment.io context to the request
+     * Add the castled.io context to the request
      * @return array additional context
      */
     private function getDefaultContext(): array
     {
         require __DIR__ . '/Version.php';
 
-        global $SEGMENT_VERSION;
+        global $CASTLED_VERSION;
 
         return [
             'library' => [
                 'name'     => 'analytics-php',
-                'version'  => $SEGMENT_VERSION,
+                'version'  => $CASTLED_VERSION,
                 'consumer' => $this->consumer->getConsumer(),
             ],
         ];

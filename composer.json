@@ -3,8 +3,8 @@
 	"description": "Castled PHP Library",
 	"keywords": [
 		"analytics",
-		"segmentio",
-		"segment",
+		"castledio",
+		"castled",
 		"analytics.js"
 	],
 	"homepage": "https://castled.io",
@@ -20,7 +20,7 @@
 		"ext-json": "*"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~9.5",
+		"phpunit/phpunit": "^11.0",
 		"overtrue/phplint": "^3.0",
 		"squizlabs/php_codesniffer": "^3.6",
 		"roave/security-advisories": "dev-latest",
@@ -34,12 +34,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Segment\\": "lib/"
+			"Castled\\": "lib/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Segment\\Test\\": "test/"
+			"Castled\\Test\\": "test/"
 		}
 	},
 	"bin": [

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Segment\Test;
 
 use PHPUnit\Framework\TestCase;
-use Segment\Client;
+use Castled\Client;
 
 class ConsumerForkCurlTest extends TestCase
 {

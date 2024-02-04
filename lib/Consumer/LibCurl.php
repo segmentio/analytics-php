@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Segment\Consumer;
+namespace Castled\Consumer;
 
 class LibCurl extends QueueConsumer
 {
@@ -28,7 +28,7 @@ class LibCurl extends QueueConsumer
         if ($this->host) {
             $host = $this->host;
         } else {
-            $host = 'api.segment.io';
+            $host = 'api.castled.io';
         }
         $path = '/v1/batch';
         $url = $this->protocol . $host . $path;

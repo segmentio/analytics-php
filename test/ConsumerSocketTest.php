@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Segment\Test;
+namespace Castled\Test;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Segment\Client;
+use Castled\Client;
 
 class ConsumerSocketTest extends TestCase
 {
@@ -226,7 +226,7 @@ class ConsumerSocketTest extends TestCase
             'x',
             [
                 'consumer'      => 'socket',
-                'host'          => 'api.segment.ioooooo',
+                'host'          => 'api.castled.ioooooo',
                 'error_handler' => function ($errno, $errmsg) {
                     throw new RuntimeException($errmsg, $errno);
                 },

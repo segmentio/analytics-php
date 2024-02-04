@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-global $SEGMENT_VERSION;
+global $CASTLED_VERSION;
 
-$SEGMENT_VERSION = '3.7.0';
+$CASTLED_VERSION = '3.7.0';

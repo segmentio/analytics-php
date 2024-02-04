@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Segment\Consumer;
+namespace Castled\Consumer;
 
 class Socket extends QueueConsumer
 {
@@ -25,7 +25,7 @@ class Socket extends QueueConsumer
         }
 
         if (!isset($options['host'])) {
-            $options['host'] = 'api.segment.io';
+            $options['host'] = 'api.castled.io';
         }
 
         if (!isset($options['tls'])) {

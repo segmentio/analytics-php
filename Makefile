@@ -28,7 +28,7 @@ lint: dependencies
 
 release:
 	@printf "releasing ${VERSION}..."
-	@printf '<?php\nglobal $$SEGMENT_VERSION;\n$$SEGMENT_VERSION = "%b";\n' ${VERSION} > ./lib/Version.php
+	@printf '<?php\nglobal $$CASTLED_VERSION;\n$$CASTLED_VERSION = "%b";\n' ${VERSION} > ./lib/Version.php
 	@git changelog -t ${VERSION}
 	@git release ${VERSION}
 
