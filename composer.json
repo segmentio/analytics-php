@@ -1,18 +1,18 @@
 {
-	"name": "segmentio/analytics-php",
-	"description": "Segment Analytics PHP Library",
+	"name": "castledio/castled-php-sdk",
+	"description": "Castled PHP Library",
 	"keywords": [
 		"analytics",
 		"segmentio",
 		"segment",
 		"analytics.js"
 	],
-	"homepage": "https://segment.com/libraries/php",
+	"homepage": "https://castled.io",
 	"license": "MIT",
 	"authors": [
 		{
-			"name": "Segment.io <friends@segment.com>",
-			"homepage": "https://segment.com/"
+			"name": "Castled.io <founders@castled.io>",
+			"homepage": "https://castled.io/"
 		}
 	],
 	"require": {
@@ -56,7 +56,7 @@
 	},
 	"config": {
 		"allow-plugins": {
-			"segmentio/*": true,
+			"castledio/*": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	}
