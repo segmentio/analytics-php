@@ -93,7 +93,7 @@ class Client
         if (!isset($msg['timestamp'])) {
             $msg['timestamp'] = null;
         }
-        $msg['timestamp'] = $this->formatTime((int)$msg['timestamp']);
+        $msg['timestamp'] = $this->formatTime($msg['timestamp']);
 
         if (!isset($msg['messageId'])) {
             $msg['messageId'] = self::messageId();
