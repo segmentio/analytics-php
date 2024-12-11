@@ -164,7 +164,7 @@ class ConsumerSocketTest extends TestCase
             },
         ];
 
-        $client = new Client('x', $options);
+        $client = new Client('oq0vdlg7yi', $options);
 
         // Should error out with debug on.
         self::assertTrue($client->track(['user_id' => 'some-user', 'event' => 'Socket PHP Event']));
