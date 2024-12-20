@@ -41,6 +41,7 @@ class ForkCurl extends QueueConsumer
             exec($cmd2, $output, $exit);
 
             if ($exit !== 0) {
+                $output = implode(PHP_EOL, $output);
                 $this->handleError($exit, $output);
                 return false;
             }
@@ -75,6 +76,7 @@ class ForkCurl extends QueueConsumer
         exec($cmd, $output, $exit);
 
         if ($exit !== 0) {
+            $output = implode(PHP_EOL, $output);
             $this->handleError($exit, $output);
         }
 
