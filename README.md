@@ -1,4 +1,4 @@
-analytics-php
+analytics-php TEST
 ==============
 [![Test status](https://github.com/segmentio/analytics-php/workflows/Tests/badge.svg)](https://github.com/segmentio/analytics-php/actions)
 [![codecov.io](https://codecov.io/gh/segmentio/analytics-php/branch/master/graph/badge.svg?token=iORZpwmYmM)](https://codecov.io/gh/segmentio/analytics-php)
