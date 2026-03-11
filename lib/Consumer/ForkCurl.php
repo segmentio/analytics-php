@@ -53,7 +53,7 @@ class ForkCurl extends QueueConsumer
             $cmd .= ' -d ' . $payload;
         }
 
-        $cmd .= " '" . $url . "'";
+        $cmd .= ' ' . escapeshellarg($url);
 
         // Verify payload size is below 512KB
         if (strlen($payload) >= 500 * 1024) {
@@ -67,7 +67,7 @@ class ForkCurl extends QueueConsumer
         $library = $messages[0]['context']['library'];
         $libName = $library['name'];
         $libVersion = $library['version'];
-        $cmd .= " -H 'User-Agent: $libName/$libVersion'";
+        $cmd .= ' -H ' . escapeshellarg("User-Agent: $libName/$libVersion");
 
         if (!$this->debug()) {
             $cmd .= ' > /dev/null 2>&1 &';
