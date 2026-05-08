@@ -51,6 +51,22 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+/**
+ * LibCurl subclass that allows overriding the protocol (http:// vs https://).
+ * The base class hardcodes $protocol = 'https://', so we extend it to support
+ * plain-HTTP targets used by the mock test server.
+ */
+class E2eLibCurl extends \Segment\Consumer\LibCurl
+{
+    public function __construct(string $secret, array $options = [])
+    {
+        parent::__construct($secret, $options);
+        if (isset($options['protocol'])) {
+            $this->protocol = $options['protocol'];
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -127,8 +143,17 @@ function buildClientOptions(array $input, array &$errors): array
     $config  = $input['config'] ?? [];
     $apiHost = $input['apiHost'] ?? '';
 
+    // Determine protocol from the apiHost scheme (default https://).
+    $scheme = 'https://';
+    if (preg_match('#^(https?)://#i', $apiHost, $m)) {
+        $scheme = strtolower($m[1]) . '://';
+    }
+
     $options = [
-        'consumer'      => 'lib_curl',
+        // Use our subclass so we can inject a plain-http:// protocol for the
+        // mock test server (the base LibCurl hardcodes https://).
+        'consumer'      => E2eLibCurl::class,
+        'protocol'      => $scheme,
         'error_handler' => function (int $code, string $message) use (&$errors): void {
             $msg = "HTTP {$code}: {$message}";
             debugLog('SDK error — ' . $msg);
@@ -138,7 +163,7 @@ function buildClientOptions(array $input, array &$errors): array
 
     if ($apiHost !== '') {
         $options['host'] = parseHost($apiHost);
-        debugLog('Using host: ' . $options['host']);
+        debugLog('Using host: ' . $options['host'] . ' (protocol: ' . $scheme . ')');
     }
 
     if (isset($config['flushAt']) && is_numeric($config['flushAt'])) {
