@@ -1,0 +1,13 @@
+{
+  "name": "segment/analytics-php-e2e-cli",
+  "description": "E2E testing CLI for Segment Analytics PHP",
+  "type": "project",
+  "require": {
+    "php": "^7.4 || ^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Segment\\": "../lib/"
+    }
+  }
+}
