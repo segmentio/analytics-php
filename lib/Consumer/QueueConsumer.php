@@ -131,12 +131,10 @@ abstract class QueueConsumer extends Consumer
                 return false;
             }
 
-            $success = $this->flushBatch($batch);
+            // Remove batch before sending — flushBatch() handles all retries internally
+            array_splice($this->queue, 0, $batchSize);
 
-            // Remove batch from queue only after successful send
-            if ($success) {
-                array_splice($this->queue, 0, $batchSize);
-            }
+            $success = $this->flushBatch($batch);
 
             $count = count($this->queue);
 
