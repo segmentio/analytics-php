@@ -9,12 +9,7 @@ class LibCurl extends QueueConsumer
     protected string $type = 'LibCurl';
 
     /**
-     * Send a batch of messages to the API with spec-compliant retry logic:
-     * - 2xx/3xx: success
-     * - 429 + Retry-After: sleep without consuming retry budget
-     * - 429 without Retry-After / other retryable (5xx except 501/505/511,
-     *   408/410/460): exponential backoff, counts against retry budget
-     * - Non-retryable 4xx / 501/505/511: drop immediately
+     * Send a batch of messages to the API with retries on error
      *
      * @param array $messages array of all the messages to send
      * @return bool whether the request succeeded
@@ -35,7 +30,7 @@ class LibCurl extends QueueConsumer
         $library   = $messages[0]['context']['library'];
         $userAgent = $library['name'] . '/' . $library['version'];
 
-        $backoffMs          = 500;   // base 500ms per e2e spec
+        $backoffMs          = 500;   // base 500ms per spec
         $backoffCapMs       = 60000; // cap 60s
         $retriesRemaining   = $this->retry_count;
         $attempt            = 0;
