@@ -8,15 +8,15 @@ on:
 jobs:
 
   coding-standard:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest-large
     name: Coding standards
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2
         with:
           php-version: '8.1'
           coverage: none
@@ -25,7 +25,7 @@ jobs:
       # Install dependencies and handle caching in one go.
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install Composer dependencies
-        uses: "ramsey/composer-install@v2"
+        uses: ramsey/composer-install@1919f6c305aea6ab10e6181a8ddf72317ad77e0e  # v2
 
       - name: Check coding standards
         continue-on-error: true
@@ -35,7 +35,7 @@ jobs:
         run: cs2pr ./phpcs-report.xml
 
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest-large
     strategy:
       matrix:
         php: ['7.4', '8.0', '8.1', '8.2', '8.3']
@@ -46,10 +46,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Install PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2
         with:
           php-version: ${{ matrix.php }}
           coverage: none
@@ -58,7 +58,7 @@ jobs:
       # Install dependencies and handle caching in one go.
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install Composer dependencies
-        uses: "ramsey/composer-install@v2"
+        uses: ramsey/composer-install@1919f6c305aea6ab10e6181a8ddf72317ad77e0e  # v2
 
       - name: Lint against parse errors
         if: ${{ matrix.php != '8.1' }}
@@ -70,7 +70,7 @@ jobs:
 
   test:
     needs: ['coding-standard', 'lint']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest-large
     strategy:
       matrix:
         php: ['7.4', '8.0', '8.1', '8.2', '8.3']
@@ -100,10 +100,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2
         with:
           php-version: ${{ matrix.php }}
           coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
@@ -114,11 +114,11 @@ jobs:
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install dependencies
         if: ${{ matrix.php != '8.1' }}
-        uses: "ramsey/composer-install@v2"
+        uses: ramsey/composer-install@1919f6c305aea6ab10e6181a8ddf72317ad77e0e  # v2
 
       - name: Install dependencies - ignore-platform-reqs
         if: ${{ matrix.php == '8.1' }}
-        uses: "ramsey/composer-install@v2"
+        uses: ramsey/composer-install@1919f6c305aea6ab10e6181a8ddf72317ad77e0e  # v2
         with:
           composer-options: --ignore-platform-reqs
 
@@ -132,7 +132,7 @@ jobs:
 
       - name: Send coverage report to Codecov
         if: ${{ success() && matrix.coverage }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac  # v5
         with:
           files: ./build/logs/clover.xml
           fail_ci_if_error: true
