@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}
+
+jobs:
+  coding-standard:
+    name: Coding Standards
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@cf4cade2721270509d5b1c766dad417c269cbb11 # v2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: cs2pr
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/artifactory-oidc
+        with:
+          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      - name: Check coding standards
+        continue-on-error: true
+        run: ./vendor/bin/phpcs -s --report-full --report-checkstyle=./phpcs-report.xml
+
+      - name: Show PHPCS results in PR
+        run: cs2pr ./phpcs-report.xml
+
+  lint:
+    name: "Lint: PHP ${{ matrix.php }}"
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.1", "8.2", "8.3", "8.4"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@cf4cade2721270509d5b1c766dad417c269cbb11 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: cs2pr
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/artifactory-oidc
+        with:
+          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      - name: Lint against parse errors
+        run: composer lint
+
+  test:
+    name: "Test: PHP ${{ matrix.php }}"
+    needs: [coding-standard, lint]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.1", "8.2", "8.3", "8.4"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@cf4cade2721270509d5b1c766dad417c269cbb11 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+          ini-values: error_reporting=E_ALL, display_errors=On
+          extensions: curl, json, mbstring
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/artifactory-oidc
+        with:
+          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      - name: Run tests
+        run: ./vendor/bin/phpunit --no-coverage
+
+      - name: Run tests with coverage
+        if: ${{ matrix.php == '8.2' }}
+        run: ./vendor/bin/phpunit
+
+      - name: Upload coverage to Codecov
+        if: ${{ success() && matrix.php == '8.2' }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./build/logs/clover.xml
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-verification:
+    name: Build Verification
+    needs: [test]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@cf4cade2721270509d5b1c766dad417c269cbb11 # v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/artifactory-oidc
+        with:
+          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-scripts --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Verify autoload
+        run: php -r "require 'vendor/autoload.php'; echo 'Autoload OK' . PHP_EOL;"
+
+      - name: Verify package structure
+        run: |
+          # Ensure required files exist for Packagist
+          test -f composer.json
+          test -f LICENSE.md
+          test -d lib
+          echo "Package structure verified"
