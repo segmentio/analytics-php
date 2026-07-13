@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: ${{ success() && matrix.php == '8.2' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@e851fdd58d965fa1d6a5b0db7cb65a4d42b992fc # v5
         with:
           files: ./build/logs/clover.xml
           fail_ci_if_error: true
