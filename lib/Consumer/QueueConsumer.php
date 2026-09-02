@@ -162,7 +162,8 @@ abstract class QueueConsumer extends Consumer
 
     /**
      * Parse Retry-After header as integer seconds.
-     * Returns null if absent, non-numeric, zero, or negative.
+     * Supports both integer seconds and HTTP-date format (RFC 7231).
+     * Returns null if absent, unparseable, zero, or negative.
      */
     protected function parseRetryAfter(?string $value): ?int
     {
@@ -172,13 +173,20 @@ abstract class QueueConsumer extends Consumer
 
         $value = trim($value);
 
-        if (!ctype_digit($value)) {
-            return null;
+        // Try integer seconds
+        if (ctype_digit($value)) {
+            $seconds = (int)$value;
+            return $seconds > 0 ? $seconds : null;
         }
 
-        $seconds = (int)$value;
+        // Try HTTP-date format (RFC 7231)
+        $timestamp = strtotime($value);
+        if ($timestamp !== false) {
+            $seconds = $timestamp - time();
+            return $seconds > 0 ? $seconds : null;
+        }
 
-        return $seconds > 0 ? $seconds : null;
+        return null;
     }
 
     /**

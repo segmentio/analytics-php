@@ -39,9 +39,6 @@ class LibCurl extends QueueConsumer
 
         while (true) {
             $attempt++;
-            $responseHeaders = [];
-
-            $ch = curl_init();
 
             $headers = [
                 'Content-Type: application/json',
@@ -56,26 +53,8 @@ class LibCurl extends QueueConsumer
                 $headers[] = 'X-Retry-Count: ' . ($attempt - 1);
             }
 
-            curl_setopt($ch, CURLOPT_USERPWD,        $secret . ':');
-            curl_setopt($ch, CURLOPT_POSTFIELDS,     $payload);
-            curl_setopt($ch, CURLOPT_TIMEOUT,        $this->curl_timeout);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_connecttimeout);
-            curl_setopt($ch, CURLOPT_HTTPHEADER,     $headers);
-            curl_setopt($ch, CURLOPT_URL,            $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
-                $parts = explode(':', $header, 2);
-                if (count($parts) === 2) {
-                    $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
-                }
-
-                return strlen($header);
-            });
-
-            $responseContent = curl_exec($ch);
-            $err             = curl_error($ch);
-            $responseCode    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+            [$responseCode, $responseHeaders, $responseContent, $err] =
+                $this->executeHttpRequest($url, $secret, $payload, $headers);
 
             if ($err) {
                 $this->handleError(0, $err);
@@ -90,46 +69,79 @@ class LibCurl extends QueueConsumer
 
             $this->handleError($responseCode, $responseContent);
 
-            // 429: check for Retry-After header first
-            if ($responseCode === 429) {
-                $retryAfterS = $this->parseRetryAfter($responseHeaders['retry-after'] ?? null);
-
-                if ($retryAfterS !== null) {
-                    if ($rateLimitStartTime === null) {
-                        $rateLimitStartTime = microtime(true);
-                    }
-
-                    if ((microtime(true) - $rateLimitStartTime) * 1000 >= $this->max_rate_limit_duration_ms) {
-                        return false;
-                    }
-
-                    $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
-                    usleep($sleepMs * 1000);
-                    continue; // Do NOT decrement retriesRemaining
-                }
-                // No Retry-After: fall through to counted backoff
-            }
-
             if (!$this->isRetryable($responseCode)) {
                 return false;
             }
 
-            $retriesRemaining--;
+            // Any retryable status with valid Retry-After: use rate-limit path (no budget cost)
+            $retryAfterS = $this->parseRetryAfter($responseHeaders['retry-after'] ?? null);
+            if ($retryAfterS !== null) {
+                if ($rateLimitStartTime === null) {
+                    $rateLimitStartTime = microtime(true);
+                }
+                if ((microtime(true) - $rateLimitStartTime) * 1000 >= $this->max_rate_limit_duration_ms) {
+                    return false;
+                }
+                $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
+                usleep($sleepMs * 1000);
+                continue; // Do NOT decrement retriesRemaining
+            }
 
+            // No Retry-After: counted backoff
+            $retriesRemaining--;
             if ($retriesRemaining <= 0) {
                 return false;
             }
-
             if ($backoffStartTime === null) {
                 $backoffStartTime = microtime(true);
             }
-
             if ((microtime(true) - $backoffStartTime) * 1000 >= $this->max_total_backoff_duration_ms) {
                 return false;
             }
-
             usleep($backoffMs * 1000);
             $backoffMs = min($backoffMs * 2, $backoffCapMs);
         }
+    }
+
+    /**
+     * Execute an HTTP POST request via cURL.
+     *
+     * Returns [statusCode, responseHeaders, responseBody, curlError].
+     * responseHeaders keys are lower-cased.
+     *
+     * @param string $url
+     * @param string $secret
+     * @param string $payload
+     * @param array  $headers
+     * @return array{int, array<string,string>, string|false, string}
+     */
+    protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
+    {
+        $responseHeaders = [];
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_USERPWD,        $secret . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS,     $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT,        $this->curl_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_connecttimeout);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,     $headers);
+        curl_setopt($ch, CURLOPT_URL,            $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+
+            return strlen($header);
+        });
+
+        $responseContent = curl_exec($ch);
+        $err             = curl_error($ch);
+        $responseCode    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return [$responseCode, $responseHeaders, $responseContent, $err];
     }
 }
