@@ -51,7 +51,7 @@ class Socket extends QueueConsumer
             return false;
         }
 
-        return $this->makeRequest($socket, $body);
+        return $this->makeRequest($socket, $body, $payload);
     }
 
     /**
@@ -152,10 +152,11 @@ class Socket extends QueueConsumer
      * For full Retry-After support, use the default LibCurl consumer.
      *
      * @param resource|false $socket the handle for the socket
-     * @param string $req request body
+     * @param string $req     request body for this attempt
+     * @param string $payload  encoded batch, re-used to rebuild the request on retries
      * @return bool
      */
-    private function makeRequest($socket, string $req): bool
+    private function makeRequest($socket, string $req, string $payload): bool
     {
         $bytes_written = 0;
         $bytes_total   = strlen($req);
@@ -213,9 +214,14 @@ class Socket extends QueueConsumer
                 return false;
             }
 
-            // Rebuild request with updated X-Retry-Count
-            $content_json = json_decode($req, true);
-            // Re-create body with new attempt count (reuse original payload via flushBatch flow)
+            // Rebuild the request so X-Retry-Count reflects this attempt. Previously
+            // the original buffer was resent unchanged, so the header was never sent.
+            $rebuilt = $this->createBody($this->options['host'], $payload, $attempt);
+            if ($rebuilt === false) {
+                return false;
+            }
+            $req = $rebuilt;
+
             $bytes_written = 0;
             $bytes_total   = strlen($req);
             $closed        = false;

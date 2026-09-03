@@ -160,6 +160,13 @@ abstract class QueueConsumer extends Consumer
         return in_array($statusCode, [408, 410, 429, 460], true);
     }
 
+    /** The three date formats RFC 7231 permits for Retry-After. */
+    private const HTTP_DATE_FORMATS = [
+        'D, d M Y H:i:s \G\M\T',  // IMF-fixdate
+        'l, d-M-y H:i:s \G\M\T',  // obsolete RFC 850
+        'D M j H:i:s Y',           // obsolete asctime
+    ];
+
     /**
      * Parse Retry-After header as integer seconds.
      * Supports both integer seconds and HTTP-date format (RFC 7231).
@@ -179,10 +186,22 @@ abstract class QueueConsumer extends Consumer
             return $seconds > 0 ? $seconds : null;
         }
 
-        // Try HTTP-date format (RFC 7231)
-        $timestamp = strtotime($value);
-        if ($timestamp !== false) {
-            $seconds = $timestamp - time();
+        // Try HTTP-date format (RFC 7231 section 7.1.1.1). strtotime() is far more
+        // permissive than the spec: it reads "-1" as a timezone offset (3600),
+        // "Wed" as next Wednesday and "tomorrow" as a date, any of which would send
+        // a malformed header down the rate-limit path, which spends no retry budget.
+        foreach (self::HTTP_DATE_FORMATS as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $value, new \DateTimeZone('UTC'));
+            if ($date === false) {
+                continue;
+            }
+
+            $errors = \DateTimeImmutable::getLastErrors();
+            if (!empty($errors['warning_count']) || !empty($errors['error_count'])) {
+                continue;
+            }
+
+            $seconds = $date->getTimestamp() - time();
             return $seconds > 0 ? $seconds : null;
         }
 

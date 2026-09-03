@@ -24,15 +24,12 @@ class MockLibCurl extends LibCurl
     /** @var int[] microseconds recorded from each usleep call */
     public array $sleepCalls = [];
 
-    /** @var int how many times retriesRemaining was decremented */
-    public int $retryDecrements = 0;
-
-    private int $initialRetryCount;
+    /** @var int how many counted-backoff waits were performed */
+    public int $backoffSleeps = 0;
 
     public function __construct(string $secret, array $options = [])
     {
         parent::__construct($secret, $options);
-        $this->initialRetryCount = $this->retry_count;
     }
 
     protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
@@ -45,104 +42,17 @@ class MockLibCurl extends LibCurl
     }
 
     /**
-     * Override flushBatch to track retry decrements and intercept usleep.
-     * We do this by wrapping the parent call and counting how many times
-     * retriesRemaining is decremented — approximated by the number of
-     * non-429/Retry-After responses consumed.
-     *
-     * Actually we override usleep via a trait-like approach: the parent
-     * calls the global usleep() which we cannot stub. Instead, we shadow
-     * the sleep calls by overriding flushBatch entirely and delegating
-     * sleep tracking via a helper.
-     *
-     * @param array $messages
-     * @return bool
+     * Record the retry schedule instead of sleeping. This overrides only the wait,
+     * so the tests exercise the real LibCurl::flushBatch rather than a copy of it.
      */
-    public function flushBatch(array $messages): bool
+    protected function sleepBeforeRetry(int $milliseconds, bool $rateLimited): void
     {
-        // Reset tracking
-        $this->sleepCalls     = [];
-        $this->retryDecrements = 0;
-
-        $body    = $this->payload($messages);
-        $payload = json_encode($body);
-        $secret  = $this->secret;
-
-        $host = $this->host ?: 'api.segment.io';
-        $url  = $this->protocol . $host . '/v1/batch';
-
-        $library   = $messages[0]['context']['library'];
-        $userAgent = $library['name'] . '/' . $library['version'];
-
-        $backoffMs          = 500;
-        $backoffCapMs       = 60000;
-        $retriesRemaining   = $this->retry_count;
-        $attempt            = 0;
-        $backoffStartTime   = null;
-        $rateLimitStartTime = null;
-
-        while (true) {
-            $attempt++;
-
-            $headers = [
-                'Content-Type: application/json',
-                'User-Agent: ' . $userAgent,
-            ];
-
-            if ($attempt > 1) {
-                $headers[] = 'X-Retry-Count: ' . ($attempt - 1);
-            }
-
-            [$responseCode, $responseHeaders, $responseContent, $err] =
-                $this->executeHttpRequest($url, $secret, $payload, $headers);
-
-            if ($err) {
-                $this->handleError(0, $err);
-                return false;
-            }
-
-            if ($responseCode >= 200 && $responseCode < 400) {
-                return true;
-            }
-
-            $this->handleError($responseCode, $responseContent);
-
-            if (!$this->isRetryable($responseCode)) {
-                return false;
-            }
-
-            // Any retryable status with valid Retry-After: use rate-limit path (no budget cost)
-            $retryAfterS = $this->parseRetryAfter($responseHeaders['retry-after'] ?? null);
-            if ($retryAfterS !== null) {
-                if ($rateLimitStartTime === null) {
-                    $rateLimitStartTime = microtime(true);
-                }
-                if ((microtime(true) - $rateLimitStartTime) * 1000 >= $this->max_rate_limit_duration_ms) {
-                    return false;
-                }
-                $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
-                $this->sleepCalls[] = $sleepMs * 1000;
-                continue; // Do NOT decrement retriesRemaining
-            }
-
-            // No Retry-After: counted backoff
-            $retriesRemaining--;
-            $this->retryDecrements++;
-            if ($retriesRemaining <= 0) {
-                return false;
-            }
-            if ($backoffStartTime === null) {
-                $backoffStartTime = microtime(true);
-            }
-            if ((microtime(true) - $backoffStartTime) * 1000 >= $this->max_total_backoff_duration_ms) {
-                return false;
-            }
-            $this->sleepCalls[] = $backoffMs * 1000;
-            $backoffMs = min($backoffMs * 2, $backoffCapMs);
+        $this->sleepCalls[] = $milliseconds * 1000;
+        if (!$rateLimited) {
+            $this->backoffSleeps++;
         }
     }
 
-    // Expose protected methods for direct unit testing
     public function publicParseRetryAfter(?string $value): ?int
     {
         return $this->parseRetryAfter($value);
@@ -313,7 +223,7 @@ class ConsumerLibCurlTest extends TestCase
         self::assertSame(2000 * 1000, $consumer->sleepCalls[0]); // 2000ms in µs
 
         // retriesRemaining must NOT have been decremented (rate-limit path)
-        self::assertSame(0, $consumer->retryDecrements);
+        self::assertSame(0, $consumer->backoffSleeps);
     }
 
     /**
@@ -336,7 +246,7 @@ class ConsumerLibCurlTest extends TestCase
         self::assertSame(1000 * 1000, $consumer->sleepCalls[0]); // 1000ms in µs
 
         // retriesRemaining must NOT have been decremented (rate-limit path)
-        self::assertSame(0, $consumer->retryDecrements);
+        self::assertSame(0, $consumer->backoffSleeps);
     }
 
     /**
@@ -359,7 +269,7 @@ class ConsumerLibCurlTest extends TestCase
         self::assertCount(1, $consumer->sleepCalls);
         self::assertSame(500 * 1000, $consumer->sleepCalls[0]); // 500ms in µs
 
-        self::assertSame(1, $consumer->retryDecrements);
+        self::assertSame(1, $consumer->backoffSleeps);
     }
 
     /**
@@ -382,7 +292,7 @@ class ConsumerLibCurlTest extends TestCase
         self::assertSame(3000 * 1000, $consumer->sleepCalls[0]); // 3000ms in µs
 
         // retriesRemaining must NOT have been decremented
-        self::assertSame(0, $consumer->retryDecrements);
+        self::assertSame(0, $consumer->backoffSleeps);
     }
 
     /**
@@ -401,7 +311,10 @@ class ConsumerLibCurlTest extends TestCase
         $result = $consumer->flushBatch(makeTestMessages());
 
         self::assertFalse($result);
-        self::assertSame(1, $consumer->retryDecrements);
+        // retry_count = 1, so the single decrement exhausts the budget and the
+        // batch is abandoned without ever waiting.
+        self::assertSame(0, $consumer->backoffSleeps);
+        self::assertCount(0, $consumer->sleepCalls);
     }
 
     // -------------------------------------------------------------------------

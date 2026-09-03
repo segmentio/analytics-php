@@ -83,7 +83,7 @@ class LibCurl extends QueueConsumer
                     return false;
                 }
                 $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
-                usleep($sleepMs * 1000);
+                $this->sleepBeforeRetry($sleepMs, true);
                 continue; // Do NOT decrement retriesRemaining
             }
 
@@ -98,7 +98,7 @@ class LibCurl extends QueueConsumer
             if ((microtime(true) - $backoffStartTime) * 1000 >= $this->max_total_backoff_duration_ms) {
                 return false;
             }
-            usleep($backoffMs * 1000);
+            $this->sleepBeforeRetry($backoffMs, false);
             $backoffMs = min($backoffMs * 2, $backoffCapMs);
         }
     }
@@ -115,6 +115,18 @@ class LibCurl extends QueueConsumer
      * @param array  $headers
      * @return array{int, array<string,string>, string|false, string}
      */
+    /**
+     * Wait before the next attempt. Split out from flushBatch so tests can observe
+     * the schedule without re-implementing the retry loop.
+     *
+     * @param int  $milliseconds how long to wait
+     * @param bool $rateLimited  true when the server sent Retry-After, false for counted backoff
+     */
+    protected function sleepBeforeRetry(int $milliseconds, bool $rateLimited): void
+    {
+        usleep($milliseconds * 1000);
+    }
+
     protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
     {
         $responseHeaders = [];
