@@ -19,6 +19,10 @@ abstract class QueueConsumer extends Consumer
     protected int $max_batch_size_bytes = 512000; //500kb
     protected int $max_item_size_bytes = 32000; // 32kb
     protected int $maximum_backoff_duration = 10000; // Set maximum waiting limit to 10s
+    protected int $max_total_backoff_duration_ms = 43200000; // 12 hours
+    protected int $max_rate_limit_duration_ms    = 43200000; // 12 hours
+    protected int $rate_limit_retry_after_cap_s  = 300;      // 5 minutes
+    protected int $retry_count                   = 10;       // max retries
     protected string $host = '';
     protected bool $compress_request = false;
     protected int $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
@@ -83,6 +87,22 @@ abstract class QueueConsumer extends Consumer
             $this->curl_connecttimeout = $options['curl_connecttimeout'];
         }
 
+        if (isset($options['max_total_backoff_duration'])) {
+            $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'];
+        }
+
+        if (isset($options['max_rate_limit_duration'])) {
+            $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'];
+        }
+
+        if (isset($options['rate_limit_retry_after_cap_s'])) {
+            $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap_s'];
+        }
+
+        if (isset($options['retry_count'])) {
+            $this->retry_count = (int)$options['retry_count'];
+        }
+
         $this->queue = [];
     }
 
@@ -101,7 +121,8 @@ abstract class QueueConsumer extends Consumer
         $success = true;
 
         while ($count > 0 && $success) {
-            $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
+            $batchSize = min($this->flush_at, $count);
+            $batch = array_slice($this->queue, 0, $batchSize);
 
             if (mb_strlen(serialize($batch), '8bit') >= $this->max_batch_size_bytes) {
                 $msg = 'Batch size is larger than 500KB';
@@ -110,16 +131,81 @@ abstract class QueueConsumer extends Consumer
                 return false;
             }
 
+            // Remove batch before sending — flushBatch() handles all retries internally
+            array_splice($this->queue, 0, $batchSize);
+
             $success = $this->flushBatch($batch);
 
             $count = count($this->queue);
 
-            if ($count > 0) {
+            if ($count > 0 && $success) {
                 usleep($this->flush_interval_in_mills * 1000);
             }
         }
 
         return $success;
+    }
+
+    /**
+     * Determine if a status code is retryable per e2e spec.
+     * 5xx are retryable except 501, 505, 511.
+     * 4xx are non-retryable except 408, 410, 429, 460.
+     */
+    protected function isRetryable(int $statusCode): bool
+    {
+        if ($statusCode >= 500 && $statusCode < 600) {
+            return !in_array($statusCode, [501, 505, 511], true);
+        }
+
+        return in_array($statusCode, [408, 410, 429, 460], true);
+    }
+
+    /** The three date formats RFC 7231 permits for Retry-After. */
+    private const HTTP_DATE_FORMATS = [
+        'D, d M Y H:i:s \G\M\T',  // IMF-fixdate
+        'l, d-M-y H:i:s \G\M\T',  // obsolete RFC 850
+        'D M j H:i:s Y',           // obsolete asctime
+    ];
+
+    /**
+     * Parse Retry-After header as integer seconds.
+     * Supports both integer seconds and HTTP-date format (RFC 7231).
+     * Returns null if absent, unparseable, zero, or negative.
+     */
+    protected function parseRetryAfter(?string $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        // Try integer seconds
+        if (ctype_digit($value)) {
+            $seconds = (int)$value;
+            return $seconds > 0 ? $seconds : null;
+        }
+
+        // Try HTTP-date (RFC 7231 section 7.1.1.1). Parsed strictly rather than with
+        // strtotime(), which reads "-1" as a timezone offset and "tomorrow" as a date.
+        // A malformed header must not reach the rate-limit path, which spends no
+        // retry budget.
+        foreach (self::HTTP_DATE_FORMATS as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $value, new \DateTimeZone('UTC'));
+            if ($date === false) {
+                continue;
+            }
+
+            $errors = \DateTimeImmutable::getLastErrors();
+            if (!empty($errors['warning_count']) || !empty($errors['error_count'])) {
+                continue;
+            }
+
+            $seconds = $date->getTimestamp() - time();
+            return $seconds > 0 ? $seconds : null;
+        }
+
+        return null;
     }
 
     /**

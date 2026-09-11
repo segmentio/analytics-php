@@ -135,10 +135,9 @@ function parseHost(string $apiHost): string
  * Build the options array for Segment\Client.
  *
  * @param array<string,mixed>   $input
- * @param array<int,string>    &$errors   collected error messages
  * @return array<string,mixed>
  */
-function buildClientOptions(array $input, array &$errors): array
+function buildClientOptions(array $input): array
 {
     $config  = $input['config'] ?? [];
     $apiHost = $input['apiHost'] ?? '';
@@ -154,10 +153,11 @@ function buildClientOptions(array $input, array &$errors): array
         // mock test server (the base LibCurl hardcodes https://).
         'consumer'      => E2eLibCurl::class,
         'protocol'      => $scheme,
-        'error_handler' => function (int $code, string $message) use (&$errors): void {
-            $msg = "HTTP {$code}: {$message}";
-            debugLog('SDK error — ' . $msg);
-            $errors[] = $msg;
+        // Log HTTP errors to stderr only — success/failure is determined by
+        // track()/flush() return values, not by the error_handler callback,
+        // because handleError fires for transient retry errors too.
+        'error_handler' => function (int $code, string $message): void {
+            debugLog("SDK HTTP error {$code}: {$message}");
         },
     ];
 
@@ -174,6 +174,11 @@ function buildClientOptions(array $input, array &$errors): array
     if (isset($config['timeout']) && is_numeric($config['timeout'])) {
         $options['curl_timeout'] = (int)$config['timeout'];
         debugLog('curl_timeout: ' . $options['curl_timeout']);
+    }
+
+    if (isset($config['maxRetries']) && is_numeric($config['maxRetries'])) {
+        $options['retry_count'] = (int)$config['maxRetries'];
+        debugLog('retry_count: ' . $options['retry_count']);
     }
 
     return $options;
@@ -241,9 +246,10 @@ if ($writeKey === '') {
 }
 
 $errors = [];
+$autoFlushFailed = false; // set true if an enqueue() auto-flush returns false
 
-// Build client options (error_handler captures into $errors by reference)
-$options = buildClientOptions($input, $errors);
+// Build client options (error_handler just logs; we track success via return values)
+$options = buildClientOptions($input);
 
 debugLog('Creating Segment\\Client with writeKey=' . substr($writeKey, 0, 4) . '...');
 
@@ -268,29 +274,34 @@ foreach ($sequences as $seqIndex => $sequence) {
 
         debugLog("  [{$seqIndex}/{$eventIndex}] Enqueueing {$type}");
 
+        $enqueueOk = true;
         switch ($type) {
             case 'track':
-                $client->track($message);
+                $enqueueOk = $client->track($message);
                 break;
             case 'identify':
-                $client->identify($message);
+                $enqueueOk = $client->identify($message);
                 break;
             case 'page':
-                $client->page($message);
+                $enqueueOk = $client->page($message);
                 break;
             case 'screen':
-                $client->screen($message);
+                $enqueueOk = $client->screen($message);
                 break;
             case 'alias':
-                $client->alias($message);
+                $enqueueOk = $client->alias($message);
                 break;
             case 'group':
-                $client->group($message);
+                $enqueueOk = $client->group($message);
                 break;
             default:
                 $errors[] = "Unknown event type: {$type}";
                 debugLog("  Unknown event type: {$type}");
                 break;
+        }
+        if (!$enqueueOk) {
+            $autoFlushFailed = true;
+            debugLog("  Enqueue/auto-flush failed for {$type}");
         }
     }
 }
@@ -306,14 +317,19 @@ if ($flushOk) {
     $errors[] = 'Flush failed';
 }
 
-$hasErrors = !empty($errors);
-$success   = $flushOk && !$hasErrors;
+// Success = all flushes succeeded and no fatal errors.
+// auto-flushes (from enqueue when flush_at reached) and explicit flush are both tracked.
+$overallSuccess = $flushOk && !$autoFlushFailed && empty($errors);
 
-if ($success) {
+if ($overallSuccess) {
     outputResult(true, $sentBatches);
     exit(0);
 } else {
-    $errorMsg = implode('; ', $errors);
+    $allErrors = array_merge(
+        $errors,
+        $autoFlushFailed ? ['Auto-flush failed'] : []
+    );
+    $errorMsg = implode('; ', $allErrors ?: ['Unknown flush failure']);
     outputResult(false, $sentBatches, $errorMsg);
     exit(1);
 }
