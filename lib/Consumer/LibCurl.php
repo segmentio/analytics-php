@@ -133,12 +133,12 @@ class LibCurl extends QueueConsumer
 
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_USERPWD,        $secret . ':');
-        curl_setopt($ch, CURLOPT_POSTFIELDS,     $payload);
-        curl_setopt($ch, CURLOPT_TIMEOUT,        $this->curl_timeout);
+        curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_connecttimeout);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,     $headers);
-        curl_setopt($ch, CURLOPT_URL,            $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
             $parts = explode(':', $header, 2);
