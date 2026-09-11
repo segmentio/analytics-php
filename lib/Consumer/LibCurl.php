@@ -116,8 +116,8 @@ class LibCurl extends QueueConsumer
      * @return array{int, array<string,string>, string|false, string}
      */
     /**
-     * Wait before the next attempt. Split out from flushBatch so tests can observe
-     * the schedule without re-implementing the retry loop.
+     * Wait before the next attempt. Separate from flushBatch so tests can observe the
+     * retry schedule by overriding this alone.
      *
      * @param int  $milliseconds how long to wait
      * @param bool $rateLimited  true when the server sent Retry-After, false for counted backoff

@@ -214,8 +214,7 @@ class Socket extends QueueConsumer
                 return false;
             }
 
-            // Rebuild the request so X-Retry-Count reflects this attempt. Previously
-            // the original buffer was resent unchanged, so the header was never sent.
+            // The request buffer is per-attempt: rebuild it so X-Retry-Count is correct.
             $rebuilt = $this->createBody($this->options['host'], $payload, $attempt);
             if ($rebuilt === false) {
                 return false;

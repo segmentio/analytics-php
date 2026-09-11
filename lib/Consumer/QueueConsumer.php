@@ -186,10 +186,10 @@ abstract class QueueConsumer extends Consumer
             return $seconds > 0 ? $seconds : null;
         }
 
-        // Try HTTP-date format (RFC 7231 section 7.1.1.1). strtotime() is far more
-        // permissive than the spec: it reads "-1" as a timezone offset (3600),
-        // "Wed" as next Wednesday and "tomorrow" as a date, any of which would send
-        // a malformed header down the rate-limit path, which spends no retry budget.
+        // Try HTTP-date (RFC 7231 section 7.1.1.1). Parsed strictly rather than with
+        // strtotime(), which reads "-1" as a timezone offset and "tomorrow" as a date.
+        // A malformed header must not reach the rate-limit path, which spends no
+        // retry budget.
         foreach (self::HTTP_DATE_FORMATS as $format) {
             $date = \DateTimeImmutable::createFromFormat($format, $value, new \DateTimeZone('UTC'));
             if ($date === false) {
