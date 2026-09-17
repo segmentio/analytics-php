@@ -8,6 +8,22 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Segment\Client;
 
+/** Minimal message fixture for flushBatch calls */
+function makeTestMessages(): array
+{
+    return [
+        [
+            'type'      => 'track',
+            'event'     => 'Test',
+            'userId'    => 'u1',
+            'context'   => [
+                'library' => ['name' => 'analytics-php', 'version' => '0.0.0'],
+            ],
+            'timestamp' => date('c'),
+        ],
+    ];
+}
+
 class ConsumerLibCurlTest extends TestCase
 {
     private Client $client;
@@ -122,5 +138,188 @@ class ConsumerLibCurlTest extends TestCase
         );
 
         $client->__destruct();
+    }
+
+    // -------------------------------------------------------------------------
+    // Retry-After header tests (unit — no real HTTP)
+    // -------------------------------------------------------------------------
+
+    /**
+     * 503 + Retry-After: 2 → sleep 2000ms (not exponential), does NOT decrement retriesRemaining
+     */
+    public function testRetryAfterOnNon429UsesHeaderSleepAndDoesNotDecrementRetries(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        // First response: 503 with Retry-After: 2
+        // Second response: 200 (success)
+        $consumer->responses = [
+            [503, ['retry-after' => '2'], 'Service Unavailable', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertTrue($result);
+
+        // Should have slept 2000ms (2s * 1000 = 2000ms, * 1000 for usleep = 2000000 µs)
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(2000 * 1000, $consumer->sleepCalls[0]); // 2000ms in µs
+
+        // retriesRemaining must NOT have been decremented (rate-limit path)
+        self::assertSame(0, $consumer->backoffSleeps);
+    }
+
+    /**
+     * 529 + Retry-After: 1 → sleep 1000ms, does NOT decrement retriesRemaining
+     */
+    public function testRetryAfterOn529UsesHeaderSleepAndDoesNotDecrementRetries(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        $consumer->responses = [
+            [529, ['retry-after' => '1'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertTrue($result);
+
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(1000 * 1000, $consumer->sleepCalls[0]); // 1000ms in µs
+
+        // retriesRemaining must NOT have been decremented (rate-limit path)
+        self::assertSame(0, $consumer->backoffSleeps);
+    }
+
+    /**
+     * 503 without Retry-After → exponential backoff sleep (500ms), decrements retriesRemaining
+     */
+    public function testNon429WithoutRetryAfterUsesExponentialBackoff(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        $consumer->responses = [
+            [503, [], 'Service Unavailable', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertTrue($result);
+
+        // Base backoff is 500ms
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(500 * 1000, $consumer->sleepCalls[0]); // 500ms in µs
+
+        self::assertSame(1, $consumer->backoffSleeps);
+    }
+
+    /**
+     * 429 + Retry-After: 3 → sleep 3000ms, does NOT decrement retriesRemaining
+     */
+    public function testRetryAfterOn429DoesNotDecrementRetries(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        $consumer->responses = [
+            [429, ['retry-after' => '3'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertTrue($result);
+
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(3000 * 1000, $consumer->sleepCalls[0]); // 3000ms in µs
+
+        // retriesRemaining must NOT have been decremented
+        self::assertSame(0, $consumer->backoffSleeps);
+    }
+
+    /**
+     * 429 + Retry-After: 3 → budget exhausted after retry_count retries on other codes.
+     * Re-verify: if retry_count is 1 and we get a 503 (no Retry-After), we fail immediately.
+     */
+    public function testNon429ExhaustsRetryBudget(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 1]);
+
+        $consumer->responses = [
+            [503, [], 'Service Unavailable', ''],
+            // retry_count=1 means retriesRemaining starts at 1, after one decrement it's 0 → return false
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertFalse($result);
+        // retry_count = 1, so the single decrement exhausts the budget and the
+        // batch is abandoned without ever waiting.
+        self::assertSame(0, $consumer->backoffSleeps);
+        self::assertCount(0, $consumer->sleepCalls);
+    }
+
+    // -------------------------------------------------------------------------
+    // parseRetryAfter HTTP-date tests
+    // -------------------------------------------------------------------------
+
+    /**
+     * parseRetryAfter with a future HTTP-date returns a positive integer.
+     */
+    public function testParseRetryAfterHttpDateFuture(): void
+    {
+        $consumer = new MockLibCurl('test-secret', []);
+        $result = $consumer->publicParseRetryAfter('Wed, 21 Oct 2099 07:28:00 GMT');
+
+        self::assertIsInt($result);
+        self::assertGreaterThan(0, $result);
+    }
+
+    /**
+     * parseRetryAfter with a past HTTP-date returns null.
+     */
+    public function testParseRetryAfterHttpDatePast(): void
+    {
+        $consumer = new MockLibCurl('test-secret', []);
+        $result = $consumer->publicParseRetryAfter('Wed, 21 Oct 2015 07:28:00 GMT');
+
+        self::assertNull($result);
+    }
+
+    /**
+     * parseRetryAfter with garbage string returns null.
+     */
+    public function testParseRetryAfterGarbageReturnsNull(): void
+    {
+        $consumer = new MockLibCurl('test-secret', []);
+        $result = $consumer->publicParseRetryAfter('garbage');
+
+        self::assertNull($result);
+    }
+
+    /**
+     * Retry-After cap is respected: if header says 600s and cap is 300s → sleep 300s.
+     */
+    public function testRetryAfterCapIsRespected(): void
+    {
+        $consumer = new MockLibCurl('test-secret', [
+            'retry_count'                => 3,
+            'rate_limit_retry_after_cap_s' => 300,
+        ]);
+
+        $consumer->responses = [
+            [503, ['retry-after' => '600'], 'Service Unavailable', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $result = $consumer->flushBatch(makeTestMessages());
+
+        self::assertTrue($result);
+
+        // Sleep should be capped at 300s = 300000ms = 300000000 µs
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(300000 * 1000, $consumer->sleepCalls[0]);
     }
 }
