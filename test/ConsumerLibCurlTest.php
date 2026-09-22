@@ -302,6 +302,46 @@ class ConsumerLibCurlTest extends TestCase
     /**
      * Retry-After cap is respected: if header says 600s and cap is 300s → sleep 300s.
      */
+    public function testOversizedBatchDoesNotWedgeTheQueue(): void
+    {
+        // A single item over 32KB is rejected by enqueue(), so an oversized *batch*
+        // is built from many smaller ones: 20 items just under the item limit sum to
+        // roughly 600KB, past the 500KB batch limit.
+        $consumer = new MockLibCurl('test-secret', ['flush_at' => 20, 'max_queue_size' => 1000]);
+
+        $chunk = str_repeat('x', 30 * 1024);
+        $bigMessage = static function (string $payload): array {
+            return [
+                'type'      => 'track',
+                'event'     => $payload,
+                'userId'    => 'u1',
+                'context'   => ['library' => ['name' => 'analytics-php', 'version' => '0.0.0']],
+                'timestamp' => date('c'),
+            ];
+        };
+
+        for ($i = 0; $i < 19; $i++) {
+            self::assertTrue($consumer->track($bigMessage($chunk)));
+        }
+
+        // The 20th reaches flush_at, so enqueue() flushes and the batch trips the
+        // size guard.
+        self::assertFalse(
+            $consumer->track($bigMessage($chunk)),
+            'the oversized batch should fail this flush'
+        );
+
+        // The batch must have left the queue. If it did not, every later flush takes
+        // it again and track() returns false forever.
+        $consumer->responses = [[200, [], '{"success":true}', '']];
+        $consumer->track($bigMessage('small'));
+
+        self::assertTrue(
+            $consumer->flush(),
+            'queue is wedged: the oversized batch was never removed'
+        );
+    }
+
     public function testRetryAfterCapIsRespected(): void
     {
         $consumer = new MockLibCurl('test-secret', [

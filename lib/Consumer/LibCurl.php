@@ -89,9 +89,11 @@ class LibCurl extends QueueConsumer
             $retryAfterS = $this->parseRetryAfter($responseHeaders['retry-after'] ?? null);
             if ($retryAfterS !== null) {
                 if ($rateLimitStartTime === null) {
-                    $rateLimitStartTime = microtime(true);
+                    // hrtime is monotonic; microtime would let a clock adjustment
+                    // expire or extend this budget.
+                    $rateLimitStartTime = hrtime(true);
                 }
-                if ((microtime(true) - $rateLimitStartTime) * 1000 >= $this->max_rate_limit_duration_ms) {
+                if ((hrtime(true) - $rateLimitStartTime) / 1e6 >= $this->max_rate_limit_duration_ms) {
                     return false;
                 }
                 $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
@@ -105,9 +107,9 @@ class LibCurl extends QueueConsumer
                 return false;
             }
             if ($backoffStartTime === null) {
-                $backoffStartTime = microtime(true);
+                $backoffStartTime = hrtime(true);
             }
-            if ((microtime(true) - $backoffStartTime) * 1000 >= $this->max_total_backoff_duration_ms) {
+            if ((hrtime(true) - $backoffStartTime) / 1e6 >= $this->max_total_backoff_duration_ms) {
                 return false;
             }
             $this->sleepBeforeRetry($backoffMs, false);

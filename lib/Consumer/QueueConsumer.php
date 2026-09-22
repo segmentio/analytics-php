@@ -121,8 +121,11 @@ abstract class QueueConsumer extends Consumer
         $success = true;
 
         while ($count > 0 && $success) {
-            $batchSize = min($this->flush_at, $count);
-            $batch = array_slice($this->queue, 0, $batchSize);
+            // Remove the batch before doing anything else. Leaving it in place on the
+            // oversize bail below would wedge the queue: every later flush would take
+            // the same batch, fail the same check, and track() would return false
+            // forever.
+            $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
 
             if (mb_strlen(serialize($batch), '8bit') >= $this->max_batch_size_bytes) {
                 $msg = 'Batch size is larger than 500KB';
@@ -130,9 +133,6 @@ abstract class QueueConsumer extends Consumer
 
                 return false;
             }
-
-            // Remove batch before sending — flushBatch() handles all retries internally
-            array_splice($this->queue, 0, $batchSize);
 
             $success = $this->flushBatch($batch);
 
@@ -196,6 +196,9 @@ abstract class QueueConsumer extends Consumer
                 continue;
             }
 
+            // getLastErrors() returns false when the parse was clean and an array
+            // when it was not, so this rejects values createFromFormat accepts with
+            // warnings — "Wed, 32 Oct 2099" rolling over into November, for instance.
             $errors = \DateTimeImmutable::getLastErrors();
             if (!empty($errors['warning_count']) || !empty($errors['error_count'])) {
                 continue;
