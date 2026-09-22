@@ -62,9 +62,21 @@ class LibCurl extends QueueConsumer
                 return false;
             }
 
-            // 2xx and 3xx are success
-            if ($responseCode >= 200 && $responseCode < 400) {
+            // Only 2xx is success. curl is not configured to follow redirects, so a
+            // 3xx means nothing was uploaded; treating it as success would drop the
+            // batch silently. TAPI does not emit 3xx — this shows up when the
+            // configured host is a proxy or redirector.
+            if ($responseCode >= 200 && $responseCode < 300) {
                 return true;
+            }
+
+            if ($responseCode >= 300 && $responseCode < 400) {
+                $this->handleError(
+                    $responseCode,
+                    'Unexpected redirect; batch not uploaded. Check whether the configured '
+                    . 'host points at a proxy or redirector.'
+                );
+                return false;
             }
 
             $this->handleError($responseCode, $responseContent);

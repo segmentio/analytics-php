@@ -187,8 +187,9 @@ class Socket extends QueueConsumer
             }
             fclose($socket);
 
-            // 2xx and 3xx are success
-            if ($statusCode >= 200 && $statusCode < 400) {
+            // Only 2xx is success; a raw socket never follows redirects, so a 3xx
+            // means nothing was uploaded.
+            if ($statusCode >= 200 && $statusCode < 300) {
                 return true;
             }
 
