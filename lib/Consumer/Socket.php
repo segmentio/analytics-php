@@ -147,7 +147,11 @@ class Socket extends QueueConsumer
      * - Status code classification: Full support (retryable vs non-retryable
      *   per e2e spec, via parent isRetryable()).
      * - X-Retry-Count: Supported.
-     * - Backoff: Exponential with cap (maximum_backoff_duration).
+     * - Backoff: Exponential from 500ms, each wait capped at
+     *   maximum_backoff_duration, bounded by retry_count and
+     *   max_total_backoff_duration — the same budgets the LibCurl consumer uses.
+     * - max_rate_limit_duration: not applicable, since there is no Retry-After
+     *   path here for it to bound.
      *
      * For full Retry-After support, use the default LibCurl consumer.
      *
@@ -163,8 +167,10 @@ class Socket extends QueueConsumer
         $closed        = false;
 
         // Retries with exponential backoff until success
-        $backoff = 100; // Set initial waiting time to 100ms
-        $attempt = 1;
+        $backoffMs        = 500; // base 500ms, matching the LibCurl consumer
+        $retriesRemaining = $this->retry_count;
+        $backoffStartTime = null;
+        $attempt          = 1;
 
         while (true) {
             // Send request to server
@@ -202,12 +208,24 @@ class Socket extends QueueConsumer
                 return false;
             }
 
-            if ($backoff >= $this->maximum_backoff_duration) {
+            // Counted retries and the total-duration budget, shared with the LibCurl
+            // consumer. Retry-After is still not honoured here; see the note above.
+            if ($retriesRemaining <= 0) {
+                break;
+            }
+            $retriesRemaining--;
+
+            if ($backoffStartTime === null) {
+                // hrtime is monotonic; microtime would let a clock adjustment expire
+                // or extend this budget.
+                $backoffStartTime = hrtime(true);
+            }
+            if ((hrtime(true) - $backoffStartTime) / 1e6 >= $this->max_total_backoff_duration_ms) {
                 break;
             }
 
-            usleep($backoff * 1000);
-            $backoff *= 2;
+            usleep($backoffMs * 1000);
+            $backoffMs = min($backoffMs * 2, $this->maximum_backoff_duration);
             $attempt++;
 
             $socket = $this->createSocket();

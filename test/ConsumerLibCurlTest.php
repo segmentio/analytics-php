@@ -274,6 +274,47 @@ class ConsumerLibCurlTest extends TestCase
         self::assertCount(0, $consumer->sleepCalls);
     }
 
+    public function testRejectsRetryAfterWhoseWeekdayContradictsTheDate(): void
+    {
+        // PHP's createFromFormat silently rolls a weekday/date mismatch forward to the
+        // next matching weekday and reports no warning, so this turned a date in the
+        // past into one ~4 days in the future and took the rate-limit path, which
+        // spends no retry budget. 20 Sep 2026 was a Sunday, not a Thursday.
+        $consumer = new MockLibCurl('test-secret');
+
+        self::assertNull($consumer->publicParseRetryAfter('Thu, 20 Sep 2026 10:49:58 GMT'));
+    }
+
+    public function testAcceptsAllThreeRfc7231DateFormats(): void
+    {
+        // Guards the round-trip check added above against over-rejecting: asctime pads
+        // single-digit days with a second space, which a naive comparison would fail.
+        $consumer = new MockLibCurl('test-secret');
+        $future = new \DateTimeImmutable('+2 hours');
+
+        self::assertSame(
+            7200,
+            $consumer->publicParseRetryAfter($future->format('D, d M Y H:i:s') . ' GMT'),
+            'IMF-fixdate'
+        );
+        self::assertSame(
+            7200,
+            $consumer->publicParseRetryAfter($future->format('l, d-M-y H:i:s') . ' GMT'),
+            'RFC 850'
+        );
+        self::assertSame(
+            7200,
+            $consumer->publicParseRetryAfter(sprintf(
+                '%s %s %2d %s',
+                $future->format('D'),
+                $future->format('M'),
+                (int)$future->format('j'),
+                $future->format('H:i:s Y')
+            )),
+            'asctime, double-spaced single-digit day'
+        );
+    }
+
     public function testTransportErrorReportsTheRealCurlErrno(): void
     {
         // The refactor dropped curl_errno and passed a literal 0, so every transport

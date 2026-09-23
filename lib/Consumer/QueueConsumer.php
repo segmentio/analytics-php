@@ -207,11 +207,28 @@ abstract class QueueConsumer extends Consumer
                 continue;
             }
 
+            // createFromFormat does not check the day-name token against the rest of
+            // the date: on a mismatch it silently rolls the result forward to the next
+            // matching weekday and reports no warning, so "Thu, 20 Sep 2026" — actually
+            // a Sunday — parses as 24 Sep, turning a date in the past into one in the
+            // future. Comparing the parsed date's own weekday cannot catch this, since
+            // the roll-forward is what makes the two agree; re-formatting the whole
+            // value and comparing does. Whitespace is collapsed so asctime's
+            // double-spaced single-digit days still round-trip.
+            if (strcasecmp(self::collapseWhitespace($date->format($format)), self::collapseWhitespace($value)) !== 0) {
+                continue;
+            }
+
             $seconds = $date->getTimestamp() - time();
             return $seconds > 0 ? $seconds : null;
         }
 
         return null;
+    }
+
+    private static function collapseWhitespace(string $value): string
+    {
+        return trim((string)preg_replace('/\s+/', ' ', $value));
     }
 
     /**

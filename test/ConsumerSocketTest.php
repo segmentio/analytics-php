@@ -8,6 +8,8 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Segment\Client;
+use Segment\Consumer\QueueConsumer;
+use Segment\Consumer\Socket;
 
 class ConsumerSocketTest extends TestCase
 {
@@ -252,5 +254,29 @@ class ConsumerSocketTest extends TestCase
         # Should error out with debug on.
         self::assertTrue($client->track(['user_id' => 'some-user', 'event' => 'Socket PHP Event']));
         $client->__destruct();
+    }
+
+    /**
+     * The Socket consumer referenced none of the shared retry-budget options, so
+     * setting them had no effect there at all — it gave up after a fixed ~13s
+     * regardless. It is a selectable consumer ('socket' in Client::$consumers),
+     * not a legacy path, so the options have to reach it.
+     */
+    public function testSocketReadsTheSharedRetryBudgetOptions(): void
+    {
+        $consumer = new Socket('test-secret', [
+            'retry_count'                => 7,
+            'max_total_backoff_duration' => 120,
+        ]);
+
+        $read = function (string $property) use ($consumer) {
+            $ref = new \ReflectionProperty(QueueConsumer::class, $property);
+            $ref->setAccessible(true);
+            return $ref->getValue($consumer);
+        };
+
+        self::assertSame(7, $read('retry_count'));
+        // Options are in seconds; the field behind them is milliseconds.
+        self::assertSame(120000, $read('max_total_backoff_duration_ms'));
     }
 }
