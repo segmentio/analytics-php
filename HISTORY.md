@@ -1,31 +1,35 @@
 Unreleased
 ==================
 
-  * `max_rate_limit_duration` now defaults to 5 minutes rather than 12 hours, and `rate_limit_retry_after_cap` to 60s rather than 300s. The 12 hour value was a backstop meant to be unreachable, but rate-limited attempts are deliberately uncounted, so it was the only limit on that path. It matters more here than in the other clients: the LibCurl consumer is the default and retries inline on the caller's thread, so that budget is time a web request spends blocked and an FPM worker spends occupied.
-  * The rate-limit sleep is clamped to the remaining budget. The elapsed check runs before the wait, so a check passing just inside the budget previously slept a full `Retry-After` on top.
-  * Exhausting the rate-limit budget now logs unconditionally rather than only when `debug` is on. A request that stopped for the whole budget should not have to be diagnosed from an absence of output.
+### Upgrade note: new request header
 
-### Upgrade note: new request header and proxy allowlists
+This release sends an `X-Retry-Count` request header on retries. If traffic to
+Segment passes through a proxy, gateway or WAF that allowlists request headers,
+add it before upgrading or retried uploads will be rejected. The `Authorization`
+header is unchanged.
 
-This release sends an `X-Retry-Count` request header on retries. If your
-traffic to Segment goes through a proxy, gateway or WAF that allowlists
-request headers, add it before upgrading or retried uploads will be
-rejected. The `Authorization` header is unchanged: this client has always
-sent the write key as HTTP Basic credentials.
+### Upgrade note: Socket consumer retry behaviour
 
-  * Send `X-Retry-Count` on retries from both the LibCurl and Socket consumers, so the server can distinguish a retry from a first attempt. Omitted on the first attempt.
-  * Unified retry handling: 429, 408, 410, 460 and 5xx (except 501, 505 and 511) are retried. `Retry-After` is honoured on all of them, not just 429, which brings 529 in through the generic 5xx rule.
-  * `Retry-After` accepts numeric seconds and the RFC 7231 HTTP-date formats, capped at 300s (`rate_limit_retry_after_cap`). Malformed values are rejected rather than parsed into an arbitrary date.
-  * Rate-limited retries are bounded by elapsed time rather than counted against the retry limit, so a long `Retry-After` no longer exhausts the budget.
-  * New options `max_total_backoff_duration` and `max_rate_limit_duration`, both in seconds and defaulting to 12 hours, bound the two waits.
-  * The Socket consumer now honours `retry_count` and `max_total_backoff_duration` too, and backs off from 500ms like the LibCurl consumer rather than 100ms. It previously ignored both and gave up after a fixed seven retries over roughly 13 seconds. `maximum_backoff_duration` now caps each individual wait rather than ending the loop, so its 10s default still bounds how long any one retry sleeps. `max_rate_limit_duration` does not apply there, since Socket still does not read `Retry-After` — use the LibCurl consumer if you need that.
-  * `retry_count` grants exactly that many retries. It previously granted one fewer, and a `retry_count` of 1 granted none.
-  * The new budget options reject negative values and keep the default, logging as `flush_at` and `flush_interval` already do. A negative previously disabled retrying outright. Zero is still accepted and meaningful: `retry_count` of 0 means do not retry.
-  * Transport failures report the real libcurl error number to `error_handler` again, so a DNS failure, a timeout and a TLS error can be told apart.
-  * Only 2xx responses count as a successful upload. A 3xx is now reported as a failed upload rather than silently treated as delivered. It is not retried: a redirect curl already declined to follow will not succeed on a retry. The Segment endpoint does not redirect, so this only affects custom `host` values.
-  * Retry timing uses `hrtime()`, so a system clock change cannot stretch or collapse a backoff.
-  * Fix an oversized batch wedging the queue: the batch is now removed before the size check, so one too-large batch no longer makes every later `track()` return false.
+The Socket consumer previously gave up after a fixed seven retries over roughly
+13 seconds. It now honours `retry_count` and `max_total_backoff_duration`, and
+backs off from 500ms rather than 100ms, so a failing upload is retried for
+longer than before. `maximum_backoff_duration` now caps each individual wait
+rather than ending the retry loop; its 10 second default still bounds how long
+any one retry sleeps. Lower `retry_count` to restore a shorter schedule.
 
+### Retry handling
+
+  * Uploads are retried on 408, 410, 429, 460, and 5xx except 501, 505 and 511.
+  * A `Retry-After` header is honoured on any retryable response, not only 429. Numeric seconds and the RFC 7231 HTTP-date formats are both accepted, malformed values are ignored, and the value is capped at `rate_limit_retry_after_cap`.
+  * Responses carrying `Retry-After` are retried for up to `max_rate_limit_duration` and do not consume the retry count. Other failures use exponential backoff limited by `retry_count` and by `max_total_backoff_duration` as an upper bound.
+  * New options, all in seconds: `max_rate_limit_duration` (default 300), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 60). Negative values are ignored, logged, and the default kept. A `retry_count` of 0 means do not retry.
+  * `Retry-After` is not read by the Socket consumer, which uses exponential backoff for every retryable response. Use the default LibCurl consumer if you need it.
+  * Exhausting the rate-limit budget is logged regardless of the `debug` setting.
+
+### Other changes
+
+  * `X-Retry-Count` is sent on retries by the LibCurl and Socket consumers, allowing the server to distinguish a retry from a first attempt. It is omitted on the first attempt.
+  * Only 2xx responses count as a successful upload. A 3xx is reported as a failed upload rather than treated as delivered, and is not retried: a redirect curl has already declined to follow will not succeed on one. The Segment endpoint does not redirect, so this affects only custom `host` values.
 
 3.8.2 / 2026-03-11
 ==================
