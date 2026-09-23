@@ -164,11 +164,6 @@ abstract class QueueConsumer extends Consumer
     }
 
     /**
-     * Determine if a status code is retryable per e2e spec.
-     * 5xx are retryable except 501, 505, 511.
-     * 4xx are non-retryable except 408, 410, 429, 460.
-     */
-    /**
      * Whether an option value is usable as a count or duration.
      *
      * Logs and returns false otherwise, so the caller keeps the default. Zero is
@@ -189,6 +184,11 @@ abstract class QueueConsumer extends Consumer
         return true;
     }
 
+    /**
+     * Determine if a status code is retryable per e2e spec.
+     * 5xx are retryable except 501, 505, 511.
+     * 4xx are non-retryable except 408, 410, 429, 460.
+     */
     protected function isRetryable(int $statusCode): bool
     {
         if ($statusCode >= 500 && $statusCode < 600) {

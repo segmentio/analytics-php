@@ -123,18 +123,6 @@ class LibCurl extends QueueConsumer
     }
 
     /**
-     * Execute an HTTP POST request via cURL.
-     *
-     * Returns [statusCode, responseHeaders, responseBody, curlError].
-     * responseHeaders keys are lower-cased.
-     *
-     * @param string $url
-     * @param string $secret
-     * @param string $payload
-     * @param array  $headers
-     * @return array{int, array<string,string>, string|false, string}
-     */
-    /**
      * Wait before the next attempt. Separate from flushBatch so tests can observe the
      * retry schedule by overriding this alone.
      *
@@ -146,6 +134,18 @@ class LibCurl extends QueueConsumer
         usleep($milliseconds * 1000);
     }
 
+    /**
+     * Execute an HTTP POST request via cURL.
+     *
+     * Returns [statusCode, responseHeaders, responseBody, curlError, curlErrno].
+     * responseHeaders keys are lower-cased.
+     *
+     * @param string $url
+     * @param string $secret
+     * @param string $payload
+     * @param array  $headers
+     * @return array{int, array<string,string>, string|false, string, int}
+     */
     protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
     {
         $responseHeaders = [];
