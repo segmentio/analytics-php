@@ -13,7 +13,9 @@ sent the write key as HTTP Basic credentials.
   * Unified retry handling: 429, 408, 410, 460 and 5xx (except 501, 505 and 511) are retried. `Retry-After` is honoured on all of them, not just 429, which brings 529 in through the generic 5xx rule.
   * `Retry-After` accepts numeric seconds and the RFC 7231 HTTP-date formats, capped at 300s (`rate_limit_retry_after_cap`). Malformed values are rejected rather than parsed into an arbitrary date.
   * Rate-limited retries are bounded by elapsed time rather than counted against the retry limit, so a long `Retry-After` no longer exhausts the budget.
-  * New options `max_total_backoff_duration` and `max_rate_limit_duration` (default 12 hours each) bound the two waits. These apply to the LibCurl consumer; the Socket consumer stays in maintenance mode and still bounds retries with the older `maximum_backoff_duration` alone.
+  * New options `max_total_backoff_duration` and `max_rate_limit_duration`, both in seconds and defaulting to 12 hours, bound the two waits. These apply to the LibCurl consumer; the Socket consumer stays in maintenance mode and still bounds retries with the older `maximum_backoff_duration` alone.
+  * `retry_count` grants exactly that many retries. It previously granted one fewer, and a `retry_count` of 1 granted none.
+  * Transport failures report the real libcurl error number to `error_handler` again, so a DNS failure, a timeout and a TLS error can be told apart.
   * Only 2xx responses count as a successful upload. A 3xx is now reported as a failed upload rather than silently treated as delivered. It is not retried: a redirect curl already declined to follow will not succeed on a retry. The Segment endpoint does not redirect, so this only affects custom `host` values.
   * Retry timing uses `hrtime()`, so a system clock change cannot stretch or collapse a backoff.
   * Fix an oversized batch wedging the queue: the batch is now removed before the size check, so one too-large batch no longer makes every later `track()` return false.

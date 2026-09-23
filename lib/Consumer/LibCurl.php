@@ -53,11 +53,13 @@ class LibCurl extends QueueConsumer
                 $headers[] = 'X-Retry-Count: ' . ($attempt - 1);
             }
 
-            [$responseCode, $responseHeaders, $responseContent, $err] =
+            [$responseCode, $responseHeaders, $responseContent, $err, $errno] =
                 $this->executeHttpRequest($url, $secret, $payload, $headers);
 
             if ($err) {
-                $this->handleError(0, $err);
+                // The real libcurl errno, not 0: error_handler callbacks branch on it
+                // to tell a DNS failure from a timeout from a TLS error.
+                $this->handleError($errno, $err);
 
                 return false;
             }
@@ -102,10 +104,13 @@ class LibCurl extends QueueConsumer
             }
 
             // No Retry-After: counted backoff
-            $retriesRemaining--;
+            // Checked before the decrement: decrementing first spent one retry on
+            // the exhaustion test itself, so retry_count of N performed N-1 and a
+            // retry_count of 1 performed none at all.
             if ($retriesRemaining <= 0) {
                 return false;
             }
+            $retriesRemaining--;
             if ($backoffStartTime === null) {
                 $backoffStartTime = hrtime(true);
             }
@@ -165,9 +170,10 @@ class LibCurl extends QueueConsumer
 
         $responseContent = curl_exec($ch);
         $err             = curl_error($ch);
+        $errno           = curl_errno($ch);
         $responseCode    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return [$responseCode, $responseHeaders, $responseContent, $err];
+        return [$responseCode, $responseHeaders, $responseContent, $err, $errno];
     }
 }

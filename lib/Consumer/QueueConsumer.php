@@ -87,16 +87,19 @@ abstract class QueueConsumer extends Consumer
             $this->curl_connecttimeout = $options['curl_connecttimeout'];
         }
 
+        // These three are in SECONDS, matching the options of the same names in the
+        // python, ruby, go and java clients. The _ms fields behind them are internal;
+        // taking milliseconds here made 43200 mean 43 seconds rather than 12 hours.
         if (isset($options['max_total_backoff_duration'])) {
-            $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'];
+            $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'] * 1000;
         }
 
         if (isset($options['max_rate_limit_duration'])) {
-            $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'];
+            $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'] * 1000;
         }
 
-        if (isset($options['rate_limit_retry_after_cap_s'])) {
-            $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap_s'];
+        if (isset($options['rate_limit_retry_after_cap'])) {
+            $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
         }
 
         if (isset($options['retry_count'])) {

@@ -240,25 +240,59 @@ class ConsumerLibCurlTest extends TestCase
     }
 
     /**
-     * 429 + Retry-After: 3 → budget exhausted after retry_count retries on other codes.
-     * Re-verify: if retry_count is 1 and we get a 503 (no Retry-After), we fail immediately.
+     * retry_count of N grants exactly N counted-backoff retries.
+     *
+     * The budget used to be decremented before the exhaustion check, so N performed
+     * N-1 and a retry_count of 1 performed none — indistinguishable from 0.
      */
-    public function testNon429ExhaustsRetryBudget(): void
+    public function testRetryCountGrantsExactlyThatManyRetries(): void
     {
         $consumer = new MockLibCurl('test-secret', ['retry_count' => 1]);
 
         $consumer->responses = [
             [503, [], 'Service Unavailable', ''],
-            // retry_count=1 means retriesRemaining starts at 1, after one decrement it's 0 → return false
+            [503, [], 'Service Unavailable', ''],
         ];
 
         $result = $consumer->flushBatch(makeTestMessages());
 
         self::assertFalse($result);
-        // retry_count = 1, so the single decrement exhausts the budget and the
-        // batch is abandoned without ever waiting.
+        self::assertSame(1, $consumer->backoffSleeps, 'retry_count 1 should grant one retry');
+        self::assertCount(1, $consumer->sleepCalls);
+    }
+
+    public function testRetryCountOfZeroGrantsNoRetries(): void
+    {
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 0]);
+
+        $consumer->responses = [
+            [503, [], 'Service Unavailable', ''],
+        ];
+
+        self::assertFalse($consumer->flushBatch(makeTestMessages()));
         self::assertSame(0, $consumer->backoffSleeps);
         self::assertCount(0, $consumer->sleepCalls);
+    }
+
+    public function testTransportErrorReportsTheRealCurlErrno(): void
+    {
+        // The refactor dropped curl_errno and passed a literal 0, so every transport
+        // failure looked identical to an error_handler branching on the code.
+        $reported = [];
+        $consumer = new MockLibCurl('test-secret', [
+            'error_handler' => function ($code, $msg) use (&$reported) {
+                $reported[] = [$code, $msg];
+            },
+        ]);
+
+        // 28 is CURLE_OPERATION_TIMEDOUT.
+        $consumer->responses = [
+            [0, [], '', 'Operation timed out after 5000 milliseconds', 28],
+        ];
+
+        self::assertFalse($consumer->flushBatch(makeTestMessages()));
+        self::assertCount(1, $reported);
+        self::assertSame(28, $reported[0][0]);
     }
 
     // -------------------------------------------------------------------------
@@ -346,7 +380,7 @@ class ConsumerLibCurlTest extends TestCase
     {
         $consumer = new MockLibCurl('test-secret', [
             'retry_count'                => 3,
-            'rate_limit_retry_after_cap_s' => 300,
+            'rate_limit_retry_after_cap' => 300,
         ]);
 
         $consumer->responses = [

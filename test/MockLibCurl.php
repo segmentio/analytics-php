@@ -32,10 +32,14 @@ class MockLibCurl extends LibCurl
     protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
     {
         if (empty($this->responses)) {
-            return [200, [], '{"success":true}', ''];
+            return [200, [], '{"success":true}', '', 0];
         }
 
-        return array_shift($this->responses);
+        $response = array_shift($this->responses);
+
+        // Rows may omit the curl errno; default it so tests that do not care about
+        // transport errors stay as four-element arrays.
+        return $response + [4 => 0];
     }
 
     /**
