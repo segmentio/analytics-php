@@ -7,6 +7,7 @@ namespace Segment\Test;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Segment\Client;
+use Segment\Consumer\QueueConsumer;
 
 /** Minimal message fixture for flushBatch calls */
 function makeTestMessages(): array
@@ -272,6 +273,38 @@ class ConsumerLibCurlTest extends TestCase
         self::assertFalse($consumer->flushBatch(makeTestMessages()));
         self::assertSame(0, $consumer->backoffSleeps);
         self::assertCount(0, $consumer->sleepCalls);
+    }
+
+    public function testNegativeBudgetOptionsKeepTheDefault(): void
+    {
+        // A negative value used to be cast straight in, which silently disabled
+        // retrying: retriesRemaining started below zero and the duration budget
+        // was already exceeded on the first check.
+        $consumer = new MockLibCurl('test-secret', [
+            'retry_count'                => -5,
+            'max_total_backoff_duration' => -1,
+        ]);
+
+        $read = function (string $property) use ($consumer) {
+            $ref = new \ReflectionProperty(QueueConsumer::class, $property);
+            $ref->setAccessible(true);
+            return $ref->getValue($consumer);
+        };
+
+        self::assertSame(10, $read('retry_count'), 'default retry_count');
+        self::assertSame(43200000, $read('max_total_backoff_duration_ms'), 'default 12h budget');
+    }
+
+    public function testZeroRetryCountIsAcceptedRatherThanTreatedAsInvalid(): void
+    {
+        // retry_count 0 means "do not retry" and is deliberate in analytics-python
+        // and analytics-ruby, so php accepts it rather than falling back to 10.
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 0]);
+
+        $ref = new \ReflectionProperty(QueueConsumer::class, 'retry_count');
+        $ref->setAccessible(true);
+
+        self::assertSame(0, $ref->getValue($consumer));
     }
 
     public function testRejectsRetryAfterWhoseWeekdayContradictsTheDate(): void

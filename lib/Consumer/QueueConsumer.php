@@ -90,20 +90,34 @@ abstract class QueueConsumer extends Consumer
         // These three are in SECONDS, matching the options of the same names in the
         // python, ruby, go and java clients. The _ms fields behind them are internal;
         // taking milliseconds here made 43200 mean 43 seconds rather than 12 hours.
+        //
+        // Negatives are rejected rather than cast blindly: they silently disabled
+        // retrying altogether, the opposite of what someone setting these is asking
+        // for. Zero is allowed and meaningful — retry_count 0 means "do not retry",
+        // matching analytics-python and analytics-ruby. Bad values log and keep the
+        // default, the way flush_at and flush_interval above do.
         if (isset($options['max_total_backoff_duration'])) {
-            $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'] * 1000;
+            if ($this->isNonNegativeInt($options['max_total_backoff_duration'], 'max_total_backoff_duration')) {
+                $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'] * 1000;
+            }
         }
 
         if (isset($options['max_rate_limit_duration'])) {
-            $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'] * 1000;
+            if ($this->isNonNegativeInt($options['max_rate_limit_duration'], 'max_rate_limit_duration')) {
+                $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'] * 1000;
+            }
         }
 
         if (isset($options['rate_limit_retry_after_cap'])) {
-            $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
+            if ($this->isNonNegativeInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
+                $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
+            }
         }
 
         if (isset($options['retry_count'])) {
-            $this->retry_count = (int)$options['retry_count'];
+            if ($this->isNonNegativeInt($options['retry_count'], 'retry_count')) {
+                $this->retry_count = (int)$options['retry_count'];
+            }
         }
 
         $this->queue = [];
@@ -154,6 +168,27 @@ abstract class QueueConsumer extends Consumer
      * 5xx are retryable except 501, 505, 511.
      * 4xx are non-retryable except 408, 410, 429, 460.
      */
+    /**
+     * Whether an option value is usable as a count or duration.
+     *
+     * Logs and returns false otherwise, so the caller keeps the default. Zero is
+     * accepted: analytics-python validates these the same way, and retry_count 0
+     * meaning "do not retry" is deliberate there and in analytics-ruby.
+     */
+    protected function isNonNegativeInt($value, string $name): bool
+    {
+        if (!is_numeric($value) || (int)$value < 0) {
+            error_log(sprintf(
+                '[Analytics][%s] %s must be a non-negative integer; keeping the default',
+                $this->type,
+                $name
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
     protected function isRetryable(int $statusCode): bool
     {
         if ($statusCode >= 500 && $statusCode < 600) {
