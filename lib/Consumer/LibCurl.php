@@ -95,10 +95,28 @@ class LibCurl extends QueueConsumer
                     // expire or extend this budget.
                     $rateLimitStartTime = hrtime(true);
                 }
-                if ((hrtime(true) - $rateLimitStartTime) / 1e6 >= $this->max_rate_limit_duration_ms) {
+                $elapsedMs = (hrtime(true) - $rateLimitStartTime) / 1e6;
+                if ($elapsedMs >= $this->max_rate_limit_duration_ms) {
+                    // Logged unconditionally: this consumer blocks the caller, and a
+                    // request that stopped for the whole budget should not have to be
+                    // diagnosed from an absence of output. handleError only writes when
+                    // debug is on, which it is not by default.
+                    error_log(sprintf(
+                        '[Analytics][%s] Rate-limit budget of %dms exhausted; dropping batch',
+                        $this->type,
+                        $this->max_rate_limit_duration_ms
+                    ));
                     return false;
                 }
-                $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
+                // Clamped to the remaining budget as well as the cap: the elapsed check
+                // above runs before the wait, so without this a check passing just inside
+                // the budget would sleep a full Retry-After on top and overshoot it.
+                $remainingMs = (int)($this->max_rate_limit_duration_ms - $elapsedMs);
+                $sleepMs = min(
+                    $retryAfterS * 1000,
+                    $this->rate_limit_retry_after_cap_s * 1000,
+                    $remainingMs
+                );
                 $this->sleepBeforeRetry($sleepMs, true);
                 continue; // Do NOT decrement retriesRemaining
             }

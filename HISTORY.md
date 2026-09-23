@@ -1,6 +1,10 @@
 Unreleased
 ==================
 
+  * `max_rate_limit_duration` now defaults to 5 minutes rather than 12 hours, and `rate_limit_retry_after_cap` to 60s rather than 300s. The 12 hour value was a backstop meant to be unreachable, but rate-limited attempts are deliberately uncounted, so it was the only limit on that path. It matters more here than in the other clients: the LibCurl consumer is the default and retries inline on the caller's thread, so that budget is time a web request spends blocked and an FPM worker spends occupied.
+  * The rate-limit sleep is clamped to the remaining budget. The elapsed check runs before the wait, so a check passing just inside the budget previously slept a full `Retry-After` on top.
+  * Exhausting the rate-limit budget now logs unconditionally rather than only when `debug` is on. A request that stopped for the whole budget should not have to be diagnosed from an absence of output.
+
 ### Upgrade note: new request header and proxy allowlists
 
 This release sends an `X-Retry-Count` request header on retries. If your

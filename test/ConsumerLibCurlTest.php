@@ -275,6 +275,35 @@ class ConsumerLibCurlTest extends TestCase
         self::assertCount(0, $consumer->sleepCalls);
     }
 
+    public function testRateLimitSleepNeverOvershootsTheBudget(): void
+    {
+        // The elapsed check runs before the wait, so without clamping a check
+        // passing just inside the budget sleeps a full Retry-After on top. At a
+        // 5 minute budget that doubles the bound rather than rounding it, and
+        // this consumer blocks the caller for the whole of it.
+        $consumer = new MockLibCurl('test-secret', [
+            'max_rate_limit_duration' => 1, // 1 second of budget
+            'retry_count'             => 5,
+        ]);
+
+        $consumer->responses = [
+            [429, ['retry-after' => '60'], 'Too Many Requests', ''],
+            [429, ['retry-after' => '60'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        $consumer->flushBatch(makeTestMessages());
+
+        self::assertNotEmpty($consumer->sleepCalls);
+        foreach ($consumer->sleepCalls as $micros) {
+            self::assertLessThanOrEqual(
+                1_000_000,
+                $micros,
+                'slept ' . $micros . 'us with at most 1s of budget left'
+            );
+        }
+    }
+
     public function testNegativeBudgetOptionsKeepTheDefault(): void
     {
         // A negative value used to be cast straight in, which silently disabled

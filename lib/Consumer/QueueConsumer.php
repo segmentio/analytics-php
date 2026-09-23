@@ -20,8 +20,21 @@ abstract class QueueConsumer extends Consumer
     protected int $max_item_size_bytes = 32000; // 32kb
     protected int $maximum_backoff_duration = 10000; // Set maximum waiting limit to 10s
     protected int $max_total_backoff_duration_ms = 43200000; // 12 hours
-    protected int $max_rate_limit_duration_ms    = 43200000; // 12 hours
-    protected int $rate_limit_retry_after_cap_s  = 300;      // 5 minutes
+
+    /**
+     * Five minutes, in line with the counted-backoff path's ~4 minute worst case.
+     * This was 12 hours, meant as a backstop a retry count would stop us reaching —
+     * but rate-limited attempts are deliberately uncounted, so it was the only limit
+     * on that path. This consumer retries inline on the caller's thread, so that
+     * budget is time a web request spends blocked.
+     */
+    protected int $max_rate_limit_duration_ms = 300000; // 5 minutes
+
+    /**
+     * Kept well below max_rate_limit_duration so the budget buys several attempts
+     * rather than one long sleep; at the old 300s a single sleep consumed it.
+     */
+    protected int $rate_limit_retry_after_cap_s = 60;
     protected int $retry_count                   = 10;       // max retries
     protected string $host = '';
     protected bool $compress_request = false;
