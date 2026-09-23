@@ -481,9 +481,14 @@ class ConsumerLibCurlTest extends TestCase
 
     public function testRetryAfterCapIsRespected(): void
     {
+        // max_rate_limit_duration is raised well above the cap so the cap is what
+        // binds. Left at its default it equals the cap, and the remaining-budget
+        // clamp then wins by the fraction of a millisecond that has already
+        // elapsed — which is correct behaviour but tests the wrong thing.
         $consumer = new MockLibCurl('test-secret', [
             'retry_count'                => 3,
             'rate_limit_retry_after_cap' => 300,
+            'max_rate_limit_duration'    => 3600,
         ]);
 
         $consumer->responses = [
@@ -498,5 +503,21 @@ class ConsumerLibCurlTest extends TestCase
         // Sleep should be capped at 300s = 300000ms = 300000000 µs
         self::assertCount(1, $consumer->sleepCalls);
         self::assertSame(300000 * 1000, $consumer->sleepCalls[0]);
+    }
+
+    public function testRetryAfterCapDefaultsToSixtySeconds(): void
+    {
+        // The shipped default, rather than an override: a large Retry-After is
+        // clamped to the cap, well inside the 5 minute budget.
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        $consumer->responses = [
+            [503, ['retry-after' => '600'], 'Service Unavailable', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        self::assertTrue($consumer->flushBatch(makeTestMessages()));
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(60 * 1000 * 1000, $consumer->sleepCalls[0]);
     }
 }
