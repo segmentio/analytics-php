@@ -40,7 +40,13 @@ abstract class QueueConsumer extends Consumer
     protected string $host = '';
     protected bool $compress_request = false;
     protected int $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
-    protected int $curl_timeout = 0; // by default this is infinite
+
+    /**
+     * Bounds one request. A value of 0 means no limit at all, which lets a connection
+     * that stalls after the handshake hold the caller's thread until the peer or the
+     * network gives up, outliving every retry budget above it.
+     */
+    protected int $curl_timeout = 300;
     protected int $curl_connecttimeout = 300;
 
     /**
