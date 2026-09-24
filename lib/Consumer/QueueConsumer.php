@@ -22,11 +22,10 @@ abstract class QueueConsumer extends Consumer
     protected int $max_total_backoff_duration_ms = 43200000; // 12 hours
 
     /**
-     * Five minutes, in line with the counted-backoff path's ~4 minute worst case.
-     * This was 12 hours, meant as a backstop a retry count would stop us reaching —
-     * but rate-limited attempts are deliberately uncounted, so it was the only limit
-     * on that path. This consumer retries inline on the caller's thread, so that
-     * budget is time a web request spends blocked.
+     * Rate-limited attempts are deliberately uncounted, so this duration is the only
+     * thing bounding them. It matters more here than in a client with a background
+     * worker: LibCurl retries inline on the caller's thread, so this is time a web
+     * request spends blocked and an FPM worker spends occupied.
      */
     protected int $max_rate_limit_duration_ms = 300000; // 5 minutes
 

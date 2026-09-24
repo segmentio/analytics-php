@@ -243,8 +243,8 @@ class ConsumerLibCurlTest extends TestCase
     /**
      * retry_count of N grants exactly N counted-backoff retries.
      *
-     * The budget used to be decremented before the exhaustion check, so N performed
-     * N-1 and a retry_count of 1 performed none — indistinguishable from 0.
+     * Decrementing before the exhaustion check spends one retry on the check itself,
+     * which yields N-1 and makes a retry_count of 1 indistinguishable from 0.
      */
     public function testRetryCountGrantsExactlyThatManyRetries(): void
     {
@@ -306,9 +306,8 @@ class ConsumerLibCurlTest extends TestCase
 
     public function testNegativeBudgetOptionsKeepTheDefault(): void
     {
-        // A negative value used to be cast straight in, which silently disabled
-        // retrying: retriesRemaining started below zero and the duration budget
-        // was already exceeded on the first check.
+        // A negative cast straight in disables retrying silently: retriesRemaining
+        // starts below zero and the duration budget is exceeded on its first check.
         $consumer = new MockLibCurl('test-secret', [
             'retry_count'                => -5,
             'max_total_backoff_duration' => -1,
