@@ -25,18 +25,13 @@ any one retry sleeps. Lower `retry_count` to restore a shorter schedule.
   * New options, all in seconds: `max_rate_limit_duration` (default 300), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 300). Negative values are ignored, logged, and the default kept. A `retry_count` of 0 means do not retry.
   * `Retry-After` is not read by the Socket consumer, which uses exponential backoff for every retryable response. Use the default LibCurl consumer if you need it.
   * Exhausting the rate-limit budget is logged regardless of the `debug` setting.
-  * A flush blocks for at most `max_rate_limit_duration` or `max_total_backoff_duration`, plus the `curl_timeout` of the request in flight when the budget runs out. Applications that cannot block for that long can set `consumer` to `file`, which appends events to a log file and makes no network call; the bundled `send.php` delivers that file separately.
+  * A flush blocks for at most `max_rate_limit_duration` or `max_total_backoff_duration`, plus the `curl_timeout` of the request in flight when the budget runs out. Applications that cannot block for that long can use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer), which records events to a log file with no network call and uploads them out of band.
 
 ### Other changes
 
   * `X-Retry-Count` is sent on retries by the LibCurl and Socket consumers, allowing the server to distinguish a retry from a first attempt. It is omitted on the first attempt.
   * Only 2xx responses count as a successful upload. A 3xx is reported as a failed upload rather than treated as delivered, and is not retried: a redirect curl has already declined to follow will not succeed on one. The Segment endpoint does not redirect, so this affects only custom `host` values.
   * `curl_timeout` now defaults to 300 seconds rather than 0, which meant no limit: a stalled upload could otherwise block the caller indefinitely. Set `curl_timeout` explicitly to restore the old behaviour or to choose a different bound.
-
-3.8.2 / 2026-03-11
-==================
-
-
 
 3.8.2 / 2026-03-11
 ==================
