@@ -504,19 +504,20 @@ class ConsumerLibCurlTest extends TestCase
         self::assertSame(300000 * 1000, $consumer->sleepCalls[0]);
     }
 
-    public function testRetryAfterCapDefaultsToSixtySeconds(): void
+    public function testRetryAfterIsHonouredWhenItFitsTheBudget(): void
     {
-        // The shipped default, rather than an override: a large Retry-After is
-        // clamped to the cap, well inside the 5 minute budget.
+        // Waiting less than asked sends more requests at a server already
+        // rate-limiting us, so a value inside the cap and the budget is used
+        // as given rather than shortened.
         $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
 
         $consumer->responses = [
-            [503, ['retry-after' => '600'], 'Service Unavailable', ''],
+            [503, ['retry-after' => '120'], 'Service Unavailable', ''],
             [200, [], '{"success":true}', ''],
         ];
 
         self::assertTrue($consumer->flushBatch(makeTestMessages()));
         self::assertCount(1, $consumer->sleepCalls);
-        self::assertSame(60 * 1000 * 1000, $consumer->sleepCalls[0]);
+        self::assertSame(120 * 1000 * 1000, $consumer->sleepCalls[0]);
     }
 }

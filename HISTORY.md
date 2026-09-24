@@ -22,7 +22,7 @@ any one retry sleeps. Lower `retry_count` to restore a shorter schedule.
   * Uploads are retried on 408, 410, 429, 460, and 5xx except 501, 505 and 511.
   * A `Retry-After` header is honoured on any retryable response, not only 429. Numeric seconds and the RFC 7231 HTTP-date formats are both accepted, malformed values are ignored, and the value is capped at `rate_limit_retry_after_cap`.
   * Responses carrying `Retry-After` are retried for up to `max_rate_limit_duration` and do not consume the retry count. Other failures use exponential backoff limited by `retry_count` and by `max_total_backoff_duration` as an upper bound.
-  * New options, all in seconds: `max_rate_limit_duration` (default 300), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 60). Negative values are ignored, logged, and the default kept. A `retry_count` of 0 means do not retry.
+  * New options, all in seconds: `max_rate_limit_duration` (default 300), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 300). Negative values are ignored, logged, and the default kept. A `retry_count` of 0 means do not retry.
   * `Retry-After` is not read by the Socket consumer, which uses exponential backoff for every retryable response. Use the default LibCurl consumer if you need it.
   * Exhausting the rate-limit budget is logged regardless of the `debug` setting.
 

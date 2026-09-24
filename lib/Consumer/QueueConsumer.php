@@ -30,10 +30,12 @@ abstract class QueueConsumer extends Consumer
     protected int $max_rate_limit_duration_ms = 300000; // 5 minutes
 
     /**
-     * Kept well below max_rate_limit_duration so the budget buys several attempts
-     * rather than one long sleep; at the old 300s a single sleep consumed it.
+     * A guard against an absurd header, not a second budget. Waiting less than the
+     * server asked for does not make the next attempt more likely to succeed, it
+     * just sends more requests at something already rate-limiting us; how long we
+     * keep trying is max_rate_limit_duration's job.
      */
-    protected int $rate_limit_retry_after_cap_s = 60;
+    protected int $rate_limit_retry_after_cap_s = 300;
     protected int $retry_count                   = 10;       // max retries
     protected string $host = '';
     protected bool $compress_request = false;
