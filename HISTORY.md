@@ -18,7 +18,7 @@ considerably longer than before.
 
 This matters most for the default LibCurl consumer, which retries inline on the
 calling thread: with the default `retry_count` a persistently failing upload
-spends around four minutes in waits, plus up to `curl_timeout` per attempt,
+spends around four minutes in waits, plus however long each attempt takes,
 before giving up. On a web request that is a worker held for the duration. Lower
 `retry_count` to restore a shorter schedule, or use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer),
 which records events without making a network call.
@@ -45,13 +45,12 @@ than continuing through the queue. Code branching on the return value of
   * New options, all in seconds: `max_rate_limit_duration` (default 300 — deliberately shorter than in Segment's other server libraries, because the LibCurl consumer retries inline on the calling thread, so this budget is time a web request spends blocked and a PHP-FPM worker spends occupied), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 300). Negative values are ignored, logged, and the default kept, as is a `rate_limit_retry_after_cap` of 0 — a cap of zero would clamp every wait to nothing and, since that path does not consume a retry, post continuously for the whole budget. A `retry_count` of 0 does mean do not retry, and `curl_timeout` of 0 still means no limit.
   * `Retry-After` is not read by the Socket consumer, which uses exponential backoff for every retryable response. Use the default LibCurl consumer if you need it.
   * Exhausting the rate-limit budget is logged regardless of the `debug` setting.
-  * These budgets bound one batch: it is retried for up to `max_rate_limit_duration` on responses carrying `Retry-After` and, independently, up to `max_total_backoff_duration` on those without, so a response stream that mixes the two spends both — plus the `curl_timeout` of the request in flight when a budget runs out. A single `flush()` sends as many batches as the queue holds, waiting `flush_interval` between them, so it can take considerably longer than any one batch's budget. Applications that cannot block for that long can use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer), which records events to a log file with no network call and uploads them out of band.
+  * These budgets bound one batch: it is retried for up to `max_rate_limit_duration` on responses carrying `Retry-After` and, independently, up to `max_total_backoff_duration` on those without, so a response stream that mixes the two spends both — plus however long the request in flight takes, which `curl_timeout` bounds only if it has been set — it defaults to no limit. A single `flush()` sends as many batches as the queue holds, waiting `flush_interval` between them, so it can take considerably longer than any one batch's budget. Applications that cannot block for that long can use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer), which records events to a log file with no network call and uploads them out of band.
 
 ### Other changes
 
   * `X-Retry-Count` is sent on retries by the LibCurl and Socket consumers, allowing the server to distinguish a retry from a first attempt. It is omitted on the first attempt.
   * Only 2xx responses count as a successful upload. A 3xx is reported as a failed upload rather than treated as delivered, and is not retried: a redirect curl has already declined to follow will not succeed on one. The Segment endpoint does not redirect, so this affects only custom `host` values.
-  * `curl_timeout` now defaults to 300 seconds rather than 0, which meant no limit: a stalled upload could otherwise block the caller indefinitely. Set `curl_timeout` explicitly to restore the old behaviour or to choose a different bound.
 
 3.8.2 / 2026-03-11
 ==================
