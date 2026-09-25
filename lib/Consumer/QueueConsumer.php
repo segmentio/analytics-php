@@ -128,8 +128,13 @@ abstract class QueueConsumer extends Consumer
             }
         }
 
+        // Positive, not merely non-negative. A cap of 0 clamps every wait to 0, and
+        // the rate-limit path does not consume a retry, so the client would post
+        // back-to-back at RTT rate for the whole budget against a server that is
+        // already rate-limiting it. 0 is meaningful for retry_count and curl_timeout,
+        // but there is no sensible reading of "cap the wait at nothing".
         if (isset($options['rate_limit_retry_after_cap'])) {
-            if ($this->isNonNegativeInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
+            if ($this->isPositiveInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
                 $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
             }
         }
@@ -190,6 +195,20 @@ abstract class QueueConsumer extends Consumer
      * accepted: analytics-python validates these the same way, and retry_count 0
      * meaning "do not retry" is deliberate there and in analytics-ruby.
      */
+    protected function isPositiveInt($value, string $name): bool
+    {
+        if (!is_numeric($value) || (int)$value < 1) {
+            error_log(sprintf(
+                '[Analytics][%s] %s must be a positive integer; keeping the default',
+                $this->type,
+                $name
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
     protected function isNonNegativeInt($value, string $name): bool
     {
         if (!is_numeric($value) || (int)$value < 0) {

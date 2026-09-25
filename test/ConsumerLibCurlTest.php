@@ -323,6 +323,20 @@ class ConsumerLibCurlTest extends TestCase
         self::assertSame(43200000, $read('max_total_backoff_duration_ms'), 'default 12h budget');
     }
 
+    public function testZeroRetryAfterCapKeepsTheDefault(): void
+    {
+        // Unlike retry_count, 0 is not a meaningful cap. It clamps every rate-limit
+        // wait to zero, and that path does not consume a retry, so the consumer would
+        // post back-to-back at RTT rate for the whole budget at a server that is
+        // already rate-limiting it.
+        $consumer = new MockLibCurl('test-secret', ['rate_limit_retry_after_cap' => 0]);
+
+        $ref = new \ReflectionProperty(QueueConsumer::class, 'rate_limit_retry_after_cap_s');
+        $ref->setAccessible(true);
+
+        self::assertSame(300, $ref->getValue($consumer), 'a cap of 0 must not be accepted');
+    }
+
     public function testZeroRetryCountIsAcceptedRatherThanTreatedAsInvalid(): void
     {
         // retry_count 0 means "do not retry" and is deliberate in analytics-python

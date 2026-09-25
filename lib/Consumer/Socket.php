@@ -149,7 +149,10 @@ class Socket extends QueueConsumer
      * - X-Retry-Count: Supported.
      * - Backoff: Exponential from 500ms, each wait capped at
      *   maximum_backoff_duration, bounded by retry_count and
-     *   max_total_backoff_duration — the same budgets the LibCurl consumer uses.
+     *   max_total_backoff_duration. retry_count and max_total_backoff_duration are
+     *   shared with LibCurl; the per-wait cap is not. LibCurl caps each wait at a
+     *   fixed 60s and does not read maximum_backoff_duration at all, so the same
+     *   configuration produces different schedules on the two consumers.
      * - max_rate_limit_duration: not applicable, since there is no Retry-After
      *   path here for it to bound.
      *

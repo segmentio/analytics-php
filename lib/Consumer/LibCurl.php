@@ -129,13 +129,22 @@ class LibCurl extends QueueConsumer
                 return false;
             }
             $retriesRemaining--;
+            // One reading serves the budget test and the clamp below, as on the
+            // rate-limit path above.
+            $backoffNow = hrtime(true);
             if ($backoffStartTime === null) {
-                $backoffStartTime = hrtime(true);
+                $backoffStartTime = $backoffNow;
             }
-            if ((hrtime(true) - $backoffStartTime) / 1e6 >= $this->max_total_backoff_duration_ms) {
+            $backoffRemainingMs = (int)(
+                $this->max_total_backoff_duration_ms - ($backoffNow - $backoffStartTime) / 1e6
+            );
+            if ($backoffRemainingMs <= 0) {
                 return false;
             }
-            $this->sleepBeforeRetry($backoffMs, false);
+            // Clamped for the same reason as the rate-limit path: the budget is
+            // checked before the wait, so an unclamped sleep overshoots it by up to
+            // the backoff ceiling.
+            $this->sleepBeforeRetry(min($backoffMs, $backoffRemainingMs), false);
             $backoffMs = min($backoffMs * 2, $backoffCapMs);
         }
     }

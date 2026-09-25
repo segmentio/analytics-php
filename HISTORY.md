@@ -8,14 +8,33 @@ Segment passes through a proxy, gateway or WAF that allowlists request headers,
 add it before upgrading or retried uploads will be rejected. The `Authorization`
 header is unchanged.
 
-### Upgrade note: Socket consumer retry behaviour
+### Upgrade note: retries take longer than they used to
 
-The Socket consumer previously gave up after a fixed seven retries over roughly
-13 seconds. It now honours `retry_count` and `max_total_backoff_duration`, and
-backs off from 500ms rather than 100ms, so a failing upload is retried for
-longer than before. `maximum_backoff_duration` now caps each individual wait
-rather than ending the retry loop; its 10 second default still bounds how long
-any one retry sleeps. Lower `retry_count` to restore a shorter schedule.
+Both the LibCurl and Socket consumers previously gave up after a fixed seven
+retries over roughly 13 seconds. Both now honour `retry_count` (default 10) and
+back off from 500ms rather than 100ms, so a failing upload is retried for
+considerably longer than before.
+
+This matters most for the default LibCurl consumer, which retries inline on the
+calling thread: with the default `retry_count` a persistently failing upload
+spends around four minutes in waits, plus up to `curl_timeout` per attempt,
+before giving up. On a web request that is a worker held for the duration. Lower
+`retry_count` to restore a shorter schedule, or use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer),
+which records events without making a network call.
+
+The two consumers cap an individual wait differently: LibCurl caps each wait at
+60 seconds, while Socket caps it at `maximum_backoff_duration`, whose default is
+10 seconds.
+
+### Upgrade note: `track()` return value
+
+`track()` and the other message methods return the result of a flush when the
+queue reaches `flush_at`. Previously the LibCurl consumer reported success for
+any response it had finished with, including a 4xx and a retry-exhausted upload,
+so that flush almost always returned `true`. It now returns `false` when the
+batch was not delivered, and `flush()` stops at the first failing batch rather
+than continuing through the queue. Code branching on the return value of
+`track()` will see failures it did not see before.
 
 ### Retry handling
 
@@ -25,7 +44,7 @@ any one retry sleeps. Lower `retry_count` to restore a shorter schedule.
   * New options, all in seconds: `max_rate_limit_duration` (default 300), `max_total_backoff_duration` (default 43200) and `rate_limit_retry_after_cap` (default 300). Negative values are ignored, logged, and the default kept. A `retry_count` of 0 means do not retry.
   * `Retry-After` is not read by the Socket consumer, which uses exponential backoff for every retryable response. Use the default LibCurl consumer if you need it.
   * Exhausting the rate-limit budget is logged regardless of the `debug` setting.
-  * A flush blocks for at most `max_rate_limit_duration` or `max_total_backoff_duration`, plus the `curl_timeout` of the request in flight when the budget runs out. Applications that cannot block for that long can use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer), which records events to a log file with no network call and uploads them out of band.
+  * These budgets bound one batch: it is retried for up to `max_rate_limit_duration` on responses carrying `Retry-After` and, independently, up to `max_total_backoff_duration` on those without, so a response stream that mixes the two spends both — plus the `curl_timeout` of the request in flight when a budget runs out. A single `flush()` sends as many batches as the queue holds, waiting `flush_interval` between them, so it can take considerably longer than any one batch's budget. Applications that cannot block for that long can use the [file consumer](https://www.twilio.com/docs/segment/connections/sources/catalog/libraries/server/php#file-consumer), which records events to a log file with no network call and uploads them out of band.
 
 ### Other changes
 
