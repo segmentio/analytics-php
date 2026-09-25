@@ -24,6 +24,9 @@ class MockLibCurl extends LibCurl
     /** @var int how many counted-backoff waits were performed */
     public int $backoffSleeps = 0;
 
+    /** @var int how many HTTP attempts were made */
+    public int $requestCount = 0;
+
     public function __construct(string $secret, array $options = [])
     {
         parent::__construct($secret, $options);
@@ -31,6 +34,8 @@ class MockLibCurl extends LibCurl
 
     protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
     {
+        $this->requestCount++;
+
         if (empty($this->responses)) {
             return [200, [], '{"success":true}', '', 0];
         }

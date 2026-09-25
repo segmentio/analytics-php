@@ -275,12 +275,12 @@ class ConsumerLibCurlTest extends TestCase
         self::assertCount(0, $consumer->sleepCalls);
     }
 
-    public function testRateLimitSleepNeverOvershootsTheBudget(): void
+    public function testARateLimitWaitThatCannotFitTheBudgetDropsWithoutWaiting(): void
     {
-        // The elapsed check runs before the wait, so without clamping a check
-        // passing just inside the budget sleeps a full Retry-After on top. At a
-        // 5 minute budget that doubles the bound rather than rounding it, and
-        // this consumer blocks the caller for the whole of it.
+        // Shortening the wait would resume inside the window the server named --
+        // one it has already said it will not serve -- and the budget is spent by
+        // then, so that attempt would be the last either way. This consumer blocks
+        // the caller for the whole wait, so the shortened one is paid for twice.
         $consumer = new MockLibCurl('test-secret', [
             'max_rate_limit_duration' => 1, // 1 second of budget
             'retry_count'             => 5,
@@ -288,20 +288,29 @@ class ConsumerLibCurlTest extends TestCase
 
         $consumer->responses = [
             [429, ['retry-after' => '60'], 'Too Many Requests', ''],
-            [429, ['retry-after' => '60'], 'Too Many Requests', ''],
             [200, [], '{"success":true}', ''],
         ];
 
-        $consumer->flushBatch(makeTestMessages());
+        self::assertFalse($consumer->flushBatch(makeTestMessages()));
+        self::assertEmpty($consumer->sleepCalls, 'should not have waited at all');
+        self::assertSame(1, $consumer->requestCount, 'should not have made a second request');
+    }
 
-        self::assertNotEmpty($consumer->sleepCalls);
-        foreach ($consumer->sleepCalls as $micros) {
-            self::assertLessThanOrEqual(
-                1_000_000,
-                $micros,
-                'slept ' . $micros . 'us with at most 1s of budget left'
-            );
-        }
+    public function testARateLimitWaitThatFitsIsHonouredInFull(): void
+    {
+        // "Never shorten" must not become "never wait".
+        $consumer = new MockLibCurl('test-secret', [
+            'max_rate_limit_duration' => 300,
+            'retry_count'             => 5,
+        ]);
+
+        $consumer->responses = [
+            [429, ['retry-after' => '2'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        self::assertTrue($consumer->flushBatch(makeTestMessages()));
+        self::assertSame([2_000_000], $consumer->sleepCalls);
     }
 
     public function testNegativeBudgetOptionsKeepTheDefault(): void

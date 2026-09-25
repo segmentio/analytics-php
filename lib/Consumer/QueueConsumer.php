@@ -189,11 +189,9 @@ abstract class QueueConsumer extends Consumer
     }
 
     /**
-     * Whether an option value is usable as a count or duration.
+     * Whether an option value is usable where zero is not meaningful.
      *
-     * Logs and returns false otherwise, so the caller keeps the default. Zero is
-     * accepted: analytics-python validates these the same way, and retry_count 0
-     * meaning "do not retry" is deliberate there and in analytics-ruby.
+     * Logs and returns false otherwise, so the caller keeps the default.
      */
     protected function isPositiveInt($value, string $name): bool
     {
@@ -209,6 +207,13 @@ abstract class QueueConsumer extends Consumer
         return true;
     }
 
+    /**
+     * Whether an option value is usable as a count or duration.
+     *
+     * Logs and returns false otherwise, so the caller keeps the default. Zero is
+     * accepted: analytics-python validates these the same way, and retry_count 0
+     * meaning "do not retry" is deliberate there and in analytics-ruby.
+     */
     protected function isNonNegativeInt($value, string $name): bool
     {
         if (!is_numeric($value) || (int)$value < 0) {

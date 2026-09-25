@@ -108,16 +108,24 @@ class LibCurl extends QueueConsumer
                     ));
                     return false;
                 }
-                // Clamped to the remaining budget as well as the cap: the elapsed check
-                // above runs before the wait, so without this a check passing just inside
-                // the budget would sleep a full Retry-After on top and overshoot it.
-                $remainingMs = (int)($this->max_rate_limit_duration_ms - $elapsedMs);
-                $sleepMs = min(
-                    $retryAfterS * 1000,
-                    $this->rate_limit_retry_after_cap_s * 1000,
-                    $remainingMs
-                );
-                $this->sleepBeforeRetry($sleepMs, true);
+                // Capped, then required to fit. Shortening the wait would resume inside
+                // the window the server named -- one it has already said it will not
+                // serve -- and the budget is spent by then, so that attempt would be the
+                // last either way. Compared in floats: an int cast here truncates a
+                // sub-millisecond remainder to 0, which would sleep not at all and
+                // re-POST at round-trip rate without consuming a retry.
+                $remainingMs = $this->max_rate_limit_duration_ms - $elapsedMs;
+                $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
+                if ($sleepMs > $remainingMs) {
+                    error_log(sprintf(
+                        '[Analytics][%s] Retry-After of %ds does not fit the remaining '
+                        . 'rate-limit budget; dropping batch',
+                        $this->type,
+                        (int)($sleepMs / 1000)
+                    ));
+                    return false;
+                }
+                $this->sleepBeforeRetry((int)$sleepMs, true);
                 continue; // Do NOT decrement retriesRemaining
             }
 
@@ -135,16 +143,17 @@ class LibCurl extends QueueConsumer
             if ($backoffStartTime === null) {
                 $backoffStartTime = $backoffNow;
             }
-            $backoffRemainingMs = (int)(
-                $this->max_total_backoff_duration_ms - ($backoffNow - $backoffStartTime) / 1e6
-            );
+            $backoffRemainingMs =
+                $this->max_total_backoff_duration_ms - ($backoffNow - $backoffStartTime) / 1e6;
             if ($backoffRemainingMs <= 0) {
                 return false;
             }
-            // Clamped for the same reason as the rate-limit path: the budget is
-            // checked before the wait, so an unclamped sleep overshoots it by up to
-            // the backoff ceiling.
-            $this->sleepBeforeRetry(min($backoffMs, $backoffRemainingMs), false);
+            // Same rule as the rate-limit path, for the simpler reason that a backoff
+            // outlasting the budget is a wait whose attempt can never run.
+            if ($backoffMs > $backoffRemainingMs) {
+                return false;
+            }
+            $this->sleepBeforeRetry($backoffMs, false);
             $backoffMs = min($backoffMs * 2, $backoffCapMs);
         }
     }
