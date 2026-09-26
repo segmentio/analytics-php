@@ -39,13 +39,13 @@ jobs:
           path: sdk-e2e-tests
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        uses: ./sdk/.github/actions/setup-php
         with:
-          php-version: "8.2"
+          php-version: "8.3"
           extensions: curl, json
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
 
