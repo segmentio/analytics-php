@@ -20,12 +20,27 @@ abstract class QueueConsumer extends Consumer
     protected int $max_item_size_bytes = 32000; // 32kb
     protected int $maximum_backoff_duration = 10000; // Set maximum waiting limit to 10s
     protected int $max_total_backoff_duration_ms = 43200000; // 12 hours
-    protected int $max_rate_limit_duration_ms    = 43200000; // 12 hours
-    protected int $rate_limit_retry_after_cap_s  = 300;      // 5 minutes
+
+    /**
+     * Rate-limited attempts are deliberately uncounted, so this duration is the only
+     * thing bounding them. It matters more here than in a client with a background
+     * worker: LibCurl retries inline on the caller's thread, so this is time a web
+     * request spends blocked and an FPM worker spends occupied.
+     */
+    protected int $max_rate_limit_duration_ms = 300000; // 5 minutes
+
+    /**
+     * A guard against an absurd header, not a second budget. Waiting less than the
+     * server asked for does not make the next attempt more likely to succeed, it
+     * just sends more requests at something already rate-limiting us; how long we
+     * keep trying is max_rate_limit_duration's job.
+     */
+    protected int $rate_limit_retry_after_cap_s = 300;
     protected int $retry_count                   = 10;       // max retries
     protected string $host = '';
     protected bool $compress_request = false;
     protected int $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
+
     protected int $curl_timeout = 0; // by default this is infinite
     protected int $curl_connecttimeout = 300;
 
@@ -108,8 +123,13 @@ abstract class QueueConsumer extends Consumer
             }
         }
 
+        // Positive, not merely non-negative. A cap of 0 clamps every wait to 0, and
+        // the rate-limit path does not consume a retry, so the client would post
+        // back-to-back at RTT rate for the whole budget against a server that is
+        // already rate-limiting it. 0 is meaningful for retry_count and curl_timeout,
+        // but there is no sensible reading of "cap the wait at nothing".
         if (isset($options['rate_limit_retry_after_cap'])) {
-            if ($this->isNonNegativeInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
+            if ($this->isPositiveInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
                 $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
             }
         }
@@ -161,6 +181,25 @@ abstract class QueueConsumer extends Consumer
         }
 
         return $success;
+    }
+
+    /**
+     * Whether an option value is usable where zero is not meaningful.
+     *
+     * Logs and returns false otherwise, so the caller keeps the default.
+     */
+    protected function isPositiveInt($value, string $name): bool
+    {
+        if (!is_numeric($value) || (int)$value < 1) {
+            error_log(sprintf(
+                '[Analytics][%s] %s must be a positive integer; keeping the default',
+                $this->type,
+                $name
+            ));
+            return false;
+        }
+
+        return true;
     }
 
     /**

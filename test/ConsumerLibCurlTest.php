@@ -243,8 +243,8 @@ class ConsumerLibCurlTest extends TestCase
     /**
      * retry_count of N grants exactly N counted-backoff retries.
      *
-     * The budget used to be decremented before the exhaustion check, so N performed
-     * N-1 and a retry_count of 1 performed none — indistinguishable from 0.
+     * Decrementing before the exhaustion check spends one retry on the check itself,
+     * which yields N-1 and makes a retry_count of 1 indistinguishable from 0.
      */
     public function testRetryCountGrantsExactlyThatManyRetries(): void
     {
@@ -275,11 +275,48 @@ class ConsumerLibCurlTest extends TestCase
         self::assertCount(0, $consumer->sleepCalls);
     }
 
+    public function testARateLimitWaitThatCannotFitTheBudgetDropsWithoutWaiting(): void
+    {
+        // Shortening the wait would resume inside the window the server named --
+        // one it has already said it will not serve -- and the budget is spent by
+        // then, so that attempt would be the last either way. This consumer blocks
+        // the caller for the whole wait, so the shortened one is paid for twice.
+        $consumer = new MockLibCurl('test-secret', [
+            'max_rate_limit_duration' => 1, // 1 second of budget
+            'retry_count'             => 5,
+        ]);
+
+        $consumer->responses = [
+            [429, ['retry-after' => '60'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        self::assertFalse($consumer->flushBatch(makeTestMessages()));
+        self::assertEmpty($consumer->sleepCalls, 'should not have waited at all');
+        self::assertSame(1, $consumer->requestCount, 'should not have made a second request');
+    }
+
+    public function testARateLimitWaitThatFitsIsHonouredInFull(): void
+    {
+        // "Never shorten" must not become "never wait".
+        $consumer = new MockLibCurl('test-secret', [
+            'max_rate_limit_duration' => 300,
+            'retry_count'             => 5,
+        ]);
+
+        $consumer->responses = [
+            [429, ['retry-after' => '2'], 'Too Many Requests', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        self::assertTrue($consumer->flushBatch(makeTestMessages()));
+        self::assertSame([2_000_000], $consumer->sleepCalls);
+    }
+
     public function testNegativeBudgetOptionsKeepTheDefault(): void
     {
-        // A negative value used to be cast straight in, which silently disabled
-        // retrying: retriesRemaining started below zero and the duration budget
-        // was already exceeded on the first check.
+        // A negative cast straight in disables retrying silently: retriesRemaining
+        // starts below zero and the duration budget is exceeded on its first check.
         $consumer = new MockLibCurl('test-secret', [
             'retry_count'                => -5,
             'max_total_backoff_duration' => -1,
@@ -293,6 +330,20 @@ class ConsumerLibCurlTest extends TestCase
 
         self::assertSame(10, $read('retry_count'), 'default retry_count');
         self::assertSame(43200000, $read('max_total_backoff_duration_ms'), 'default 12h budget');
+    }
+
+    public function testZeroRetryAfterCapKeepsTheDefault(): void
+    {
+        // Unlike retry_count, 0 is not a meaningful cap. It clamps every rate-limit
+        // wait to zero, and that path does not consume a retry, so the consumer would
+        // post back-to-back at RTT rate for the whole budget at a server that is
+        // already rate-limiting it.
+        $consumer = new MockLibCurl('test-secret', ['rate_limit_retry_after_cap' => 0]);
+
+        $ref = new \ReflectionProperty(QueueConsumer::class, 'rate_limit_retry_after_cap_s');
+        $ref->setAccessible(true);
+
+        self::assertSame(300, $ref->getValue($consumer), 'a cap of 0 must not be accepted');
     }
 
     public function testZeroRetryCountIsAcceptedRatherThanTreatedAsInvalid(): void
@@ -452,9 +503,14 @@ class ConsumerLibCurlTest extends TestCase
 
     public function testRetryAfterCapIsRespected(): void
     {
+        // max_rate_limit_duration is raised well above the cap so the cap is what
+        // binds. Left at its default it equals the cap, and the remaining-budget
+        // clamp then wins by the fraction of a millisecond that has already
+        // elapsed — which is correct behaviour but tests the wrong thing.
         $consumer = new MockLibCurl('test-secret', [
             'retry_count'                => 3,
             'rate_limit_retry_after_cap' => 300,
+            'max_rate_limit_duration'    => 3600,
         ]);
 
         $consumer->responses = [
@@ -469,5 +525,22 @@ class ConsumerLibCurlTest extends TestCase
         // Sleep should be capped at 300s = 300000ms = 300000000 µs
         self::assertCount(1, $consumer->sleepCalls);
         self::assertSame(300000 * 1000, $consumer->sleepCalls[0]);
+    }
+
+    public function testRetryAfterIsHonouredWhenItFitsTheBudget(): void
+    {
+        // Waiting less than asked sends more requests at a server already
+        // rate-limiting us, so a value inside the cap and the budget is used
+        // as given rather than shortened.
+        $consumer = new MockLibCurl('test-secret', ['retry_count' => 3]);
+
+        $consumer->responses = [
+            [503, ['retry-after' => '120'], 'Service Unavailable', ''],
+            [200, [], '{"success":true}', ''],
+        ];
+
+        self::assertTrue($consumer->flushBatch(makeTestMessages()));
+        self::assertCount(1, $consumer->sleepCalls);
+        self::assertSame(120 * 1000 * 1000, $consumer->sleepCalls[0]);
     }
 }

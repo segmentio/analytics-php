@@ -95,11 +95,37 @@ class LibCurl extends QueueConsumer
                     // expire or extend this budget.
                     $rateLimitStartTime = hrtime(true);
                 }
-                if ((hrtime(true) - $rateLimitStartTime) / 1e6 >= $this->max_rate_limit_duration_ms) {
+                $elapsedMs = (hrtime(true) - $rateLimitStartTime) / 1e6;
+                if ($elapsedMs >= $this->max_rate_limit_duration_ms) {
+                    // Logged unconditionally: this consumer blocks the caller, and a
+                    // request that stopped for the whole budget should not have to be
+                    // diagnosed from an absence of output. handleError only writes when
+                    // debug is on, which it is not by default.
+                    error_log(sprintf(
+                        '[Analytics][%s] Rate-limit budget of %dms exhausted; dropping batch',
+                        $this->type,
+                        $this->max_rate_limit_duration_ms
+                    ));
                     return false;
                 }
+                // Capped, then required to fit. Shortening the wait would resume inside
+                // the window the server named -- one it has already said it will not
+                // serve -- and the budget is spent by then, so that attempt would be the
+                // last either way. Compared in floats: an int cast here truncates a
+                // sub-millisecond remainder to 0, which would sleep not at all and
+                // re-POST at round-trip rate without consuming a retry.
+                $remainingMs = $this->max_rate_limit_duration_ms - $elapsedMs;
                 $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
-                $this->sleepBeforeRetry($sleepMs, true);
+                if ($sleepMs > $remainingMs) {
+                    error_log(sprintf(
+                        '[Analytics][%s] Retry-After of %ds does not fit the remaining '
+                        . 'rate-limit budget; dropping batch',
+                        $this->type,
+                        (int)($sleepMs / 1000)
+                    ));
+                    return false;
+                }
+                $this->sleepBeforeRetry((int)$sleepMs, true);
                 continue; // Do NOT decrement retriesRemaining
             }
 
@@ -111,10 +137,20 @@ class LibCurl extends QueueConsumer
                 return false;
             }
             $retriesRemaining--;
+            // One reading serves the budget test and the clamp below, as on the
+            // rate-limit path above.
+            $backoffNow = hrtime(true);
             if ($backoffStartTime === null) {
-                $backoffStartTime = hrtime(true);
+                $backoffStartTime = $backoffNow;
             }
-            if ((hrtime(true) - $backoffStartTime) / 1e6 >= $this->max_total_backoff_duration_ms) {
+            $backoffRemainingMs =
+                $this->max_total_backoff_duration_ms - ($backoffNow - $backoffStartTime) / 1e6;
+            if ($backoffRemainingMs <= 0) {
+                return false;
+            }
+            // Same rule as the rate-limit path, for the simpler reason that a backoff
+            // outlasting the budget is a wait whose attempt can never run.
+            if ($backoffMs > $backoffRemainingMs) {
                 return false;
             }
             $this->sleepBeforeRetry($backoffMs, false);
