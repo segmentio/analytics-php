@@ -69,9 +69,10 @@ jobs:
 
       - name: Configure Artifactory
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: ./.github/actions/artifactory-oidc
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
         with:
-          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+          ecosystem: php
+          provider-name: github-actions-segmentio
 
       - name: Install Composer dependencies
         run: composer install --no-scripts --no-interaction --prefer-dist
@@ -112,9 +113,10 @@ jobs:
 
       - name: Configure Artifactory
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: ./.github/actions/artifactory-oidc
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
         with:
-          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+          ecosystem: php
+          provider-name: github-actions-segmentio
 
       - name: Install Composer dependencies
         run: composer install --no-scripts --no-interaction --prefer-dist
@@ -145,9 +147,10 @@ jobs:
 
       - name: Configure Artifactory
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: ./.github/actions/artifactory-oidc
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
         with:
-          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+          ecosystem: php
+          provider-name: github-actions-segmentio
 
       - name: Install Composer dependencies
         run: composer install --no-scripts --no-interaction --prefer-dist
@@ -186,9 +189,10 @@ jobs:
 
       - name: Configure Artifactory
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: ./.github/actions/artifactory-oidc
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
         with:
-          artifactory_url: ${{ vars.ARTIFACTORY_URL }}
+          ecosystem: php
+          provider-name: github-actions-segmentio
 
       - name: Install Composer dependencies (production)
         run: composer install --no-scripts --no-interaction --prefer-dist --no-dev --optimize-autoloader
