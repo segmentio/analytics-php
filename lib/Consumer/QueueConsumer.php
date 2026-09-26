@@ -19,9 +19,28 @@ abstract class QueueConsumer extends Consumer
     protected int $max_batch_size_bytes = 512000; //500kb
     protected int $max_item_size_bytes = 32000; // 32kb
     protected int $maximum_backoff_duration = 10000; // Set maximum waiting limit to 10s
+    protected int $max_total_backoff_duration_ms = 43200000; // 12 hours
+
+    /**
+     * Rate-limited attempts are deliberately uncounted, so this duration is the only
+     * thing bounding them. It matters more here than in a client with a background
+     * worker: LibCurl retries inline on the caller's thread, so this is time a web
+     * request spends blocked and an FPM worker spends occupied.
+     */
+    protected int $max_rate_limit_duration_ms = 300000; // 5 minutes
+
+    /**
+     * A guard against an absurd header, not a second budget. Waiting less than the
+     * server asked for does not make the next attempt more likely to succeed, it
+     * just sends more requests at something already rate-limiting us; how long we
+     * keep trying is max_rate_limit_duration's job.
+     */
+    protected int $rate_limit_retry_after_cap_s = 300;
+    protected int $retry_count                   = 10;       // max retries
     protected string $host = '';
     protected bool $compress_request = false;
     protected int $flush_interval_in_mills = 10000; //frequency in milliseconds to send data, default 10
+
     protected int $curl_timeout = 0; // by default this is infinite
     protected int $curl_connecttimeout = 300;
 
@@ -83,6 +102,44 @@ abstract class QueueConsumer extends Consumer
             $this->curl_connecttimeout = $options['curl_connecttimeout'];
         }
 
+        // These three are in SECONDS, matching the options of the same names in the
+        // python, ruby, go and java clients. The _ms fields behind them are internal;
+        // taking milliseconds here made 43200 mean 43 seconds rather than 12 hours.
+        //
+        // Negatives are rejected rather than cast blindly: they silently disabled
+        // retrying altogether, the opposite of what someone setting these is asking
+        // for. Zero is allowed and meaningful — retry_count 0 means "do not retry",
+        // matching analytics-python and analytics-ruby. Bad values log and keep the
+        // default, the way flush_at and flush_interval above do.
+        if (isset($options['max_total_backoff_duration'])) {
+            if ($this->isNonNegativeInt($options['max_total_backoff_duration'], 'max_total_backoff_duration')) {
+                $this->max_total_backoff_duration_ms = (int)$options['max_total_backoff_duration'] * 1000;
+            }
+        }
+
+        if (isset($options['max_rate_limit_duration'])) {
+            if ($this->isNonNegativeInt($options['max_rate_limit_duration'], 'max_rate_limit_duration')) {
+                $this->max_rate_limit_duration_ms = (int)$options['max_rate_limit_duration'] * 1000;
+            }
+        }
+
+        // Positive, not merely non-negative. A cap of 0 clamps every wait to 0, and
+        // the rate-limit path does not consume a retry, so the client would post
+        // back-to-back at RTT rate for the whole budget against a server that is
+        // already rate-limiting it. 0 is meaningful for retry_count and curl_timeout,
+        // but there is no sensible reading of "cap the wait at nothing".
+        if (isset($options['rate_limit_retry_after_cap'])) {
+            if ($this->isPositiveInt($options['rate_limit_retry_after_cap'], 'rate_limit_retry_after_cap')) {
+                $this->rate_limit_retry_after_cap_s = (int)$options['rate_limit_retry_after_cap'];
+            }
+        }
+
+        if (isset($options['retry_count'])) {
+            if ($this->isNonNegativeInt($options['retry_count'], 'retry_count')) {
+                $this->retry_count = (int)$options['retry_count'];
+            }
+        }
+
         $this->queue = [];
     }
 
@@ -101,6 +158,10 @@ abstract class QueueConsumer extends Consumer
         $success = true;
 
         while ($count > 0 && $success) {
+            // Remove the batch before doing anything else. Leaving it in place on the
+            // oversize bail below would wedge the queue: every later flush would take
+            // the same batch, fail the same check, and track() would return false
+            // forever.
             $batch = array_splice($this->queue, 0, min($this->flush_at, $count));
 
             if (mb_strlen(serialize($batch), '8bit') >= $this->max_batch_size_bytes) {
@@ -114,12 +175,134 @@ abstract class QueueConsumer extends Consumer
 
             $count = count($this->queue);
 
-            if ($count > 0) {
+            if ($count > 0 && $success) {
                 usleep($this->flush_interval_in_mills * 1000);
             }
         }
 
         return $success;
+    }
+
+    /**
+     * Whether an option value is usable where zero is not meaningful.
+     *
+     * Logs and returns false otherwise, so the caller keeps the default.
+     */
+    protected function isPositiveInt($value, string $name): bool
+    {
+        if (!is_numeric($value) || (int)$value < 1) {
+            error_log(sprintf(
+                '[Analytics][%s] %s must be a positive integer; keeping the default',
+                $this->type,
+                $name
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Whether an option value is usable as a count or duration.
+     *
+     * Logs and returns false otherwise, so the caller keeps the default. Zero is
+     * accepted: analytics-python validates these the same way, and retry_count 0
+     * meaning "do not retry" is deliberate there and in analytics-ruby.
+     */
+    protected function isNonNegativeInt($value, string $name): bool
+    {
+        if (!is_numeric($value) || (int)$value < 0) {
+            error_log(sprintf(
+                '[Analytics][%s] %s must be a non-negative integer; keeping the default',
+                $this->type,
+                $name
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if a status code is retryable per e2e spec.
+     * 5xx are retryable except 501, 505, 511.
+     * 4xx are non-retryable except 408, 410, 429, 460.
+     */
+    protected function isRetryable(int $statusCode): bool
+    {
+        if ($statusCode >= 500 && $statusCode < 600) {
+            return !in_array($statusCode, [501, 505, 511], true);
+        }
+
+        return in_array($statusCode, [408, 410, 429, 460], true);
+    }
+
+    /** The three date formats RFC 7231 permits for Retry-After. */
+    private const HTTP_DATE_FORMATS = [
+        'D, d M Y H:i:s \G\M\T',  // IMF-fixdate
+        'l, d-M-y H:i:s \G\M\T',  // obsolete RFC 850
+        'D M j H:i:s Y',           // obsolete asctime
+    ];
+
+    /**
+     * Parse Retry-After header as integer seconds.
+     * Supports both integer seconds and HTTP-date format (RFC 7231).
+     * Returns null if absent, unparseable, zero, or negative.
+     */
+    protected function parseRetryAfter(?string $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        // Try integer seconds
+        if (ctype_digit($value)) {
+            $seconds = (int)$value;
+            return $seconds > 0 ? $seconds : null;
+        }
+
+        // Try HTTP-date (RFC 7231 section 7.1.1.1). Parsed strictly rather than with
+        // strtotime(), which reads "-1" as a timezone offset and "tomorrow" as a date.
+        // A malformed header must not reach the rate-limit path, which spends no
+        // retry budget.
+        foreach (self::HTTP_DATE_FORMATS as $format) {
+            $date = \DateTimeImmutable::createFromFormat($format, $value, new \DateTimeZone('UTC'));
+            if ($date === false) {
+                continue;
+            }
+
+            // getLastErrors() returns false when the parse was clean and an array
+            // when it was not, so this rejects values createFromFormat accepts with
+            // warnings — "Wed, 32 Oct 2099" rolling over into November, for instance.
+            $errors = \DateTimeImmutable::getLastErrors();
+            if (!empty($errors['warning_count']) || !empty($errors['error_count'])) {
+                continue;
+            }
+
+            // createFromFormat does not check the day-name token against the rest of
+            // the date: on a mismatch it silently rolls the result forward to the next
+            // matching weekday and reports no warning, so "Thu, 20 Sep 2026" — actually
+            // a Sunday — parses as 24 Sep, turning a date in the past into one in the
+            // future. Comparing the parsed date's own weekday cannot catch this, since
+            // the roll-forward is what makes the two agree; re-formatting the whole
+            // value and comparing does. Whitespace is collapsed so asctime's
+            // double-spaced single-digit days still round-trip.
+            if (strcasecmp(self::collapseWhitespace($date->format($format)), self::collapseWhitespace($value)) !== 0) {
+                continue;
+            }
+
+            $seconds = $date->getTimestamp() - time();
+            return $seconds > 0 ? $seconds : null;
+        }
+
+        return null;
+    }
+
+    private static function collapseWhitespace(string $value): string
+    {
+        return trim((string)preg_replace('/\s+/', ' ', $value));
     }
 
     /**

@@ -46,12 +46,12 @@ class Socket extends QueueConsumer
         $payload = $this->payload($batch);
         $payload = json_encode($payload);
 
-        $body = $this->createBody($this->options['host'], $payload);
+        $body = $this->createBody($this->options['host'], $payload, 1);
         if ($body === false) {
             return false;
         }
 
-        return $this->makeRequest($socket, $body);
+        return $this->makeRequest($socket, $body, $payload);
     }
 
     /**
@@ -95,7 +95,7 @@ class Socket extends QueueConsumer
      * @param string $content
      * @return string body
      */
-    private function createBody(string $host, string $content)
+    private function createBody(string $host, string $content, int $attempt = 1)
     {
         $req = "POST /v1/batch HTTP/1.1\r\n";
         $req .= 'Host: ' . $host . "\r\n";
@@ -109,6 +109,11 @@ class Socket extends QueueConsumer
         $libName = $library['name'];
         $libVersion = $library['version'];
         $req .= "User-Agent: $libName/$libVersion\r\n";
+
+        // X-Retry-Count: omit on first attempt, send on retries
+        if ($attempt > 1) {
+            $req .= 'X-Retry-Count: ' . ($attempt - 1) . "\r\n";
+        }
 
         // Compress content if compress_request is true
         if ($this->compress_request) {
@@ -134,22 +139,41 @@ class Socket extends QueueConsumer
     }
 
     /**
-     * Attempt to write the request to the socket, wait for response if debug
-     * mode is enabled.
+     * Socket consumer retry limitations (maintenance mode):
+     *
+     * - Retry-After header: NOT fully supported (socket only reads first 2048
+     *   bytes of response; full header parsing not implemented). Falls back to
+     *   exponential backoff on 429.
+     * - Status code classification: Full support (retryable vs non-retryable
+     *   per e2e spec, via parent isRetryable()).
+     * - X-Retry-Count: Supported.
+     * - Backoff: Exponential from 500ms, each wait capped at
+     *   maximum_backoff_duration, bounded by retry_count and
+     *   max_total_backoff_duration. retry_count and max_total_backoff_duration are
+     *   shared with LibCurl; the per-wait cap is not. LibCurl caps each wait at a
+     *   fixed 60s and does not read maximum_backoff_duration at all, so the same
+     *   configuration produces different schedules on the two consumers.
+     * - max_rate_limit_duration: not applicable, since there is no Retry-After
+     *   path here for it to bound.
+     *
+     * For full Retry-After support, use the default LibCurl consumer.
      *
      * @param resource|false $socket the handle for the socket
-     * @param string $req request body
+     * @param string $req     request body for this attempt
+     * @param string $payload  encoded batch, re-used to rebuild the request on retries
      * @return bool
      */
-    private function makeRequest($socket, string $req): bool
+    private function makeRequest($socket, string $req, string $payload): bool
     {
         $bytes_written = 0;
-        $bytes_total = strlen($req);
-        $closed = false;
-        $success = true;
+        $bytes_total   = strlen($req);
+        $closed        = false;
 
         // Retries with exponential backoff until success
-        $backoff = 100; // Set initial waiting time to 100ms
+        $backoffMs        = 500; // base 500ms, matching the LibCurl consumer
+        $retriesRemaining = $this->retry_count;
+        $backoffStartTime = null;
+        $attempt          = 1;
 
         while (true) {
             // Send request to server
@@ -167,39 +191,64 @@ class Socket extends QueueConsumer
             $statusCode = 0;
 
             if (!$closed) {
-                $res = self::parseResponse(fread($socket, 2048));
+                $res        = self::parseResponse(fread($socket, 2048));
                 $statusCode = (int)$res['status'];
             }
             fclose($socket);
 
-            // If status code is 200, return true
-            if ($statusCode === 200) {
+            // Only 2xx is success; a raw socket never follows redirects, so a 3xx
+            // means nothing was uploaded.
+            if ($statusCode >= 200 && $statusCode < 300) {
                 return true;
             }
 
-            // If status code is greater than 500 and less than 600, it indicates server error
-            // Error code 429 indicates rate limited.
-            // Retry uploading in these cases.
-            if (($statusCode >= 500 && $statusCode <= 600) || $statusCode === 429 || $statusCode === 0) {
-                if ($backoff >= $this->maximum_backoff_duration) {
-                    break;
-                }
-
-                usleep($backoff * 1000);
-            } elseif ($statusCode >= 400) {
+            // Non-retryable or backoff budget exhausted
+            if (!$this->isRetryable($statusCode) && $statusCode !== 0) {
                 if ($this->debug()) {
                     $this->handleError($res['status'], $res['message']);
                 }
 
+                return false;
+            }
+
+            // Counted retries and the total-duration budget, shared with the LibCurl
+            // consumer. Retry-After is still not honoured here; see the note above.
+            if ($retriesRemaining <= 0) {
+                break;
+            }
+            $retriesRemaining--;
+
+            if ($backoffStartTime === null) {
+                // hrtime is monotonic; microtime would let a clock adjustment expire
+                // or extend this budget.
+                $backoffStartTime = hrtime(true);
+            }
+            if ((hrtime(true) - $backoffStartTime) / 1e6 >= $this->max_total_backoff_duration_ms) {
                 break;
             }
 
-            // Retry uploading...
-            $backoff *= 2;
+            usleep($backoffMs * 1000);
+            $backoffMs = min($backoffMs * 2, $this->maximum_backoff_duration);
+            $attempt++;
+
             $socket = $this->createSocket();
+            if (!$socket) {
+                return false;
+            }
+
+            // The request buffer is per-attempt: rebuild it so X-Retry-Count is correct.
+            $rebuilt = $this->createBody($this->options['host'], $payload, $attempt);
+            if ($rebuilt === false) {
+                return false;
+            }
+            $req = $rebuilt;
+
+            $bytes_written = 0;
+            $bytes_total   = strlen($req);
+            $closed        = false;
         }
 
-        return $success;
+        return false;
     }
 
     /**

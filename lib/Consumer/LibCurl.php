@@ -9,92 +9,207 @@ class LibCurl extends QueueConsumer
     protected string $type = 'LibCurl';
 
     /**
-     * Make a sync request to our API. If debug is
-     * enabled, we wait for the response
-     * and retry once to diminish impact on performance.
+     * Send a batch of messages to the API with retries on error
+     *
      * @param array $messages array of all the messages to send
      * @return bool whether the request succeeded
      */
     public function flushBatch(array $messages): bool
     {
-        $body = $this->payload($messages);
+        $body    = $this->payload($messages);
         $payload = json_encode($body);
-        $secret = $this->secret;
+        $secret  = $this->secret;
 
         if ($this->compress_request) {
             $payload = gzencode($payload);
         }
 
-        if ($this->host) {
-            $host = $this->host;
-        } else {
-            $host = 'api.segment.io';
-        }
-        $path = '/v1/batch';
-        $url = $this->protocol . $host . $path;
+        $host = $this->host ?: 'api.segment.io';
+        $url  = $this->protocol . $host . '/v1/batch';
 
-        $backoff = 100; // Set initial waiting time to 100ms
+        $library   = $messages[0]['context']['library'];
+        $userAgent = $library['name'] . '/' . $library['version'];
 
-        while ($backoff < $this->maximum_backoff_duration) {
-            // open connection
-            $ch = curl_init();
+        $backoffMs          = 500;   // base 500ms per spec
+        $backoffCapMs       = 60000; // cap 60s
+        $retriesRemaining   = $this->retry_count;
+        $attempt            = 0;
+        $backoffStartTime   = null;
+        $rateLimitStartTime = null;
 
-            // set the url, number of POST vars, POST data
-            curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_connecttimeout);
+        while (true) {
+            $attempt++;
 
-            // set variables for headers
-            $header = [];
-            $header[] = 'Content-Type: application/json';
+            $headers = [
+                'Content-Type: application/json',
+                'User-Agent: ' . $userAgent,
+            ];
 
             if ($this->compress_request) {
-                $header[] = 'Content-Encoding: gzip';
+                $headers[] = 'Content-Encoding: gzip';
             }
 
-            // Send user agent in the form of {library_name}/{library_version} as per RFC 7231.
-            $library = $messages[0]['context']['library'];
-            $libName = $library['name'];
-            $libVersion = $library['version'];
-            $header[] = "User-Agent: $libName/$libVersion";
+            if ($attempt > 1) {
+                $headers[] = 'X-Retry-Count: ' . ($attempt - 1);
+            }
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            [$responseCode, $responseHeaders, $responseContent, $err, $errno] =
+                $this->executeHttpRequest($url, $secret, $payload, $headers);
 
-            // retry failed requests just once to diminish impact on performance
-            $responseContent = curl_exec($ch);
-
-            $err = curl_error($ch);
             if ($err) {
-                $this->handleError(curl_errno($ch), $err);
+                // The real libcurl errno, not 0: error_handler callbacks branch on it
+                // to tell a DNS failure from a timeout from a TLS error.
+                $this->handleError($errno, $err);
+
                 return false;
             }
 
-            $responseCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            //close connection
-            curl_close($ch);
-
-            if ($responseCode !== 200) {
-                // log error
-                $this->handleError($responseCode, $responseContent);
-
-                if (($responseCode >= 500 && $responseCode <= 600) || $responseCode === 429) {
-                    // If status code is greater than 500 and less than 600, it indicates server error
-                    // Error code 429 indicates rate limited.
-                    // Retry uploading in these cases.
-                    usleep($backoff * 1000);
-                    $backoff *= 2;
-                } elseif ($responseCode >= 400) {
-                    break;
-                }
-            } else {
-                break; // no error
+            // Only 2xx is success. curl is not configured to follow redirects, so a
+            // 3xx means nothing was uploaded; treating it as success would drop the
+            // batch silently. TAPI does not emit 3xx — this shows up when the
+            // configured host is a proxy or redirector.
+            if ($responseCode >= 200 && $responseCode < 300) {
+                return true;
             }
-        }
 
-        return true;
+            if ($responseCode >= 300 && $responseCode < 400) {
+                $this->handleError(
+                    $responseCode,
+                    'Unexpected redirect; batch not uploaded. Check whether the configured '
+                    . 'host points at a proxy or redirector.'
+                );
+                return false;
+            }
+
+            $this->handleError($responseCode, $responseContent);
+
+            if (!$this->isRetryable($responseCode)) {
+                return false;
+            }
+
+            // Any retryable status with valid Retry-After: use rate-limit path (no budget cost)
+            $retryAfterS = $this->parseRetryAfter($responseHeaders['retry-after'] ?? null);
+            if ($retryAfterS !== null) {
+                if ($rateLimitStartTime === null) {
+                    // hrtime is monotonic; microtime would let a clock adjustment
+                    // expire or extend this budget.
+                    $rateLimitStartTime = hrtime(true);
+                }
+                $elapsedMs = (hrtime(true) - $rateLimitStartTime) / 1e6;
+                if ($elapsedMs >= $this->max_rate_limit_duration_ms) {
+                    // Logged unconditionally: this consumer blocks the caller, and a
+                    // request that stopped for the whole budget should not have to be
+                    // diagnosed from an absence of output. handleError only writes when
+                    // debug is on, which it is not by default.
+                    error_log(sprintf(
+                        '[Analytics][%s] Rate-limit budget of %dms exhausted; dropping batch',
+                        $this->type,
+                        $this->max_rate_limit_duration_ms
+                    ));
+                    return false;
+                }
+                // Capped, then required to fit. Shortening the wait would resume inside
+                // the window the server named -- one it has already said it will not
+                // serve -- and the budget is spent by then, so that attempt would be the
+                // last either way. Compared in floats: an int cast here truncates a
+                // sub-millisecond remainder to 0, which would sleep not at all and
+                // re-POST at round-trip rate without consuming a retry.
+                $remainingMs = $this->max_rate_limit_duration_ms - $elapsedMs;
+                $sleepMs = min($retryAfterS * 1000, $this->rate_limit_retry_after_cap_s * 1000);
+                if ($sleepMs > $remainingMs) {
+                    error_log(sprintf(
+                        '[Analytics][%s] Retry-After of %ds does not fit the remaining '
+                        . 'rate-limit budget; dropping batch',
+                        $this->type,
+                        (int)($sleepMs / 1000)
+                    ));
+                    return false;
+                }
+                $this->sleepBeforeRetry((int)$sleepMs, true);
+                continue; // Do NOT decrement retriesRemaining
+            }
+
+            // No Retry-After: counted backoff
+            // Checked before the decrement: decrementing first spent one retry on
+            // the exhaustion test itself, so retry_count of N performed N-1 and a
+            // retry_count of 1 performed none at all.
+            if ($retriesRemaining <= 0) {
+                return false;
+            }
+            $retriesRemaining--;
+            // One reading serves the budget test and the clamp below, as on the
+            // rate-limit path above.
+            $backoffNow = hrtime(true);
+            if ($backoffStartTime === null) {
+                $backoffStartTime = $backoffNow;
+            }
+            $backoffRemainingMs =
+                $this->max_total_backoff_duration_ms - ($backoffNow - $backoffStartTime) / 1e6;
+            if ($backoffRemainingMs <= 0) {
+                return false;
+            }
+            // Same rule as the rate-limit path, for the simpler reason that a backoff
+            // outlasting the budget is a wait whose attempt can never run.
+            if ($backoffMs > $backoffRemainingMs) {
+                return false;
+            }
+            $this->sleepBeforeRetry($backoffMs, false);
+            $backoffMs = min($backoffMs * 2, $backoffCapMs);
+        }
+    }
+
+    /**
+     * Wait before the next attempt. Separate from flushBatch so tests can observe the
+     * retry schedule by overriding this alone.
+     *
+     * @param int  $milliseconds how long to wait
+     * @param bool $rateLimited  true when the server sent Retry-After, false for counted backoff
+     */
+    protected function sleepBeforeRetry(int $milliseconds, bool $rateLimited): void
+    {
+        usleep($milliseconds * 1000);
+    }
+
+    /**
+     * Execute an HTTP POST request via cURL.
+     *
+     * Returns [statusCode, responseHeaders, responseBody, curlError, curlErrno].
+     * responseHeaders keys are lower-cased.
+     *
+     * @param string $url
+     * @param string $secret
+     * @param string $payload
+     * @param array  $headers
+     * @return array{int, array<string,string>, string|false, string, int}
+     */
+    protected function executeHttpRequest(string $url, string $secret, string $payload, array $headers): array
+    {
+        $responseHeaders = [];
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_USERPWD, $secret . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->curl_connecttimeout);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $responseHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+
+            return strlen($header);
+        });
+
+        $responseContent = curl_exec($ch);
+        $err             = curl_error($ch);
+        $errno           = curl_errno($ch);
+        $responseCode    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return [$responseCode, $responseHeaders, $responseContent, $err, $errno];
     }
 }

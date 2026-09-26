@@ -1,7 +1,9 @@
 {
   "sdk": "php",
-  "test_suites": "basic",
+  "test_suites": "basic,retry",
   "auto_settings": false,
   "patch": null,
-  "env": {}
+  "env": {
+    "AUTH_HEADER": "true"
+  }
 }
