@@ -1,0 +1,209 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARTIFACTORY_URL: ${{ vars.ARTIFACTORY_URL }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # PHP version matrix — NARROWED, restore tracked by LIBRARIES-3169.
+  #
+  # The intended matrix is 8.1 / 8.2 / 8.3 / 8.4, matching the "^7.4 || ^8.0"
+  # that composer.json declares. It ran on shivammathur/setup-php, which the
+  # org Actions policy does not admit (GitHub-owned actions only), so every
+  # workflow using it failed at startup with no check reported.
+  #
+  # The runner image ships exactly one PHP, so CI can only prove that one.
+  # PHP_MATRIX below is the single source of truth for all three matrix jobs:
+  # restoring breadth is a one-line change here once LIBRARIES-3169 lands a
+  # way to install other versions. PHP_PRIMARY is the leg that also produces
+  # coverage; it must stay a member of PHP_MATRIX.
+  #
+  # Do NOT widen PHP_MATRIX on its own — .github/actions/setup-php verifies the
+  # runtime and fails loudly on a version the image lacks, by design.
+  # ──────────────────────────────────────────────────────────────────────────
+  PHP_MATRIX: '["8.3"]'
+  PHP_PRIMARY: "8.3"
+
+jobs:
+  # Resolves the env-level matrix into an output, because `strategy.matrix`
+  # cannot read `env` directly.
+  config:
+    name: Resolve matrix
+    # Bare ubuntu-latest gets no runner on same-repo PRs in this org; only the
+    # fork path may use it.
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    outputs:
+      php-versions: ${{ steps.set.outputs.php-versions }}
+      php-primary: ${{ steps.set.outputs.php-primary }}
+    steps:
+      - id: set
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "php-versions=${PHP_MATRIX}" >> "${GITHUB_OUTPUT}"
+          echo "php-primary=${PHP_PRIMARY}" >> "${GITHUB_OUTPUT}"
+
+  coding-standard:
+    name: Coding Standards
+    needs: [config]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: ./.github/actions/setup-php
+        with:
+          php-version: ${{ needs.config.outputs.php-primary }}
+          coverage: none
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
+        with:
+          ecosystem: php
+          provider-name: github-actions-segmentio
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      # cs2pr came from setup-php's `tools:` and annotated PRs inline. Without
+      # it the report is only readable in the log and the artifact below —
+      # see LIBRARIES-3169.
+      - name: Check coding standards
+        continue-on-error: true
+        run: ./vendor/bin/phpcs -s --report-full --report-checkstyle=./phpcs-report.xml
+
+      - name: Upload PHPCS report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: phpcs-report
+          path: phpcs-report.xml
+          if-no-files-found: warn
+
+  lint:
+    name: "Lint: PHP ${{ matrix.php }}"
+    needs: [config]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ${{ fromJSON(needs.config.outputs.php-versions) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: ./.github/actions/setup-php
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
+        with:
+          ecosystem: php
+          provider-name: github-actions-segmentio
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      - name: Lint against parse errors
+        run: composer lint
+
+  test:
+    name: "Test: PHP ${{ matrix.php }}"
+    needs: [config, coding-standard, lint]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ${{ fromJSON(needs.config.outputs.php-versions) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: ./.github/actions/setup-php
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+          ini-values: error_reporting=E_ALL, display_errors=On
+          extensions: curl, json, mbstring
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
+        with:
+          ecosystem: php
+          provider-name: github-actions-segmentio
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --prefer-dist
+
+      - name: Run tests
+        run: ./vendor/bin/phpunit --no-coverage
+
+      - name: Run tests with coverage
+        if: ${{ matrix.php == needs.config.outputs.php-primary }}
+        run: ./vendor/bin/phpunit
+
+      # codecov/codecov-action is not allow-listed either, so coverage is kept
+      # as an artifact rather than uploaded — see LIBRARIES-3169.
+      - name: Upload coverage report
+        if: ${{ success() && matrix.php == needs.config.outputs.php-primary }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-clover
+          path: build/logs/clover.xml
+          if-no-files-found: error
+
+  build-verification:
+    name: Build Verification
+    needs: [config, test]
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Set up PHP
+        uses: ./.github/actions/setup-php
+        with:
+          php-version: ${{ needs.config.outputs.php-primary }}
+          coverage: none
+
+      - name: Configure Artifactory
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: twilio/sdk-actions/artifactory-oidc@c94e420aa64ea686ff25bb03d4c66cdaf8e523e4 # main
+        with:
+          ecosystem: php
+          provider-name: github-actions-segmentio
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-scripts --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Verify autoload
+        run: php -r "require 'vendor/autoload.php'; echo 'Autoload OK' . PHP_EOL;"
+
+      - name: Verify package structure
+        run: |
+          # Ensure required files exist for Packagist
+          test -f composer.json
+          test -f LICENSE.md
+          test -d lib
+          echo "Package structure verified"
