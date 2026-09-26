@@ -38,7 +38,9 @@ jobs:
   # cannot read `env` directly.
   config:
     name: Resolve matrix
-    runs-on: ubuntu-latest
+    # Bare ubuntu-latest gets no runner on same-repo PRs in this org; only the
+    # fork path may use it.
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || 'ubuntu-x64' }}
     outputs:
       php-versions: ${{ steps.set.outputs.php-versions }}
       php-primary: ${{ steps.set.outputs.php-primary }}
