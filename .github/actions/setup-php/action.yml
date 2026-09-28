@@ -1,0 +1,114 @@
+name: "Setup PHP"
+description: "Select and configure the PHP the runner image provides"
+
+# The org Actions policy admits GitHub-owned actions only — no Marketplace, no
+# verified creators — so shivammathur/setup-php is unavailable here.
+#
+# That action's job was installing arbitrary PHP versions. This one cannot: the
+# runner image carries exactly one PHP, so this verifies the requested version is
+# the one present and applies the ini/coverage settings the matrix used to ask
+# setup-php for. Requesting any other version fails loudly rather than silently
+# testing the wrong runtime.
+#
+# Restoring the full 8.1–8.4 matrix is LIBRARIES-3169. Extending this action to
+# install other versions is one of the options recorded there; it is not a
+# drop-in and should not be attempted without reading the ticket first.
+
+inputs:
+  php-version:
+    description: "MAJOR.MINOR required, e.g. '8.3'. Must match the runner image's PHP."
+    required: true
+  coverage:
+    description: "'none' disables Xdebug for speed; 'xdebug' enables coverage mode."
+    required: false
+    default: "none"
+  extensions:
+    description: "Comma-separated extensions to require. Verified, never installed."
+    required: false
+    default: ""
+  ini-values:
+    description: "Comma-separated php.ini directives, e.g. 'error_reporting=E_ALL, display_errors=On'."
+    required: false
+    default: ""
+
+outputs:
+  php-version:
+    description: "Exact version present, e.g. '8.3.6'"
+    value: ${{ steps.verify.outputs.php-version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify the runner's PHP matches the requested version
+      id: verify
+      shell: bash
+      env:
+        REQUESTED: ${{ inputs.php-version }}
+      run: |
+        set -euo pipefail
+
+        if ! command -v php >/dev/null 2>&1; then
+          echo "::error::No php on PATH. The runner image is expected to ship one."
+          exit 1
+        fi
+
+        FULL="$(php -r 'echo PHP_VERSION;')"
+        SHORT="$(php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;')"
+
+        if [ "${SHORT}" != "${REQUESTED}" ]; then
+          echo "::error::Requested PHP ${REQUESTED} but the runner provides ${FULL}. Only ${SHORT} can be tested here — see LIBRARIES-3169 before widening the matrix."
+          exit 1
+        fi
+
+        echo "php-version=${FULL}" >> "${GITHUB_OUTPUT}"
+        echo "PHP ${FULL}"
+
+    - name: Verify required extensions
+      if: ${{ inputs.extensions != '' }}
+      shell: bash
+      env:
+        EXTENSIONS: ${{ inputs.extensions }}
+      run: |
+        set -euo pipefail
+        MISSING=""
+        IFS=','
+        for ext in ${EXTENSIONS}; do
+          ext="$(echo "${ext}" | tr -d '[:space:]')"
+          [ -z "${ext}" ] && continue
+          php -m | grep -qix "${ext}" || MISSING="${MISSING} ${ext}"
+        done
+        unset IFS
+        if [ -n "${MISSING}" ]; then
+          echo "::error::Missing PHP extension(s):${MISSING}. This action verifies but cannot install — see LIBRARIES-3169."
+          exit 1
+        fi
+
+    - name: Apply ini values and coverage mode
+      shell: bash
+      env:
+        INI_VALUES: ${{ inputs.ini-values }}
+        COVERAGE: ${{ inputs.coverage }}
+      run: |
+        set -euo pipefail
+
+        # A leading ':' keeps the image's own conf.d on the scan path, so this
+        # adds directives rather than replacing the distro configuration.
+        if [ -n "${INI_VALUES}" ]; then
+          INI_DIR="${RUNNER_TEMP}/php-ci-ini"
+          mkdir -p "${INI_DIR}"
+          : > "${INI_DIR}/99-ci.ini"
+          IFS=','
+          for kv in ${INI_VALUES}; do
+            kv="$(echo "${kv}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            [ -z "${kv}" ] && continue
+            echo "${kv}" >> "${INI_DIR}/99-ci.ini"
+          done
+          unset IFS
+          echo "PHP_INI_SCAN_DIR=:${INI_DIR}" >> "${GITHUB_ENV}"
+        fi
+
+        case "${COVERAGE}" in
+          none)   echo "XDEBUG_MODE=off"      >> "${GITHUB_ENV}" ;;
+          xdebug) echo "XDEBUG_MODE=coverage" >> "${GITHUB_ENV}" ;;
+          *) echo "::error::Unsupported coverage mode '${COVERAGE}' (expected 'none' or 'xdebug')"; exit 1 ;;
+        esac
