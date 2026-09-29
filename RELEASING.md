@@ -1,6 +1,20 @@
 Releasing
 =========
 
- 1. Run `VERSION=X.Y.Z make release` (where X.Y.Z is the new version).
+Packagist learns about a new version from the tag and fetches the code from GitHub.
+Nothing is uploaded, so there is no publish workflow and no credentials.
 
- That's it! Composer will pick up the new tag and you can see the latest version at https://packagist.org/packages/segmentio/analytics-php.
+1. Update `$SEGMENT_VERSION` in `lib/Version.php`.
+2. In `HISTORY.md`, change the `Unreleased` heading to `X.Y.Z / YYYY-MM-DD`.
+3. Open a PR and merge it to `master`.
+4. Tag the merged commit — no `v` prefix:
+
+   ```
+   git tag X.Y.Z && git push origin X.Y.Z
+   ```
+
+5. Confirm at https://packagist.org/packages/segmentio/analytics-php
+
+**Do not use `make release`.** It runs `git changelog -t`, which prepends a generated
+changelog above the curated one, and its `printf` rewrites `lib/Version.php` from
+scratch — dropping `declare(strict_types=1);` and switching to double quotes.
