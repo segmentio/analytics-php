@@ -26,16 +26,10 @@ lint: dependencies
 		printf "Please update PHP version to 5.5 or above for code formatting."; \
 	fi
 
-release:
-	@printf "releasing ${VERSION}..."
-	@printf '<?php\nglobal $$SEGMENT_VERSION;\n$$SEGMENT_VERSION = "%b";\n' ${VERSION} > ./lib/Version.php
-	@git changelog -t ${VERSION}
-	@git release ${VERSION}
-
 clean:
 	rm -rf \
 		composer.phar \
 		vendor \
 		composer.lock
 
-.PHONY: bootstrap release clean
+.PHONY: bootstrap clean

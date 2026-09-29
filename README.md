@@ -56,7 +56,7 @@ Documentation is available at [segment.com/docs/sources/server/php](https://segm
 
 ## Releasing
 
-Run `make release VERSION=<version>`. It should automatically tag and release in composer
+See [RELEASING.md](RELEASING.md).
 
 ## License
 
