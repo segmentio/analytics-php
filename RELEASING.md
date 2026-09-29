@@ -14,7 +14,3 @@ Nothing is uploaded, so there is no publish workflow and no credentials.
    ```
 
 5. Confirm at https://packagist.org/packages/segmentio/analytics-php
-
-**Do not use `make release`.** It runs `git changelog -t`, which prepends a generated
-changelog above the curated one, and its `printf` rewrites `lib/Version.php` from
-scratch — dropping `declare(strict_types=1);` and switching to double quotes.
